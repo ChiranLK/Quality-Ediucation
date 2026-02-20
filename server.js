@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 // Import Routes
 import authRouter from './Routes/authRouter.js';
 import messageRouter from './Routes/messageRouter.js';
+import tutoringSessionRouter from './Routes/tutoringSessionRouter.js';
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/auth', authRouter);
 app.use('/api/messages', messageRouter);
+app.use('/api/tutoring-sessions', tutoringSessionRouter);
 // Port
 const PORT = process.env.PORT || 5000;
 
