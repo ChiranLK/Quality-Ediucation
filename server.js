@@ -10,11 +10,10 @@ import feedbackRouter from "./Routes/feedbackRouter.js";
 import progressRouter from "./Routes/progressRouter.js";
 
 // If you have these route files, uncomment the imports + app.use lines below
-// import messageRouter from "./Routes/messageRouter.js";
-// import tutoringSessionRouter from "./Routes/tutoringSessionRouter.js";
+import messageRouter from "./Routes/messageRouter.js";
+import tutoringSessionRouter from "./Routes/tutoringSessionRouter.js";
 
 dotenv.config();
-
 const app = express();
 
 // Middleware
@@ -33,8 +32,8 @@ app.use("/api/feedbacks", feedbackRouter);
 app.use("/api/progress", progressRouter);
 
 // Uncomment if these exist
-// app.use("/api/messages", messageRouter);
-// app.use("/api/tutoring-sessions", tutoringSessionRouter);
+app.use("/api/messages", messageRouter);
+app.use("/api/tutoring-sessions", tutoringSessionRouter);
 
 // Port
 const PORT = process.env.PORT || 5000;
