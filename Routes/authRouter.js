@@ -1,6 +1,9 @@
 import { Router } from "express";
 import { register, login, logout } from "../Controllers/authController.js";
-import { validateRegisterInput, validateLoginInput } from "../Middleware/ValidatorMiddleware.js";
+import {
+  validateRegisterInput,
+  validateLoginInput,
+} from "../Middleware/ValidatorMiddleware.js";
 
 const router = Router();
 
