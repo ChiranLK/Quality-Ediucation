@@ -49,12 +49,22 @@ export const getAllTutoringSessions = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const now = new Date();
-    const filter = { "schedule.date": { $gte: now } }; // upcoming by default
+    let filter = { "schedule.date": { $gte: now } }; // upcoming by default
 
     if (req.query.tutor) filter.tutor = req.query.tutor;
     if (req.query.subject) filter.subject = { $regex: req.query.subject, $options: "i" };
     if (req.query.level) filter.level = req.query.level;
     if (req.query.status) filter.status = req.query.status;
+
+    // Safe regex escape
+    const escapeRegex = (s = "") => String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    if (req.query.grade) {
+      const g = req.query.grade;
+      const gradeNum = Number(g);
+      const gradeOr = [ { level: { $regex: `^${escapeRegex(g)}$`, $options: "i" } } ];
+      if (!Number.isNaN(gradeNum)) gradeOr.push({ grade: gradeNum }); else gradeOr.push({ grade: g });
+      filter = { $and: [filter, { $or: gradeOr }] };
+    }
 
     const [total, sessions] = await Promise.all([
       TutoringSession.countDocuments(filter),
