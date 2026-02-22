@@ -87,5 +87,3 @@ export const getAllTutoringSessions = async (req, res) => {
     throw err;
   }
 };
-
-export default { getAllTutoringSessions };
