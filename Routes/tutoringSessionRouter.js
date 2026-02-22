@@ -7,8 +7,7 @@ const router = Router();
 /**
  * POST /api/tutoring-sessions
  * Create a new tutoring session
- * Accessible to: tutor, admin
- * Authentication: Required (JWT token in cookie)
+ * Access: Tutors and Admins only
  */
 router.post(
   "/",
