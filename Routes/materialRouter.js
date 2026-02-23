@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createStudyMaterial, getAllStudyMaterials, getSingleStudyMaterial } from "../Controllers/studyMaterialController.js";
+import { createStudyMaterial, getAllStudyMaterials, getSingleStudyMaterial, updateStudyMaterial } from "../Controllers/studyMaterialController.js";
 import { protect, authorizePermissions } from "../Middleware/authMiddleware.js";
 
 const router = Router();
@@ -9,6 +9,9 @@ router.get("/", protect, getAllStudyMaterials);
 
 // GET /api/materials/:id — fetch a single material by ID
 router.get("/:id", protect, getSingleStudyMaterial);
+
+// PATCH /api/materials/:id — uploader or admin only
+router.patch("/:id", protect, updateStudyMaterial);
 
 // POST /api/materials — only tutors and admins can upload
 router.post(

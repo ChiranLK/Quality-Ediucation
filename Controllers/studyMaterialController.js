@@ -1,6 +1,6 @@
 import StudyMaterial from "../models/StudyMaterialModel.js";
 import { StatusCodes } from "http-status-codes";
-import { BadRequestError, NotFoundError } from "../errors/customErrors.js";
+import { BadRequestError, NotFoundError, UnauthorizedError } from "../errors/customErrors.js";
 
 // POST /api/materials
 // Only tutors and admins may upload
@@ -97,4 +97,53 @@ export const getSingleStudyMaterial = async (req, res) => {
   }
 
   res.status(StatusCodes.OK).json({ material });
+};
+
+// PATCH /api/materials/:id
+// Only the original uploader OR an admin may update
+export const updateStudyMaterial = async (req, res) => {
+  const { id } = req.params;
+
+  // 1. Find the document first so we can check ownership
+  const material = await StudyMaterial.findById(id);
+  if (!material) {
+    throw new NotFoundError(`No study material found with id: ${id}`);
+  }
+
+  // 2. Authorization check
+  const requesterId = String(req.user._id || req.user.userId);
+  const uploaderId  = String(material.uploadedBy);
+  const isAdmin     = req.user.role === "admin";
+
+  if (requesterId !== uploaderId && !isAdmin) {
+    throw new UnauthorizedError(
+      "You are not authorized to update this material",
+    );
+  }
+
+  // 3. Build the update payload — only allow safe fields
+  const { title, description, subject, grade, fileUrl, tags } = req.body || {};
+  const updates = {};
+
+  if (title       !== undefined) updates.title       = title.trim();
+  if (description !== undefined) updates.description = description.trim();
+  if (subject     !== undefined) updates.subject     = subject.trim().toLowerCase();
+  if (grade       !== undefined) updates.grade       = grade.trim();
+  if (fileUrl     !== undefined) updates.fileUrl     = fileUrl.trim();
+  if (tags !== undefined && Array.isArray(tags)) {
+    updates.tags = tags.map((t) => String(t).trim().toLowerCase());
+  }
+
+  if (Object.keys(updates).length === 0) {
+    throw new BadRequestError("No valid fields provided for update");
+  }
+
+  // 4. Apply update — return the new document after update
+  const updated = await StudyMaterial.findByIdAndUpdate(
+    id,
+    { $set: updates },
+    { new: true, runValidators: true },
+  ).populate("uploadedBy", "name email role");
+
+  res.status(StatusCodes.OK).json({ msg: "Study material updated", material: updated });
 };
