@@ -147,3 +147,31 @@ export const updateStudyMaterial = async (req, res) => {
 
   res.status(StatusCodes.OK).json({ msg: "Study material updated", material: updated });
 };
+
+// DELETE /api/materials/:id
+// Only the original uploader OR an admin may delete
+export const deleteStudyMaterial = async (req, res) => {
+  const { id } = req.params;
+
+  // 1. Fetch document first to check ownership
+  const material = await StudyMaterial.findById(id);
+  if (!material) {
+    throw new NotFoundError(`No study material found with id: ${id}`);
+  }
+
+  // 2. Authorization check
+  const requesterId = String(req.user._id || req.user.userId);
+  const uploaderId  = String(material.uploadedBy);
+  const isAdmin     = req.user.role === "admin";
+
+  if (requesterId !== uploaderId && !isAdmin) {
+    throw new UnauthorizedError(
+      "You are not authorized to delete this material",
+    );
+  }
+
+  // 3. Delete
+  await StudyMaterial.findByIdAndDelete(id);
+
+  res.status(StatusCodes.OK).json({ msg: "Study material deleted successfully" });
+};
