@@ -19,6 +19,9 @@ import tutorRouter from "./Routes/tutorRouter.js";
 import messageRouter from "./Routes/messageRouter.js";
 import tutoringSessionRouter from "./Routes/tutoringSessionRouter.js";
 
+// Import Error Handler
+import { errorHandler } from "./Middleware/errorHandler.js";
+
 const app = express();
 
 // Middleware
@@ -41,6 +44,18 @@ app.use("/api/tutors", tutorRouter);
 // Uncomment if these exist
 app.use("/api/messages", messageRouter);
 app.use("/api/tutoring-sessions", tutoringSessionRouter);
+
+// 404 Handler
+app.use("*", (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `Route ${req.originalUrl} not found`,
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// Error Handler Middleware (MUST be last!)
+app.use(errorHandler);
 
 // Port
 const PORT = process.env.PORT || 5000;
