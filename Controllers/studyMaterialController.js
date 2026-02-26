@@ -1,9 +1,16 @@
 import { StatusCodes } from "http-status-codes";
-import { BadRequestError } from "../errors/customErrors.js";
+import { BadRequestError, NotFoundError } from "../errors/customErrors.js";
 import * as studyMaterialService from "../Services/studyMaterialService.js";
+import {
+  paginatedResponse,
+  successResponse,
+} from "../utils/responseHandler.js";
+import { validateObjectId } from "../utils/validationUtils.js";
 
-// POST /api/materials
-// Only tutors and admins may upload
+/**
+ * POST /api/materials
+ * Upload a new study material (Tutor/Admin only)
+ */
 export const createStudyMaterial = async (req, res) => {
   if (!req.file) {
     throw new BadRequestError("Please upload a file (PDF, DOC, image, etc.)");
@@ -15,40 +22,55 @@ export const createStudyMaterial = async (req, res) => {
     fileUrl: req.file.path, // Cloudinary secure URL
   };
 
-  const material = await studyMaterialService.createMaterial(materialData, uploaderId);
+  const material = await studyMaterialService.createMaterial(
+    materialData,
+    uploaderId,
+  );
 
-  res.status(StatusCodes.CREATED).json({
-    success: true,
-    msg: "Study material uploaded",
-    data: material,
-  });
+  res
+    .status(StatusCodes.CREATED)
+    .json(successResponse("Study material uploaded successfully", material));
 };
 
-// GET /api/materials
-// Public — any authenticated user can browse materials
+/**
+ * GET /api/materials
+ * Get all study materials with pagination, filtering, and search
+ * Query params: page, limit, subject, grade, keyword, sort
+ */
 export const getAllStudyMaterials = async (req, res) => {
   const result = await studyMaterialService.getAllMaterials(req.query);
 
-  res.status(StatusCodes.OK).json({
-    success: true,
-    ...result,
-  });
+  res.status(StatusCodes.OK).json(
+    paginatedResponse("Materials retrieved successfully", result.materials, {
+      totalCount: result.totalCount,
+      totalPages: result.totalPages,
+      currentPage: result.currentPage,
+      limit: result.limit,
+    }),
+  );
 };
 
-// GET /api/materials/:id
-// Any authenticated user can fetch a single material
+/**
+ * GET /api/materials/:id
+ * Get a single study material by ID
+ */
 export const getSingleStudyMaterial = async (req, res) => {
+  validateObjectId(req.params.id); // Validate MongoDB ObjectId
+
   const material = await studyMaterialService.getMaterialById(req.params.id);
 
-  res.status(StatusCodes.OK).json({
-    success: true,
-    data: material,
-  });
+  res
+    .status(StatusCodes.OK)
+    .json(successResponse("Material retrieved successfully", material));
 };
 
-// PATCH /api/materials/:id
-// Only the original uploader OR an admin may update
+/**
+ * PATCH /api/materials/:id
+ * Update a study material (uploader or admin only)
+ */
 export const updateStudyMaterial = async (req, res) => {
+  validateObjectId(req.params.id); // Validate MongoDB ObjectId
+
   const updates = { ...req.body };
 
   // If a new file was uploaded, replace the URL
@@ -56,23 +78,29 @@ export const updateStudyMaterial = async (req, res) => {
     updates.fileUrl = req.file.path;
   }
 
-  const updatedMaterial = await studyMaterialService.updateMaterial(req.params.id, updates, req.user);
+  const updatedMaterial = await studyMaterialService.updateMaterial(
+    req.params.id,
+    updates,
+    req.user,
+  );
 
-  res.status(StatusCodes.OK).json({
-    success: true,
-    msg: "Study material updated",
-    data: updatedMaterial,
-  });
+  res
+    .status(StatusCodes.OK)
+    .json(
+      successResponse("Study material updated successfully", updatedMaterial),
+    );
 };
 
-// DELETE /api/materials/:id
-// Only the original uploader OR an admin may delete
+/**
+ * DELETE /api/materials/:id
+ * Delete a study material (uploader or admin only)
+ */
 export const deleteStudyMaterial = async (req, res) => {
+  validateObjectId(req.params.id); // Validate MongoDB ObjectId
+
   await studyMaterialService.deleteMaterial(req.params.id, req.user);
 
-  res.status(StatusCodes.OK).json({
-    success: true,
-    msg: "Study material deleted successfully",
-  });
+  res
+    .status(StatusCodes.OK)
+    .json(successResponse("Study material deleted successfully"));
 };
-
