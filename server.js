@@ -13,6 +13,7 @@ import materialRouter from "./Routes/materialRouter.js";
 // If you have these route files, uncomment the imports + app.use lines below
 import messageRouter from "./Routes/messageRouter.js";
 import tutoringSessionRouter from "./Routes/tutoringSessionRouter.js";
+import googleCalendarRouter from "./Routes/googleCalenderRouter.js";
 
 dotenv.config();
 const app = express();
@@ -32,6 +33,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/feedbacks", feedbackRouter);
 app.use("/api/progress", progressRouter);
 app.use("/api/materials", materialRouter);
+app.use("/api/google-calendar", googleCalendarRouter); // If you have this route file, uncomment the import + app.use line
 
 // Uncomment if these exist
 app.use("/api/messages", messageRouter);
