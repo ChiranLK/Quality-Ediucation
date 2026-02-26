@@ -1,17 +1,22 @@
 import StudyMaterial from "../models/StudyMaterialModel.js";
 import { StatusCodes } from "http-status-codes";
 import { BadRequestError, NotFoundError, UnauthorizedError } from "../errors/customErrors.js";
+import { cloudinary } from "../Middleware/uploadMiddleware.js";
 
 // POST /api/materials
 // Only tutors and admins may upload
 export const createStudyMaterial = async (req, res) => {
-  const { title, description, subject, grade, fileUrl, tags } = req.body || {};
+  const { title, description, subject, grade, tags } = req.body || {};
 
   // required fields
-  if (!title || !description || !subject || !grade || !fileUrl) {
+  if (!title || !description || !subject || !grade) {
     throw new BadRequestError(
-      "title, description, subject, grade and fileUrl are required",
+      "title, description, subject, and grade are required",
     );
+  }
+
+  if (!req.file) {
+    throw new BadRequestError("Please provide a file to upload");
   }
 
   // attach uploader (protect adds full user, authenticateUser adds {userId})
@@ -21,7 +26,7 @@ export const createStudyMaterial = async (req, res) => {
     description: description.trim(),
     subject: subject.trim().toLowerCase(),
     grade: grade.trim(),
-    fileUrl: fileUrl.trim(),
+    fileUrl: req.file.path,
     uploadedBy: uploaderId,
   };
   if (tags && Array.isArray(tags)) {
@@ -130,14 +135,18 @@ export const updateStudyMaterial = async (req, res) => {
   }
 
   // 3. Build the update payload — only allow safe fields
-  const { title, description, subject, grade, fileUrl, tags } = req.body || {};
+  const { title, description, subject, grade, tags } = req.body || {};
   const updates = {};
 
   if (title       !== undefined) updates.title       = title.trim();
   if (description !== undefined) updates.description = description.trim();
   if (subject     !== undefined) updates.subject     = subject.trim().toLowerCase();
   if (grade       !== undefined) updates.grade       = grade.trim();
-  if (fileUrl     !== undefined) updates.fileUrl     = fileUrl.trim();
+  
+  if (req.file) {
+    updates.fileUrl = req.file.path;
+  }
+
   if (tags !== undefined && Array.isArray(tags)) {
     updates.tags = tags.map((t) => String(t).trim().toLowerCase());
   }
@@ -178,7 +187,24 @@ export const deleteStudyMaterial = async (req, res) => {
     );
   }
 
-  // 3. Delete
+  // 3. Delete file from Cloudinary
+  if (material.fileUrl && material.fileUrl.includes("cloudinary.com")) {
+    const urlParts = material.fileUrl.split("/");
+    const fileNameWithExt = urlParts[urlParts.length - 1];
+    const folder = urlParts[urlParts.length - 2];
+    if (folder === "study_materials") {
+      const publicId = `${folder}/${fileNameWithExt.split(".")[0]}`;
+      try {
+        await cloudinary.uploader.destroy(publicId, { resource_type: "raw" });
+        await cloudinary.uploader.destroy(publicId, { resource_type: "image" });
+        await cloudinary.uploader.destroy(publicId, { resource_type: "video" });
+      } catch (err) {
+        console.error("Cloudinary deletion error:", err);
+      }
+    }
+  }
+
+  // 4. Delete document
   await StudyMaterial.findByIdAndDelete(id);
 
   res.status(StatusCodes.OK).json({ msg: "Study material deleted successfully" });
