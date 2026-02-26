@@ -46,7 +46,7 @@ app.use("/api/messages", messageRouter);
 app.use("/api/tutoring-sessions", tutoringSessionRouter);
 
 // 404 Handler
-app.use("*", (req, res) => {
+app.use((req, res) => {
   res.status(404).json({
     success: false,
     message: `Route ${req.originalUrl} not found`,

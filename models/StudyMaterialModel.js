@@ -137,9 +137,6 @@ studyMaterialSchema.index({ subject: 1, grade: 1 });
 // Filtering by uploader
 studyMaterialSchema.index({ uploadedBy: 1, createdAt: -1 });
 
-// Status filtering
-studyMaterialSchema.index({ status: 1 });
-
 /**
  * Virtual - Get uploader's name (populated when fetching)
  */

@@ -84,7 +84,6 @@ export const uploadMaterial = multer({
 // ---------------------
 import path from "path";
 import fs from "fs";
-import { BadRequestError } from "../errors/customErrors.js";
 
 const uploadsDir = "uploads";
 if (!fs.existsSync(uploadsDir)) {
