@@ -22,9 +22,25 @@ const extractPublicId = (url) => {
 };
 
 export const createMaterial = async (data, uploaderId) => {
+  // Duplicate prevention: check if a material with the same title already exists
+  // (case-insensitive match within the same subject)
+  const normalizedTitle = data.title.trim();
+  const normalizedSubject = data.subject.trim().toLowerCase();
+
+  const existing = await StudyMaterial.findOne({
+    title: { $regex: `^${normalizedTitle}$`, $options: "i" },
+    subject: normalizedSubject,
+  });
+
+  if (existing) {
+    throw new BadRequestError(
+      `A material titled "${normalizedTitle}" already exists for subject "${normalizedSubject}"`
+    );
+  }
+
   const materialData = {
     ...data,
-    subject: data.subject.trim().toLowerCase(),
+    subject: normalizedSubject,
     uploadedBy: uploaderId,
   };
 
