@@ -82,7 +82,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OThjMDUzM2QwODYyZGE0OTNjNTI2YjYiLCJpZCI6IjY5OGMwNTMzZDA4NjJkYTQ5M2M1MjZiNiIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc3MjE4MTQwOSwiZXhwIjoxNzcyMjY3ODA5fQ.9XTINChnA6kcgi0mr5uTOJmghy20LEDF62R3YXdsPiA",
                   "type": "string"
                 }
               ]
@@ -96,7 +96,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"tutor2@gmail.com\",\n  \"password\": \"123457\"\n}",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -162,7 +162,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OThjMDUzM2QwODYyZGE0OTNjNTI2YjYiLCJpZCI6IjY5OGMwNTMzZDA4NjJkYTQ5M2M1MjZiNiIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc3MjE3OTkwMywiZXhwIjoxNzcyMjY2MzAzfQ._vYIdLarnLi63xzGGDeJxq2AcZqAeGDGEMYhpzndmeI",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OThjMDUzM2QwODYyZGE0OTNjNTI2YjYiLCJpZCI6IjY5OGMwNTMzZDA4NjJkYTQ5M2M1MjZiNiIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc3MjE4MTQwOSwiZXhwIjoxNzcyMjY3ODA5fQ.9XTINChnA6kcgi0mr5uTOJmghy20LEDF62R3YXdsPiA",
                   "type": "string"
                 }
               ]
@@ -283,6 +283,16 @@
           "name": "ERROR – No File Attached",
           "id": "94d00e3f-0efd-4455-850d-80211d2e13aa",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OThjMDUzM2QwODYyZGE0OTNjNTI2YjYiLCJpZCI6IjY5OGMwNTMzZDA4NjJkYTQ5M2M1MjZiNiIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc3MjE3OTkwMywiZXhwIjoxNzcyMjY2MzAzfQ._vYIdLarnLi63xzGGDeJxq2AcZqAeGDGEMYhpzndmeI",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
             "header": [
               {
@@ -1268,17 +1278,17 @@
   },
   "variable": [
     {
-      "id": "2740983e-c758-4b93-84eb-cc28bdec24b0",
+      "id": "7b4fe257-1fac-4d70-9ed5-aebf99c87117",
       "key": "baseUrl",
       "value": "http://localhost:5000/api"
     },
     {
-      "id": "47b55af3-4d48-4838-96e5-ccb2a2a76bdf",
+      "id": "602a07e7-1878-421b-a968-a8dd0c26aa8e",
       "key": "token",
       "value": "PASTE_YOUR_TOKEN_HERE"
     },
     {
-      "id": "04f8f1f6-f876-4c47-89a9-3f39b001dae5",
+      "id": "1f03f1d3-86db-47e3-947e-def00cde1ead",
       "key": "materialId",
       "value": "PASTE_MATERIAL_ID_HERE"
     }
