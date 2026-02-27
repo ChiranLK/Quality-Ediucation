@@ -71,6 +71,20 @@ This system promotes **accessible, structured, and collaborative digital educati
 - 🔒 **Role-based access** — only tutors/admins can upload, update, or delete
 - 🛡️ **Security** — NoSQL injection protection, likedBy array hidden, Cloudinary rollback on failure
 
+### 📅 Peer Learning & Tutoring Sessions
+👨‍💻 Developed by **SERASINGHE CS** — Student ID: `IT23401976`
+
+- 🎯 **Create & Manage Sessions** — Tutors can create, update, and delete tutoring sessions
+- 📆 **Google Calendar Integration** — Automatic event creation when tutors create sessions
+- 👥 **Join & Leave Sessions** — Students can enroll/unenroll in available sessions
+- 🔢 **Capacity Management** — Automatic tracking of enrolled students vs. max capacity
+- 🔍 **Advanced Filtering** — Filter by subject, grade, tutor, date, and availability
+- 📋 **My Sessions** — View enrolled sessions and sessions created by tutor
+- 🎓 **Tutor-specific Sessions** — Get all sessions by a particular tutor
+- ⏰ **Schedule Management** — Date, time, and duration tracking for all sessions
+- 🔒 **Role-based access** — Only tutors can create/modify sessions, students can join
+- ✅ **Real-time availability** — Auto-calculate available spots and prevent overbooking
+
 ---
 
 ## 🏗️ System Architecture
@@ -131,6 +145,7 @@ This system promotes **accessible, structured, and collaborative digital educati
 - 🤖 **Google Gemini API** - Sinhala to English translation
 - 📦 **Multer** - File upload handling
 - ☁️ **Cloudinary** - Cloud storage for study material files (PDF, DOC, images)
+- 📅 **Google Calendar API** - Automatic event creation for tutoring sessions
 
 ---
 
@@ -141,37 +156,46 @@ AF_Backend/
 ├── 📁 Config/
 │   └── db.js                    # Database configuration
 ├── 📁 Controllers/
-│   ├── authController.js           # Authentication logic
-│   ├── messageContoller.js         # Message CRUD + Translation
-│   ├── studyMaterialController.js  # Study Materials CRUD & metrics  [IT23405240]
-│   ├── tutorController.js          # Tutor management
+│   ├── authController.js              # Authentication logic
+│   ├── messageContoller.js            # Message CRUD + Translation
+│   ├── studyMaterialController.js     # Study Materials CRUD & metrics  [IT23405240]
+│   ├── tutoringSessionController.js   # Tutoring Sessions CRUD           [IT23401976]
+│   ├── tutorController.js             # Tutor management
 │   └── ...
 ├── 📁 Middleware/
-│   ├── authMiddleware.js           # JWT verification & RBAC
-│   ├── errorHandler.js             # Global error handling
-│   ├── uploadMiddleware.js         # Multer + Cloudinary upload      [IT23405240]
-│   ├── studyMaterialValidation.js  # Study material input validators [IT23405240]
-│   └── ValidatorMiddleware.js      # Auth input validation
+│   ├── authMiddleware.js              # JWT verification & RBAC
+│   ├── errorHandler.js                # Global error handling
+│   ├── uploadMiddleware.js            # Multer + Cloudinary upload      [IT23405240]
+│   ├── studyMaterialValidation.js     # Study material input validators [IT23405240]
+│   ├── tutoringSessionValidator.js    # Session input validation        [IT23401976]
+│   └── ValidatorMiddleware.js         # Auth input validation
 ├── 📁 models/
-│   ├── UserModel.js                # User/Tutor schema
-│   ├── MessageModel.js             # Message schema
-│   ├── StudyMaterialModel.js       # Study material schema            [IT23405240]
+│   ├── UserModel.js                   # User/Tutor schema
+│   ├── MessageModel.js                # Message schema
+│   ├── StudyMaterialModel.js          # Study material schema            [IT23405240]
+│   ├── TutoringSessionModel.js        # Tutoring session schema          [IT23401976]
 │   └── ...
 ├── 📁 Routes/
-│   ├── authRouter.js               # Authentication routes
-│   ├── materialRouter.js           # Study material routes            [IT23405240]
-│   ├── messageRouter.js            # Message routes
-│   ├── tutorRouter.js              # Tutor routes
-│   └── index.js                    # Route aggregator
+│   ├── authRouter.js                  # Authentication routes
+│   ├── materialRouter.js              # Study material routes            [IT23405240]
+│   ├── messageRouter.js               # Message routes
+│   ├── tutoringSessionRouter.js       # Tutoring session routes          [IT23401976]
+│   ├── tutorRouter.js                 # Tutor routes
+│   ├── googleCalenderRouter.js        # Google Calendar integration      [IT23401976]
+│   └── index.js                       # Route aggregator
 ├── 📁 services/
-│   ├── messageService.js           # Translation service
-│   ├── studyMaterialService.js     # Study material business logic    [IT23405240]
+│   ├── messageService.js              # Translation service
+│   ├── studyMaterialService.js        # Study material business logic    [IT23405240]
+│   ├── tutoringSessionService.js      # Tutoring session logic           [IT23401976]
+│   ├── googleCalendarService.js       # Google Calendar integration      [IT23401976]
 │   └── ...
 ├── 📁 utils/
-│   ├── generateToken.js            # JWT generation
-│   ├── responseHandler.js          # Standardised API responses       [IT23405240]
-│   ├── validationUtils.js          # ObjectId validation helper       [IT23405240]
-│   └── passwordUtils.js            # Password hashing
+│   ├── generateToken.js               # JWT generation
+│   ├── responseHandler.js             # Standardised API responses       [IT23405240]
+│   ├── validationUtils.js             # ObjectId validation helper       [IT23405240]
+│   ├── tutoringSessionUtils.js        # Session utilities                [IT23401976]
+│   ├── googleCalender.js              # Google Calendar helper           [IT23401976]
+│   └── passwordUtils.js               # Password hashing
 ├── 📁 postman/
 │   └── StudyMaterials_Complete.postman_collection.json  # 30 API tests [IT23405240]
 ├── 📁 uploads/                     # Local file uploads (messages)
@@ -652,6 +676,365 @@ Toggle — same endpoint likes on 1st call, unlikes on 2nd call. Prevents duplic
 
 ---
 
+## 📅 Peer Learning & Tutoring Sessions API
+👨‍💻 Developed by **SERASINGHE CS** — Student ID: `IT23401976`
+
+> Base URL: `/api/tutoring-sessions` | Auth: `Bearer <token>` required on all routes
+
+### 1️⃣ Create Tutoring Session
+
+**Endpoint:** `POST /api/tutoring-sessions`  
+**Access:** Tutor / Admin only  
+**Content-Type:** `application/json`
+
+**Request Body:**
+```json
+{
+  "title": "Advanced Mathematics - Calculus",
+  "description": "Comprehensive calculus session covering derivatives and integrals",
+  "subject": "Mathematics",
+  "grade": "Grade 12",
+  "date": "2026-03-15",
+  "startTime": "14:00",
+  "endTime": "16:00",
+  "maxCapacity": 25,
+  "meetingLink": "https://zoom.us/j/123456789",
+  "isOnline": true
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Tutoring session created successfully",
+  "data": {
+    "_id": "64f1a2b3c4d5e6f7a8b9c0d1",
+    "title": "Advanced Mathematics - Calculus",
+    "subject": "Mathematics",
+    "grade": "Grade 12",
+    "tutor": {
+      "_id": "64f1a2b3c4d5e6f7a8b9c0d2",
+      "fullName": "John Doe",
+      "email": "john@example.com"
+    },
+    "date": "2026-03-15T00:00:00.000Z",
+    "startTime": "14:00",
+    "endTime": "16:00",
+    "maxCapacity": 25,
+    "enrolledStudents": [],
+    "availableSpots": 25,
+    "status": "scheduled",
+    "isOnline": true,
+    "meetingLink": "https://zoom.us/j/123456789",
+    "googleCalendarEventId": "abc123xyz",
+    "createdAt": "2026-02-27T10:00:00.000Z"
+  },
+  "googleCalendarEvent": "Event created successfully"
+}
+```
+
+---
+
+### 2️⃣ Get All Tutoring Sessions (with Filters)
+
+**Endpoint:** `GET /api/tutoring-sessions`  
+**Access:** All authenticated users
+
+**Query Parameters:**
+| Param | Example | Description |
+|---|---|---|
+| `subject` | `Mathematics` | Filter by subject |
+| `grade` | `Grade 12` | Filter by grade |
+| `tutor` | `64f1a2b3...` | Filter by tutor ID |
+| `status` | `scheduled` | `scheduled` \| `ongoing` \| `completed` \| `cancelled` |
+| `date` | `2026-03-15` | Filter by specific date |
+| `isOnline` | `true` | Filter online/offline sessions |
+| `available` | `true` | Show only sessions with available spots |
+| `page` | `1` | Page number (default: 1) |
+| `limit` | `10` | Results per page (default: 10, max: 50) |
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "_id": "64f1a2b3c4d5e6f7a8b9c0d1",
+      "title": "Advanced Mathematics - Calculus",
+      "subject": "Mathematics",
+      "grade": "Grade 12",
+      "tutor": {
+        "_id": "64f1a2b3c4d5e6f7a8b9c0d2",
+        "fullName": "John Doe",
+        "email": "john@example.com"
+      },
+      "date": "2026-03-15T00:00:00.000Z",
+      "startTime": "14:00",
+      "endTime": "16:00",
+      "maxCapacity": 25,
+      "enrolledStudents": 5,
+      "availableSpots": 20,
+      "status": "scheduled",
+      "isOnline": true
+    }
+  ],
+  "pagination": {
+    "total": 15,
+    "pages": 2,
+    "currentPage": 1,
+    "limit": 10
+  }
+}
+```
+
+---
+
+### 3️⃣ Get Single Tutoring Session
+
+**Endpoint:** `GET /api/tutoring-sessions/:id`  
+**Access:** All authenticated users
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "_id": "64f1a2b3c4d5e6f7a8b9c0d1",
+    "title": "Advanced Mathematics - Calculus",
+    "description": "Comprehensive calculus session covering derivatives and integrals",
+    "subject": "Mathematics",
+    "grade": "Grade 12",
+    "tutor": {
+      "_id": "64f1a2b3c4d5e6f7a8b9c0d2",
+      "fullName": "John Doe",
+      "email": "john@example.com",
+      "subjects": ["Mathematics", "Physics"]
+    },
+    "date": "2026-03-15T00:00:00.000Z",
+    "startTime": "14:00",
+    "endTime": "16:00",
+    "maxCapacity": 25,
+    "enrolledStudents": [
+      {
+        "_id": "64f1a2b3c4d5e6f7a8b9c0d3",
+        "fullName": "Jane Smith",
+        "email": "jane@example.com"
+      }
+    ],
+    "availableSpots": 24,
+    "status": "scheduled",
+    "isOnline": true,
+    "meetingLink": "https://zoom.us/j/123456789",
+    "googleCalendarEventId": "abc123xyz",
+    "createdAt": "2026-02-27T10:00:00.000Z",
+    "updatedAt": "2026-02-27T10:00:00.000Z"
+  }
+}
+```
+
+---
+
+### 4️⃣ Get My Enrolled Sessions
+
+**Endpoint:** `GET /api/tutoring-sessions/my-enrolled`  
+**Access:** Student / Tutor / Admin
+
+**Response:**
+```json
+{
+  "success": true,
+  "count": 3,
+  "data": [
+    {
+      "_id": "64f1a2b3c4d5e6f7a8b9c0d1",
+      "title": "Advanced Mathematics - Calculus",
+      "subject": "Mathematics",
+      "tutor": {
+        "fullName": "John Doe",
+        "email": "john@example.com"
+      },
+      "date": "2026-03-15T00:00:00.000Z",
+      "startTime": "14:00",
+      "endTime": "16:00",
+      "status": "scheduled",
+      "isOnline": true,
+      "meetingLink": "https://zoom.us/j/123456789"
+    }
+  ]
+}
+```
+
+---
+
+### 5️⃣ Get Sessions by Tutor
+
+**Endpoint:** `GET /api/tutoring-sessions/tutor/:tutorId`  
+**Access:** All authenticated users
+
+**Response:**
+```json
+{
+  "success": true,
+  "tutor": {
+    "_id": "64f1a2b3c4d5e6f7a8b9c0d2",
+    "fullName": "John Doe",
+    "email": "john@example.com",
+    "subjects": ["Mathematics", "Physics"]
+  },
+  "count": 8,
+  "data": [
+    {
+      "_id": "64f1a2b3c4d5e6f7a8b9c0d1",
+      "title": "Advanced Mathematics - Calculus",
+      "subject": "Mathematics",
+      "grade": "Grade 12",
+      "date": "2026-03-15T00:00:00.000Z",
+      "startTime": "14:00",
+      "endTime": "16:00",
+      "enrolledStudents": 15,
+      "availableSpots": 10,
+      "status": "scheduled"
+    }
+  ]
+}
+```
+
+---
+
+### 6️⃣ Update Tutoring Session
+
+**Endpoint:** `PATCH /api/tutoring-sessions/:id`  
+**Access:** Session creator (Tutor) or Admin only  
+**Content-Type:** `application/json`
+
+**Request Body:** (All fields optional)
+```json
+{
+  "title": "Advanced Mathematics - Calculus & Limits",
+  "description": "Updated description with additional topics",
+  "maxCapacity": 30,
+  "meetingLink": "https://zoom.us/j/987654321",
+  "status": "scheduled"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Tutoring session updated successfully",
+  "data": {
+    "_id": "64f1a2b3c4d5e6f7a8b9c0d1",
+    "title": "Advanced Mathematics - Calculus & Limits",
+    "maxCapacity": 30,
+    "availableSpots": 29,
+    "updatedAt": "2026-02-27T11:00:00.000Z"
+  }
+}
+```
+
+---
+
+### 7️⃣ Delete Tutoring Session
+
+**Endpoint:** `DELETE /api/tutoring-sessions/:id`  
+**Access:** Session creator (Tutor) or Admin only
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Tutoring session deleted successfully"
+}
+```
+
+---
+
+### 8️⃣ Join Tutoring Session
+
+**Endpoint:** `POST /api/tutoring-sessions/:id/join`  
+**Access:** All authenticated users (typically students)
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Successfully joined the tutoring session",
+  "data": {
+    "_id": "64f1a2b3c4d5e6f7a8b9c0d1",
+    "title": "Advanced Mathematics - Calculus",
+    "enrolledStudents": 6,
+    "availableSpots": 19
+  }
+}
+```
+
+**Error Cases:**
+```json
+{
+  "success": false,
+  "message": "Session is already full",
+  "error": "No available spots"
+}
+```
+
+```json
+{
+  "success": false,
+  "message": "Already enrolled in this session"
+}
+```
+
+---
+
+### 9️⃣ Leave Tutoring Session
+
+**Endpoint:** `POST /api/tutoring-sessions/:id/leave`  
+**Access:** Enrolled student
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Successfully left the tutoring session",
+  "data": {
+    "_id": "64f1a2b3c4d5e6f7a8b9c0d1",
+    "title": "Advanced Mathematics - Calculus",
+    "enrolledStudents": 5,
+    "availableSpots": 20
+  }
+}
+```
+
+**Error Case:**
+```json
+{
+  "success": false,
+  "message": "You are not enrolled in this session"
+}
+```
+
+---
+
+### 🔟 Google Calendar Integration
+
+When a tutor creates a tutoring session, the system automatically:
+- ✅ Creates a Google Calendar event
+- 📧 Sends invitations to the tutor
+- 🔗 Returns a Google Calendar event ID
+- 📅 Syncs session details (title, date, time, description)
+- 🔄 Updates the event when session details change
+
+**Environment Variables Required:**
+```env
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_REDIRECT_URI=your_redirect_uri
+```
+
+---
+
 ## 🌍 Translation Workflow
 
 ```mermaid
@@ -743,6 +1126,7 @@ Contributions are welcome! Please follow these steps:
 |---|---|---|
 | H A S Maduwantha | IT23472020 | Authentication, Messages, Translation |
 | **ALAHAKOON PB** | **IT23405240** | **Study Materials & Resources** |
+| **SERASINGHE CS** | **IT23401976** | **Peer Learning & Tutoring Sessions** |
 
 ---
 
@@ -757,6 +1141,7 @@ This project is developed as part of an academic curriculum.
 For support or queries, please contact:
 - 📧 IT23472020@my.sliit.lk — H A S Maduwantha
 - 📧 IT23405240@my.sliit.lk — ALAHAKOON PB
+- 📧 IT23401976@my.sliit.lk — SERASINGHE CS
 - 🎓 Institution: SLIIT
 
 ---
@@ -765,7 +1150,7 @@ For support or queries, please contact:
 
 ### ⭐ If you find this project helpful, please give it a star!
 
-Made with ❤️ by H A S Maduwantha & ALAHAKOON PB
+Made with ❤️ by H A S Maduwantha, ALAHAKOON PB & SERASINGHE CS
 
 </div>
 
