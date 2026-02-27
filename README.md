@@ -58,8 +58,7 @@ This system promotes **accessible, structured, and collaborative digital educati
 - 🔄 **Translation on both create and update** operations
 
 ### 📚 Study Materials & Resources
-
-> 👨‍💻 Developed by **ALAHAKOON PB** — Student ID: `IT23405240`
+👨‍💻 Developed by **ALAHAKOON PB** — Student ID: `IT23405240`
 
 - 📤 **Upload study materials** — PDF, DOC, DOCX, PPT, PPTX, TXT, images (max 5 MB) via Cloudinary
 - 📋 **View & search** — full-text keyword search across title, description, and tags
@@ -525,8 +524,8 @@ AF_Backend/
 ---
 
 ## 📚 Study Materials & Resources API
+👨‍💻 Developed by **ALAHAKOON PB** — Student ID: `IT23405240`
 
-> 👨‍💻 **ALAHAKOON PB** — `IT23405240`  
 > Base URL: `/api/materials` | Auth: `Bearer <token>` required on all routes
 
 ### 1️⃣ Upload Study Material
