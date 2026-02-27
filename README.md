@@ -28,7 +28,7 @@ This system promotes **accessible, structured, and collaborative digital educati
 ## 🚀 Key Features
 
 ### 🔐 Authentication & Authorization
-
+👨‍💻 Developed by **H A S Maduwantha** — Student ID: `IT23472020`
 - ✅ **Role-based access control (RBAC)**
 - ✅ Secure login & registration
 - ✅ JWT-based authentication
@@ -38,7 +38,7 @@ This system promotes **accessible, structured, and collaborative digital educati
   - 🛡️ **Admin**
 
 ### 💬 Help Request Management (Full CRUD)
-
+👨‍💻 Developed by **H A S Maduwantha** — Student ID: `IT23472020`
 #### Students can:
 - ✍️ Create help requests
 - 👀 View submitted requests
