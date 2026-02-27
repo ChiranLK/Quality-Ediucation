@@ -17,6 +17,10 @@ import feedbackEmailRoutes from "./Routes/feedbackEmailRoutes.js";
 // If you have these route files, uncomment the imports + app.use lines below
 import messageRouter from "./Routes/messageRouter.js";
 import tutoringSessionRouter from "./Routes/tutoringSessionRouter.js";
+import googleCalendarRouter from "./Routes/googleCalenderRouter.js";
+
+// Import Error Handler
+import { errorHandler } from "./Middleware/errorHandler.js";
 
 
 const app = express();
@@ -41,6 +45,18 @@ app.use("/api/email", feedbackEmailRoutes);
 // Uncomment if these exist
 app.use("/api/messages", messageRouter);
 app.use("/api/tutoring-sessions", tutoringSessionRouter);
+
+// 404 Handler
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `Route ${req.originalUrl} not found`,
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// Error Handler Middleware (MUST be last!)
+app.use(errorHandler);
 
 // Port
 const PORT = process.env.PORT || 5000;
