@@ -16,8 +16,12 @@ router.get('/callback', async (req, res, next) => {
     const code = req.query.code;
     const oAuth2Client = createOAuthClient();
     const { tokens } = await oAuth2Client.getToken(code);
-    await saveTokens(tokens); // persist securely (DB recommended)
-    res.json({ msg: 'Google OAuth successful' });
+
+    console.log("TOKENS:", tokens); // 👈 ADD THIS
+
+    await saveTokens(tokens);
+
+    res.json({ msg: 'Google OAuth successful', tokens });
   } catch (err) { next(err); }
 });
 
@@ -36,6 +40,23 @@ router.post('/events', async (req, res, next) => {
     const response = await calendar.events.insert({ calendarId, resource: event });
     res.status(201).json(response.data);
   } catch (err) { next(err); }
+});
+
+router.get('/status', async (req, res) => {
+  try {
+    const tokens = await loadTokens();
+    const hasRefreshToken = !!process.env.GOOGLE_REFRESH_TOKEN;
+    
+    res.json({
+      authenticated: !!tokens,
+      hasRefreshTokenInEnv: hasRefreshToken,
+      tokenPath: process.env.TOKEN_STORE_PATH || './google-tokens.json (default)',
+      clientIdConfigured: !!process.env.GOOGLE_CLIENT_ID,
+      redirectUri: process.env.GOOGLE_REDIRECT_URI
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 export default router;

@@ -1,24 +1,23 @@
+// services/tutoringSessionService.js
 import TutoringSession from "../models/TutoringSessionModel.js";
-import { StatusCodes } from "http-status-codes";
 import { BadRequestError, UnauthorizedError, NotFoundError } from "../errors/customErrors.js";
-import { createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from "../service/googleCalendar.service.js";
-import mongoose from "mongoose";
+import { createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from "./googleCalendarService.js";
 import * as validation from "../validations/tutoringSession.validation.js";
 import * as utils from "../utils/tutoringSessionUtils.js";
 
-// --- helpers used internally ---
-function ensureSessionExists(session) {
+// --- Helpers ---
+const ensureSessionExists = (session) => {
   if (!session) throw new NotFoundError("Session not found");
   return session;
-}
+};
 
-function checkOwnershipOrAdmin(session, user) {
+const checkOwnershipOrAdmin = (session, user) => {
   const isTutor = String(session.tutor) === String(user.userId);
   const isAdmin = user.role === "admin";
-  if (!(isTutor || isAdmin)) throw new UnauthorizedError("Not authorized to perform this action");
-}
+  if (!(isTutor || isAdmin)) throw new UnauthorizedError("Not authorized");
+};
 
-// --- service exports ---
+// --- Services ---
 export async function createSession(user, payload) {
   validation.validateSessionPayload(payload);
 
@@ -34,7 +33,6 @@ export async function createSession(user, payload) {
     tags,
     notes,
     grade,
-    duration,
   } = payload;
 
   const sessionData = {
@@ -44,29 +42,77 @@ export async function createSession(user, payload) {
     description: String(description).trim(),
     topic: topic ? String(topic).trim() : undefined,
     grade: grade || level || "intermediate",
-    duration: duration || 60,
-    schedule: { date: new Date(schedule.date), startTime: schedule.startTime, endTime: schedule.endTime },
+    schedule: {
+      date: new Date(schedule.date),
+      startTime: schedule.startTime,
+      endTime: schedule.endTime,
+    },
     location: location || { type: "online" },
     capacity: { maxParticipants: parseInt(capacity.maxParticipants, 10), currentEnrolled: 0 },
     level: level || "intermediate",
-    tags: Array.isArray(tags) ? tags.map(t => String(t).trim().toLowerCase()).filter(Boolean) : [],
-    notes: notes ? String(notes).trim() : undefined,
+    tags: Array.isArray(tags) ? tags.map((t) => t.trim().toLowerCase()) : [],
+    notes: notes ? notes.trim() : undefined,
     isPublished: true,
   };
 
   const session = await TutoringSession.create(sessionData);
   await session.populate("tutor", "fullName email role");
 
+  // Google Calendar
   if (session) {
     try {
       const googleEventId = await createCalendarEvent(session);
       session.googleEventId = googleEventId;
       await session.save();
+      console.log("✅ Google Calendar event created:", googleEventId);
     } catch (err) {
-      console.error("Calendar create error", err.message);
+      console.error("Calendar create error:", err.message);
     }
   }
+
   return session;
+}
+
+export async function updateSession(user, id, updates) {
+  validation.validateObjectId(id);
+  validation.validateUpdatePayload(updates);
+
+  const session = await TutoringSession.findById(id);
+  ensureSessionExists(session);
+  checkOwnershipOrAdmin(session, user);
+
+  const allowed = ["title", "subject", "description", "topic", "schedule", "location", "level", "grade", "tags", "notes", "status", "capacity"];
+  const data = {};
+  allowed.forEach((k) => { if (k in updates) data[k] = updates[k]; });
+
+  const updated = await TutoringSession.findByIdAndUpdate(id, data, { new: true, runValidators: true }).populate("tutor", "fullName email role");
+
+  if (updated.googleEventId) {
+    try {
+      await updateCalendarEvent(updated.googleEventId, updated);
+    } catch (err) {
+      console.error("Calendar update failed:", err.message);
+    }
+  }
+  return updated;
+}
+
+export async function deleteSession(user, id) {
+  validation.validateObjectId(id);
+  const session = await TutoringSession.findById(id);
+  ensureSessionExists(session);
+  checkOwnershipOrAdmin(session, user);
+
+  if (session.googleEventId) {
+    try {
+      await deleteCalendarEvent(session.googleEventId);
+    } catch (err) {
+      console.error("Calendar delete failed:", err.message);
+    }
+  }
+
+  await TutoringSession.findByIdAndDelete(id);
+  return;
 }
 
 export async function getAllSessions(query) {
@@ -88,78 +134,13 @@ export async function getAllSessions(query) {
       .lean(),
   ]);
 
-  return {
-    sessions,
-    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
-  };
+  return { sessions, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } };
 }
 
 export async function getSessionById(id) {
   validation.validateObjectId(id);
-  const session = await TutoringSession.findById(id)
-    .populate("tutor", "fullName email role")
-    .populate("participants.userId", "fullName email");
+  const session = await TutoringSession.findById(id).populate("tutor", "fullName email role").populate("participants.userId", "fullName email");
   return ensureSessionExists(session);
-}
-
-export async function updateSession(user, id, updates) {
-  validation.validateObjectId(id);
-  validation.validateUpdatePayload(updates);
-
-  const session = await TutoringSession.findById(id);
-  ensureSessionExists(session);
-  checkOwnershipOrAdmin(session, user);
-
-  const allowed = [
-    "title",
-    "subject",
-    "description",
-    "topic",
-    "schedule",
-    "location",
-    "level",
-    "grade",
-    "duration",
-    "tags",
-    "notes",
-    "status",
-    "capacity",
-  ];
-  const data = {};
-  allowed.forEach((k) => {
-    if (k in updates) data[k] = updates[k];
-  });
-
-  const updated = await TutoringSession.findByIdAndUpdate(id, data, { new: true, runValidators: true })
-    .populate("tutor", "fullName email role");
-
-  if (updated.googleEventId) {
-    try {
-      await updateCalendarEvent(updated.googleEventId, updated);
-    } catch (err) {
-      console.error("Calendar update failed:", err.message);
-    }
-  }
-  return updated;
-}
-
-export async function deleteSession(user, id) {
-  validation.validateObjectId(id);
-
-  const session = await TutoringSession.findById(id);
-  ensureSessionExists(session);
-  checkOwnershipOrAdmin(session, user);
-
-  if (session.googleEventId) {
-    try {
-      await deleteCalendarEvent(session.googleEventId);
-    } catch (err) {
-      console.error("Calendar delete failed:", err.message);
-    }
-  }
-
-  await TutoringSession.findByIdAndDelete(id);
-  return;
 }
 
 export async function joinSession(user, id) {
@@ -169,13 +150,8 @@ export async function joinSession(user, id) {
   const session = await TutoringSession.findById(id);
   ensureSessionExists(session);
 
-  try {
-    await session.addParticipant(user.userId);
-  } catch (err) {
-    throw new BadRequestError(err.message);
-  }
+  await session.addParticipant(user.userId);
 
-  // optionally update calendar attendees if googleEventId exists
   if (session.googleEventId) {
     try {
       const updated = await TutoringSession.findById(id).populate("participants.userId", "email");
@@ -184,6 +160,7 @@ export async function joinSession(user, id) {
       console.error("Failed to sync attendees:", err.message);
     }
   }
+
   return session.capacity.currentEnrolled;
 }
 
@@ -194,11 +171,7 @@ export async function leaveSession(user, id) {
   const session = await TutoringSession.findById(id);
   ensureSessionExists(session);
 
-  try {
-    await session.removeParticipant(user.userId);
-  } catch (err) {
-    throw new BadRequestError(err.message);
-  }
+  await session.removeParticipant(user.userId);
 
   if (session.googleEventId) {
     try {
@@ -208,24 +181,18 @@ export async function leaveSession(user, id) {
       console.error("Failed to sync attendees:", err.message);
     }
   }
+
   return session.capacity.currentEnrolled;
 }
 
 export async function getTutorSessions(tutorId) {
   validation.validateObjectId(tutorId, "tutorId");
-
-  const sessions = await TutoringSession.find({ tutor: tutorId })
-    .populate("tutor", "fullName email role")
-    .populate("participants.userId", "fullName email")
-    .sort({ "schedule.date": -1 });
-
+  const sessions = await TutoringSession.find({ tutor: tutorId }).populate("tutor", "fullName email role").populate("participants.userId", "fullName email").sort({ "schedule.date": -1 });
   return sessions;
 }
 
 export async function getMyEnrolledSessions(user) {
   if (!user) throw new UnauthorizedError("Authentication required");
-  const sessions = await TutoringSession.find({ "participants.userId": user.userId })
-    .populate("tutor", "fullName email role")
-    .sort({ "schedule.date": 1 });
+  const sessions = await TutoringSession.find({ "participants.userId": user.userId }).populate("tutor", "fullName email role").sort({ "schedule.date": 1 });
   return sessions;
 }
