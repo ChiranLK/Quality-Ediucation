@@ -3,11 +3,12 @@ dotenv.config();
 
 import express from "express";
 import cors from "cors";
-import connectDB from "./Config/db.js";
 import cookieParser from "cookie-parser";
 import emailRoutes from "./Routes/emailRoutes.js";
 
-// Import Routes
+import connectDB from "./Config/db.js";
+
+// Routes
 import authRouter from "./Routes/authRouter.js";
 import feedbackRouter from "./Routes/feedbackRouter.js";
 import progressRouter from "./Routes/progressRouter.js";
@@ -18,8 +19,8 @@ import googleCalendarRouter from "./Routes/googleCalenderRouter.js";
 import tutorRouter from "./Routes/tutorRouter.js";
 import materialRouter from "./Routes/materialRouter.js";
 
-// Import Error Handler
-import { errorHandler } from "./Middleware/errorHandler.js";
+// Google Calendar
+import { initCalendar } from "./services/googleCalendarService.js";
 
 
 const app = express();
@@ -45,22 +46,16 @@ app.use("/api/tutoring-sessions", tutoringSessionRouter);
 app.use("/api/tutors", tutorRouter);
 app.use("/api/materials", materialRouter);
 
-// 404 Handler
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: `Route ${req.originalUrl} not found`,
-    timestamp: new Date().toISOString(),
-  });
-});
+// Init Google Calendar
+initCalendar();
 
-// Error Handler Middleware (MUST be last!)
-app.use(errorHandler);
+console.log("CLIENT ID:", process.env.GOOGLE_CLIENT_ID);
+console.log("REFRESH TOKEN:", process.env.GOOGLE_REFRESH_TOKEN ? "Exists" : "Missing");
 
 // Port
 const PORT = process.env.PORT || 5000;
 
-// Connect to MongoDB and start server
+// Start server
 connectDB().then(() => {
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
