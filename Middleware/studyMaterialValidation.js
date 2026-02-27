@@ -1,14 +1,46 @@
 import { body, validationResult } from "express-validator";
 import { BadRequestError } from "../errors/customErrors.js";
+import { cloudinary } from "./uploadMiddleware.js";
+
+/**
+ * Extract Cloudinary public_id from a Cloudinary URL.
+ */
+const extractPublicId = (url) => {
+  if (!url || !url.includes("cloudinary.com")) return null;
+  try {
+    const parts = url.split("/upload/");
+    if (parts.length < 2) return null;
+    const pathAfterUpload = parts[1].replace(/^v\d+\//, "");
+    return pathAfterUpload.replace(/\.[^/.]+$/, ""); // strip extension
+  } catch {
+    return null;
+  }
+};
 
 const withValidationErrors = (validateValues) => {
   return [
     validateValues,
-    (req, res, next) => {
+    async (req, res, next) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         const errorMessages = errors.array().map((err) => err.msg);
-        throw new BadRequestError(errorMessages.join(", "));
+        
+        // ✅ CRITICAL: If validation fails AFTER Multer uploaded the file to Cloudinary,
+        // we must delete the orphaned file to prevent cloud storage leaks.
+        if (req.file && req.file.path) {
+          const publicId = extractPublicId(req.file.path);
+          if (publicId) {
+            try {
+              await cloudinary.uploader.destroy(publicId, { resource_type: "raw" });
+              console.warn("Cloudinary rollback: deleted orphaned file due to validation error:", publicId);
+            } catch (cloudErr) {
+              console.error("Cloudinary rollback failed during validation:", cloudErr.message);
+            }
+          }
+        }
+
+        next(new BadRequestError(errorMessages.join(", ")));
+        return;
       }
       next();
     },
@@ -41,7 +73,16 @@ export const validateStudyMaterialInput = withValidationErrors([
     .isLength({ max: 20 })
     .withMessage("Grade cannot exceed 20 characters"),
   // fileUrl is NOT validated here — it comes from Multer/Cloudinary via req.file
-  body("tags").optional().isArray().withMessage("Tags must be an array"),
+  body("tags")
+    .optional()
+    .custom((value) => {
+      let arr = value;
+      if (typeof value === "string") {
+        try { arr = JSON.parse(value); } catch { arr = value.split(","); }
+      }
+      if (!Array.isArray(arr)) throw new Error("Tags must be an array or string format");
+      return true;
+    }),
 ]);
 
 export const validateStudyMaterialUpdate = withValidationErrors([
@@ -66,5 +107,14 @@ export const validateStudyMaterialUpdate = withValidationErrors([
     .isLength({ max: 20 })
     .withMessage("Grade cannot exceed 20 characters"),
   // fileUrl comes from Multer/Cloudinary via req.file, not body
-  body("tags").optional().isArray().withMessage("Tags must be an array"),
+  body("tags")
+    .optional()
+    .custom((value) => {
+      let arr = value;
+      if (typeof value === "string") {
+        try { arr = JSON.parse(value); } catch { arr = value.split(","); }
+      }
+      if (!Array.isArray(arr)) throw new Error("Tags must be an array or string format");
+      return true;
+    }),
 ]);
