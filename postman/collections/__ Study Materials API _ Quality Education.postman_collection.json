@@ -1,0 +1,1286 @@
+{
+  "info": {
+    "_postman_id": "9b449107-09e9-470a-bcc5-9fedf4b72849",
+    "name": "📚 Study Materials API – Quality Education",
+    "description": "Complete Postman collection for Study Materials & Resources component.\n\n**Setup:**\n1. Import this file into Postman\n2. Create an Environment with variables: `baseUrl`, `token`, `materialId`\n3. Set `baseUrl` = http://localhost:5000/api\n4. Run 'Login' first, copy token → set `token` variable\n5. After uploading, copy the `_id` → set `materialId`",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "🔐 Auth (Setup)",
+      "item": [
+        {
+          "name": "Register Tutor",
+          "id": "43b4a894-86fc-4517-a1e3-a5d4b122cc9e",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Test Tutor\",\n  \"email\": \"tutor@test.com\",\n  \"password\": \"Test@1234\",\n  \"phoneNumber\": \"0771234567\",\n  \"location\": \"Colombo\",\n  \"role\": \"tutor\",\n  \"subjects\": [\"mathematics\", \"science\"]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "✅ Expected: 201 – 'Tutor registered successfully'"
+          },
+          "response": []
+        },
+        {
+          "name": "Login → Copy token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "b79760d6-fbaa-412d-9bb1-dc9f565cf3fd",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.token) {",
+                  "  pm.collectionVariables.set('token', json.token);",
+                  "  console.log('Token saved automatically!');",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "93d330a0-73b6-41e6-b80f-309ffd0be48f",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "b2a3f9d4-591d-41a5-a99c-efdb927d4480",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"tutor2@gmail.com\",\n  \"password\": \"123457\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "✅ Expected: 200 – Token auto-saved to {{token}} variable via test script"
+          },
+          "response": []
+        }
+      ],
+      "id": "13537641-ac71-4cf5-883b-c0f7bd4d9c07"
+    },
+    {
+      "name": "📤 Upload Material",
+      "item": [
+        {
+          "name": "Upload Material (Success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "0c4a31b3-0823-45cd-9744-54feff3128ec",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.data && json.data._id) {",
+                  "  pm.collectionVariables.set('materialId', json.data._id);",
+                  "  console.log('Material ID saved: ' + json.data._id);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "d51a284d-8f4c-4e2b-81ba-23aa5c80eef4",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "f921a245-8566-406c-b6a6-a6a2b0a71ae7",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OThjMDUzM2QwODYyZGE0OTNjNTI2YjYiLCJpZCI6IjY5OGMwNTMzZDA4NjJkYTQ5M2M1MjZiNiIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc3MjE3OTkwMywiZXhwIjoxNzcyMjY2MzAzfQ._vYIdLarnLi63xzGGDeJxq2AcZqAeGDGEMYhpzndmeI",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Introduction to Algebra",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "A comprehensive guide to algebraic expressions and equations for grade 9 students.",
+                  "type": "text"
+                },
+                {
+                  "key": "subject",
+                  "value": "mathematics",
+                  "type": "text"
+                },
+                {
+                  "key": "grade",
+                  "value": "Grade 9",
+                  "type": "text"
+                },
+                {
+                  "key": "tags",
+                  "value": "[\"algebra\",\"equations\",\"math\"]",
+                  "type": "text",
+                  "description": "JSON string array"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "description": "Select any PDF, DOC, DOCX, PPT, TXT, or image file (max 5MB)",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/materials",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials"
+              ]
+            },
+            "description": "✅ Expected: 201 – Material created. Material ID auto-saved to {{materialId}}.\n\n⚠️ Select a real file in the 'file' field before sending."
+          },
+          "response": []
+        },
+        {
+          "name": "Upload Material 2 (For Delete Test)",
+          "id": "f0bf81c5-0570-4a14-ac8c-e5b75e31fd91",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Physics: Laws of Motion",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Complete notes on Newton's three laws of motion for grade 11 students with examples.",
+                  "type": "text"
+                },
+                {
+                  "key": "subject",
+                  "value": "physics",
+                  "type": "text"
+                },
+                {
+                  "key": "grade",
+                  "value": "Grade 11",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "description": "Select a file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/materials",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials"
+              ]
+            },
+            "description": "Upload a second material. Copy the _id from response for the DELETE test."
+          },
+          "response": []
+        },
+        {
+          "name": "ERROR – No File Attached",
+          "id": "94d00e3f-0efd-4455-850d-80211d2e13aa",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Missing File Test",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "This request has no file attached to test the error handler.",
+                  "type": "text"
+                },
+                {
+                  "key": "subject",
+                  "value": "science",
+                  "type": "text"
+                },
+                {
+                  "key": "grade",
+                  "value": "Grade 10",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/materials",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials"
+              ]
+            },
+            "description": "❌ Expected: 400 – 'Please upload a file (PDF, DOC, image, etc.)'"
+          },
+          "response": []
+        },
+        {
+          "name": "ERROR – Missing Title (Validation)",
+          "id": "5df11815-d4b0-4c74-9b15-8a81f52e37af",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "description",
+                  "value": "This upload is missing the title field intentionally.",
+                  "type": "text"
+                },
+                {
+                  "key": "subject",
+                  "value": "history",
+                  "type": "text"
+                },
+                {
+                  "key": "grade",
+                  "value": "Grade 11",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/materials",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials"
+              ]
+            },
+            "description": "❌ Expected: 400 – 'Title is required'"
+          },
+          "response": []
+        },
+        {
+          "name": "ERROR – Duplicate Upload",
+          "id": "399c2bc0-984b-4429-811c-e6bbfe8f6e1a",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Introduction to Algebra",
+                  "type": "text",
+                  "description": "Same title+subject as existing"
+                },
+                {
+                  "key": "description",
+                  "value": "A comprehensive guide to algebraic expressions and equations for grade 9 students.",
+                  "type": "text"
+                },
+                {
+                  "key": "subject",
+                  "value": "mathematics",
+                  "type": "text"
+                },
+                {
+                  "key": "grade",
+                  "value": "Grade 9",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/materials",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials"
+              ]
+            },
+            "description": "❌ Expected: 400 – 'A material titled X already exists for subject Y'"
+          },
+          "response": []
+        },
+        {
+          "name": "ERROR – No Auth Token",
+          "id": "c8565719-55fa-489a-a559-a4912a1b1ad9",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/materials",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials"
+              ]
+            },
+            "description": "❌ Expected: 401 – 'Not authorized, no token'"
+          },
+          "response": []
+        }
+      ],
+      "id": "7047eef8-82a7-4e53-9414-c42c4f141196"
+    },
+    {
+      "name": "📋 Get All Materials",
+      "item": [
+        {
+          "name": "Get All (Default Page 1, Limit 10)",
+          "id": "c3087613-83fb-445e-9e24-2c3f26f28c95",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/materials",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials"
+              ]
+            },
+            "description": "✅ Expected: 200 – Paginated list with pagination metadata"
+          },
+          "response": []
+        },
+        {
+          "name": "Filter – By Subject",
+          "id": "2bcb9543-ff5d-4fd2-aecd-2e8901acf2e4",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/materials?subject=mathematics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials"
+              ],
+              "query": [
+                {
+                  "key": "subject",
+                  "value": "mathematics"
+                }
+              ]
+            },
+            "description": "✅ Filter by subject (case-insensitive)"
+          },
+          "response": []
+        },
+        {
+          "name": "Filter – By Grade",
+          "id": "1cc2838f-c9e9-481d-a66a-77bf2d825aac",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/materials?grade=Grade 9",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials"
+              ],
+              "query": [
+                {
+                  "key": "grade",
+                  "value": "Grade 9"
+                }
+              ]
+            },
+            "description": "✅ Filter by grade level"
+          },
+          "response": []
+        },
+        {
+          "name": "Filter – By Subject + Grade",
+          "id": "ce3a6d6e-6c2f-4517-a32f-4ad24091cae0",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/materials?subject=mathematics&grade=Grade 9",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials"
+              ],
+              "query": [
+                {
+                  "key": "subject",
+                  "value": "mathematics"
+                },
+                {
+                  "key": "grade",
+                  "value": "Grade 9"
+                }
+              ]
+            },
+            "description": "✅ Combined subject + grade filter"
+          },
+          "response": []
+        },
+        {
+          "name": "Filter – By Status",
+          "id": "f6926e59-f915-4ac0-a9b4-dfd139b2e17e",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/materials?status=active",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active",
+                  "description": "active | archived | pending"
+                }
+              ]
+            },
+            "description": "✅ Filter by status: active | archived | pending"
+          },
+          "response": []
+        },
+        {
+          "name": "Search – Keyword",
+          "id": "be72ba4a-d961-4041-a03d-61ac37609a0a",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/materials?keyword=algebra",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials"
+              ],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "algebra"
+                }
+              ]
+            },
+            "description": "✅ Full-text search across title, description, and tags"
+          },
+          "response": []
+        },
+        {
+          "name": "Pagination – Page 2, Limit 5",
+          "id": "7d83913f-f4b4-4aec-b5af-060169239c71",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/materials?page=2&limit=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "2"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            },
+            "description": "✅ Page 2 with 5 results per page"
+          },
+          "response": []
+        },
+        {
+          "name": "Sort – By Title A→Z",
+          "id": "b08fada5-20a5-4d0f-a495-d841aab5499a",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/materials?sort=title",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "title",
+                  "description": "latest | oldest | subject | title"
+                }
+              ]
+            },
+            "description": "✅ Sort options: latest (default) | oldest | subject | title"
+          },
+          "response": []
+        },
+        {
+          "name": "All Filters Combined",
+          "id": "b4b2a427-2011-4ccc-8344-116cf97a3222",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/materials?subject=mathematics&grade=Grade 9&keyword=algebra&sort=latest&page=1&limit=5&status=active",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials"
+              ],
+              "query": [
+                {
+                  "key": "subject",
+                  "value": "mathematics"
+                },
+                {
+                  "key": "grade",
+                  "value": "Grade 9"
+                },
+                {
+                  "key": "keyword",
+                  "value": "algebra"
+                },
+                {
+                  "key": "sort",
+                  "value": "latest"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                },
+                {
+                  "key": "status",
+                  "value": "active"
+                }
+              ]
+            },
+            "description": "✅ All query parameters combined"
+          },
+          "response": []
+        },
+        {
+          "name": "ERROR – No Auth",
+          "id": "04b7c815-7d60-4a06-8ebe-a57e5defd543",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/materials",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials"
+              ]
+            },
+            "description": "❌ Expected: 401 – Unauthorized"
+          },
+          "response": []
+        }
+      ],
+      "id": "409b43b1-03dd-48fb-8340-0cb325d51df9"
+    },
+    {
+      "name": "🗂️ My Uploads",
+      "item": [
+        {
+          "name": "Get My Uploads",
+          "id": "5875f9ed-e53f-4188-871f-962987144f1d",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/materials/my",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials",
+                "my"
+              ]
+            },
+            "description": "✅ Returns only materials uploaded by the logged-in tutor/admin"
+          },
+          "response": []
+        },
+        {
+          "name": "My Uploads – With Filters",
+          "id": "36ea1353-04ba-49d3-8fe1-a3cc04ea6c15",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/materials/my?subject=mathematics&page=1&limit=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials",
+                "my"
+              ],
+              "query": [
+                {
+                  "key": "subject",
+                  "value": "mathematics"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            },
+            "description": "✅ My uploads with filters + pagination"
+          },
+          "response": []
+        }
+      ],
+      "id": "e5460d68-0e6e-4f6e-b9ab-2df3bb41f7f9"
+    },
+    {
+      "name": "🔍 Get Single Material",
+      "item": [
+        {
+          "name": "Get Single Material (views++)",
+          "id": "8e7e09a2-2f0a-4a16-83ca-ceafc4934640",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/materials/{{materialId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials",
+                "{{materialId}}"
+              ]
+            },
+            "description": "✅ Expected: 200 – Returns material. metrics.views is incremented on every call."
+          },
+          "response": []
+        },
+        {
+          "name": "ERROR – Invalid ID Format",
+          "id": "af8ea0a1-79c1-43da-8e22-7463fb0adb38",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/materials/not-a-valid-id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials",
+                "not-a-valid-id"
+              ]
+            },
+            "description": "❌ Expected: 400 – 'Invalid ID format'"
+          },
+          "response": []
+        },
+        {
+          "name": "ERROR – Not Found (valid but missing ID)",
+          "id": "3981f01e-08ca-4f9e-be6d-5aaee5f45059",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/materials/64f1a2b3c4d5e6f7a8b9c0d1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials",
+                "64f1a2b3c4d5e6f7a8b9c0d1"
+              ]
+            },
+            "description": "❌ Expected: 404 – 'No study material found with id'"
+          },
+          "response": []
+        }
+      ],
+      "id": "9b18f1d0-e2e4-44c4-91ce-1a55202198ef"
+    },
+    {
+      "name": "✏️ Update Material",
+      "item": [
+        {
+          "name": "Update Metadata Only (No File)",
+          "id": "94968738-c8ad-4433-ad49-74c3bbde8e5f",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Introduction to Algebra – Updated Edition",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "An updated comprehensive guide to algebraic expressions for grade 9 students covering all key topics and practice exercises.",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/materials/{{materialId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials",
+                "{{materialId}}"
+              ]
+            },
+            "description": "✅ Update title and description only. File on Cloudinary stays unchanged."
+          },
+          "response": []
+        },
+        {
+          "name": "Update With New File",
+          "id": "f9e38448-90c7-4075-b764-87bf77b6eae0",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Algebra Guide – Final Version",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "description": "New file replaces old Cloudinary file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/materials/{{materialId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials",
+                "{{materialId}}"
+              ]
+            },
+            "description": "✅ Upload a new file — old Cloudinary file is deleted automatically"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Status to Archived",
+          "id": "af36ca6a-8a94-4070-8c1a-1eaa859e62b6",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "status",
+                  "value": "archived",
+                  "type": "text",
+                  "description": "active | archived | pending"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/materials/{{materialId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials",
+                "{{materialId}}"
+              ]
+            },
+            "description": "✅ Archive a material"
+          },
+          "response": []
+        },
+        {
+          "name": "ERROR – Not Owner",
+          "id": "d9df2bc9-fc6d-47f8-9090-6768d571fd79",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer ANOTHER_USERS_TOKEN_HERE"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Unauthorized Edit",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/materials/{{materialId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials",
+                "{{materialId}}"
+              ]
+            },
+            "description": "❌ Expected: 403 – 'You are not authorized to update this material'"
+          },
+          "response": []
+        }
+      ],
+      "id": "40afacc6-fbeb-46c5-9b45-a3e4a2ee53b8"
+    },
+    {
+      "name": "🗑️ Delete Material",
+      "item": [
+        {
+          "name": "Delete Material",
+          "id": "45edefb0-bc8e-4e63-9ebc-6eeb17d965b3",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/materials/{{materialId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials",
+                "{{materialId}}"
+              ]
+            },
+            "description": "✅ Expected: 200 – Deletes from MongoDB AND removes file from Cloudinary"
+          },
+          "response": []
+        },
+        {
+          "name": "ERROR – Not Owner",
+          "id": "4c27c89e-2909-4560-af2c-a50ef1410cd7",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer ANOTHER_USERS_TOKEN_HERE"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/materials/{{materialId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials",
+                "{{materialId}}"
+              ]
+            },
+            "description": "❌ Expected: 403 – Forbidden"
+          },
+          "response": []
+        },
+        {
+          "name": "ERROR – Invalid ID",
+          "id": "78db9c6a-b4ec-4348-9c6f-de59a5f97531",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/materials/invalid-id-here",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials",
+                "invalid-id-here"
+              ]
+            },
+            "description": "❌ Expected: 400 – Invalid ID format"
+          },
+          "response": []
+        }
+      ],
+      "id": "78581ac5-9227-466e-879c-eabfcadd9c9a"
+    },
+    {
+      "name": "📊 Metrics",
+      "item": [
+        {
+          "name": "Record Download",
+          "id": "cb598f96-d86d-42d1-8e33-4ea3f2647a68",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/materials/{{materialId}}/download",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials",
+                "{{materialId}}",
+                "download"
+              ]
+            },
+            "description": "✅ Expected: 200 – Increments download count. Returns new download count.\n\nNo request body needed."
+          },
+          "response": []
+        },
+        {
+          "name": "Like Material",
+          "id": "269069e8-b4bd-43cd-b634-e437488ab58c",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/materials/{{materialId}}/like",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials",
+                "{{materialId}}",
+                "like"
+              ]
+            },
+            "description": "✅ 1st call: 'Material liked', likes=1\n✅ 2nd call: 'Material unliked', likes=0\n\nToggle — prevents duplicate likes for the same user. No body needed."
+          },
+          "response": []
+        },
+        {
+          "name": "Unlike Material (Call Like Again)",
+          "id": "54213e3b-bb1c-42df-831a-01abcfbf2985",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/materials/{{materialId}}/like",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials",
+                "{{materialId}}",
+                "like"
+              ]
+            },
+            "description": "✅ Call same like endpoint again to unlike"
+          },
+          "response": []
+        }
+      ],
+      "id": "de338ebb-532a-4126-8b8a-551516d2450b"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "id": "dbaf7648-03ab-458a-b01d-d27bca937d5e",
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api"
+    },
+    {
+      "id": "d012dd39-c0fb-4dac-a415-152ede7073f0",
+      "key": "token",
+      "value": "PASTE_YOUR_TOKEN_HERE"
+    },
+    {
+      "id": "0355dbdf-041e-4e18-b5f1-b880d91bff39",
+      "key": "materialId",
+      "value": "PASTE_MATERIAL_ID_HERE"
+    }
+  ]
+}

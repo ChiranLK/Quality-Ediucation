@@ -49,18 +49,18 @@ router.get("/:id", protect, getSingleStudyMaterial);
  * ✅ Middleware order:
  *   1. protect          — authenticate JWT
  *   2. authorizePerms   — only tutor/admin
- *   3. validateInput    — validate body FIRST (reject bad requests before uploading)
- *   4. upload           — upload file to Cloudinary only after body is valid
- *   5. handleUploadErr  — convert Multer errors (e.g. file too large) to 400
+ *   3. upload           — Multer parses form-data AND uploads to Cloudinary
+ *   4. handleUploadErr  — catch Multer file size/type errors
+ *   5. validateInput    — validate req.body (deletes file if invalid)
  *   6. createStudyMat   — controller
  */
 router.post(
   "/",
   protect,
   authorizePermissions("tutor", "admin"),
-  validateStudyMaterialInput,        // ✅ Body validated BEFORE file upload
-  uploadMaterial.single("file"),     // ✅ Upload only if body is valid
-  handleUploadError,                 // ✅ Handle Multer errors gracefully
+  uploadMaterial.single("file"),     // ✅ MUST run first to parse multipart/form-data
+  handleUploadError,
+  validateStudyMaterialInput,        // ✅ Validates parsed body, cleans up file if error
   createStudyMaterial,
 );
 
@@ -73,9 +73,9 @@ router.patch(
   "/:id",
   protect,
   authorizePermissions("tutor", "admin"),
-  validateStudyMaterialUpdate,       // ✅ Body validated BEFORE file upload
-  uploadMaterial.single("file"),     // ✅ Upload only if body is valid
-  handleUploadError,                 // ✅ Handle Multer errors gracefully
+  uploadMaterial.single("file"),     // ✅ MUST run first to parse multipart/form-data
+  handleUploadError,
+  validateStudyMaterialUpdate,       // ✅ Validates parsed body, cleans up file if error
   updateStudyMaterial,
 );
 
