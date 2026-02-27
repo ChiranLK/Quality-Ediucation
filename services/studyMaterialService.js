@@ -1,10 +1,14 @@
-import StudyMaterial from "../Models/StudyMaterialModel.js";
+import StudyMaterial from "../models/StudyMaterialModel.js";
 import { NotFoundError, UnauthorizedError, BadRequestError } from "../errors/customErrors.js";
 import { cloudinary } from "../Middleware/uploadMiddleware.js";
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   PRIVATE HELPERS
+───────────────────────────────────────────────────────────────────────────── */
+
 /**
- * Extract public_id from a Cloudinary URL.
- * Example URL: https://res.cloudinary.com/xxx/image/upload/v123/study_materials/abc123.pdf
+ * Extract Cloudinary public_id from a Cloudinary URL.
+ * e.g. https://res.cloudinary.com/xxx/raw/upload/v123/study_materials/abc123
  * Returns: "study_materials/abc123"
  */
 const extractPublicId = (url) => {
@@ -12,23 +16,59 @@ const extractPublicId = (url) => {
   try {
     const parts = url.split("/upload/");
     if (parts.length < 2) return null;
-    // Remove version prefix (v123456789/) and file extension
     const pathAfterUpload = parts[1].replace(/^v\d+\//, "");
-    const publicId = pathAfterUpload.replace(/\.[^/.]+$/, "");
-    return publicId;
+    return pathAfterUpload.replace(/\.[^/.]+$/, ""); // strip extension
   } catch {
     return null;
   }
 };
 
+/**
+ * Normalise a tags value that may arrive as:
+ *  - an Array (JSON body)   → ["math","algebra"]
+ *  - a JSON string          → '["math","algebra"]'
+ *  - a comma-separated str  → "math,algebra"
+ * Always returns a clean lowercase, trimmed, non-empty string array.
+ */
+const normaliseTags = (raw) => {
+  if (!raw) return [];
+  let arr = raw;
+  if (typeof arr === "string") {
+    try {
+      arr = JSON.parse(arr);
+    } catch {
+      arr = arr.split(",");
+    }
+  }
+  if (!Array.isArray(arr)) return [];
+  return arr.map((t) => String(t).trim().toLowerCase()).filter(Boolean);
+};
+
+/**
+ * Escape special regex characters to prevent ReDoS / NoSQL injection
+ * when building dynamic $regex queries.
+ */
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/** Standard populate projection for uploader — uses fullName (matches UserModel) */
+const UPLOADER_FIELDS = "fullName email role";
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SERVICE FUNCTIONS
+───────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Create a new study material.
+ * Prevents duplicates: same title (case-insensitive) + same subject.
+ */
 export const createMaterial = async (data, uploaderId) => {
-  // Duplicate prevention: check if a material with the same title already exists
-  // (case-insensitive match within the same subject)
-  const normalizedTitle = data.title.trim();
+  const normalizedTitle   = data.title.trim();
   const normalizedSubject = data.subject.trim().toLowerCase();
 
+  // ✅ Escape title before using in $regex to prevent ReDoS / injection
+  const escaped = escapeRegex(normalizedTitle);
   const existing = await StudyMaterial.findOne({
-    title: { $regex: `^${normalizedTitle}$`, $options: "i" },
+    title:   { $regex: `^${escaped}$`, $options: "i" },
     subject: normalizedSubject,
   });
 
@@ -40,46 +80,69 @@ export const createMaterial = async (data, uploaderId) => {
 
   const materialData = {
     ...data,
-    subject: normalizedSubject,
+    subject:    normalizedSubject,
     uploadedBy: uploaderId,
+    tags:       normaliseTags(data.tags),
   };
 
-  if (data.tags && Array.isArray(data.tags)) {
-    materialData.tags = data.tags.map((t) => String(t).trim().toLowerCase());
+  // ✅ CRITICAL: If DB create fails, delete the already-uploaded Cloudinary file
+  // to prevent orphaned files consuming cloud storage.
+  let material;
+  try {
+    material = await StudyMaterial.create(materialData);
+  } catch (dbError) {
+    if (data.fileUrl) {
+      const publicId = extractPublicId(data.fileUrl);
+      if (publicId) {
+        try {
+          await cloudinary.uploader.destroy(publicId, { resource_type: "raw" });
+          console.warn("Cloudinary rollback: deleted orphaned file after DB failure:", publicId);
+        } catch (cloudErr) {
+          console.error("Cloudinary rollback failed:", cloudErr.message);
+        }
+      }
+    }
+    throw dbError; // Re-throw so the error handler sends the correct 400/500 to client
   }
 
-  const material = await StudyMaterial.create(materialData);
   return material;
 };
 
+
+/**
+ * Return a paginated, filtered, sorted list of materials.
+ * Supported query params: subject, grade, keyword, sort, page, limit, status, uploadedBy
+ */
 export const getAllMaterials = async (query) => {
-  const { subject, grade, keyword, sort, page, limit } = query;
+  const { subject, grade, keyword, sort, page, limit, status, uploadedBy } = query;
+
+  // ✅ Whitelist status values — never trust raw query strings
+  const ALLOWED_STATUS = new Set(["active", "archived", "pending"]);
+  const SORT_OPTIONS   = {
+    latest:  { createdAt: -1 },
+    oldest:  { createdAt: 1  },
+    subject: { subject:   1  },
+    title:   { title:     1  },
+  };
 
   const filter = {};
-  if (subject) filter.subject = subject.trim().toLowerCase();
-  if (grade) filter.grade = grade.trim();
-  if (keyword) {
-    // using text search index for better performance
-    filter.$text = { $search: keyword.trim() };
-  }
+  if (subject)    filter.subject    = subject.trim().toLowerCase();
+  if (grade)      filter.grade      = grade.trim();
+  if (uploadedBy) filter.uploadedBy = uploadedBy;
+  if (status && ALLOWED_STATUS.has(status.trim())) filter.status = status.trim();
+  if (keyword)    filter.$text      = { $search: keyword.trim() };
 
-  const SORT_OPTIONS = {
-    latest: { createdAt: -1 },
-    subject: { subject: 1 },
-  };
-  const sortKey = sort && SORT_OPTIONS[sort] ? sort : "latest";
-  const sortObj = SORT_OPTIONS[sortKey];
-
-  const pageNum = Math.max(1, parseInt(page, 10) || 1);
+  const sortObj  = SORT_OPTIONS[sort] ?? SORT_OPTIONS.latest;
+  const pageNum  = Math.max(1, parseInt(page,  10) || 1);
   const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 10));
-  const skip = (pageNum - 1) * limitNum;
+  const skip     = (pageNum - 1) * limitNum;
 
-  // Use .lean() for faster execution when returning read-only documents
   const [totalCount, materials] = await Promise.all([
     StudyMaterial.countDocuments(filter),
     StudyMaterial.find(filter)
-      .lean()
-      .populate("uploadedBy", "name email role")
+      .lean({ virtuals: true })     // ✅ virtuals:true so uploaderName is included
+      .populate("uploadedBy", UPLOADER_FIELDS)
+      .select("-likedBy")
       .sort(sortObj)
       .skip(skip)
       .limit(limitNum),
@@ -87,32 +150,50 @@ export const getAllMaterials = async (query) => {
 
   return {
     totalCount,
-    totalPages: Math.ceil(totalCount / limitNum),
+    totalPages:  Math.ceil(totalCount / limitNum),
     currentPage: pageNum,
-    limit: limitNum,
+    limit:       limitNum,
     materials,
   };
 };
 
+/**
+ * Get a single material by ID.
+ * Increments view count atomically on every fetch.
+ */
 export const getMaterialById = async (id) => {
-  const material = await StudyMaterial.findById(id).lean().populate("uploadedBy", "name email role");
+  const material = await StudyMaterial.findByIdAndUpdate(
+    id,
+    { $inc: { "metrics.views": 1 } },
+    { new: true }
+  )
+    .lean({ virtuals: true })       // ✅ virtuals:true so uploaderName is included
+    .populate("uploadedBy", UPLOADER_FIELDS)
+    .select("-likedBy");
+
+
   if (!material) throw new NotFoundError(`No study material found with id: ${id}`);
   return material;
 };
 
+/**
+ * Update a material's metadata or file.
+ * Only the uploader or an admin may update.
+ * Deletes the old Cloudinary file if a new one is uploaded.
+ */
 export const updateMaterial = async (id, updates, user) => {
   const material = await StudyMaterial.findById(id);
   if (!material) throw new NotFoundError(`No study material found with id: ${id}`);
 
   const requesterId = String(user._id || user.userId);
-  const uploaderId = String(material.uploadedBy);
-  const isAdmin = user.role === "admin";
+  const uploaderId  = String(material.uploadedBy);
+  const isAdmin     = user.role === "admin";
 
   if (requesterId !== uploaderId && !isAdmin) {
     throw new UnauthorizedError("You are not authorized to update this material");
   }
 
-  // If a new file is being uploaded, delete the old one from Cloudinary
+  // Delete old Cloudinary file when a replacement is uploaded
   if (updates.fileUrl && material.fileUrl) {
     const oldPublicId = extractPublicId(material.fileUrl);
     if (oldPublicId) {
@@ -124,34 +205,40 @@ export const updateMaterial = async (id, updates, user) => {
     }
   }
 
-  const filteredUpdates = { ...updates };
-  if (filteredUpdates.subject) filteredUpdates.subject = filteredUpdates.subject.trim().toLowerCase();
-  if (filteredUpdates.tags && Array.isArray(filteredUpdates.tags)) {
-    filteredUpdates.tags = filteredUpdates.tags.map((t) => String(t).trim().toLowerCase());
-  }
+  // ✅ Strip immutable / sensitive fields that must never be overwritten via PATCH
+  const { uploadedBy: _u, metrics: _m, likedBy: _l, ...safeUpdates } = updates;
+
+  if (safeUpdates.subject) safeUpdates.subject = safeUpdates.subject.trim().toLowerCase();
+  if (safeUpdates.tags)    safeUpdates.tags    = normaliseTags(safeUpdates.tags); // ✅ DRY
 
   const updatedMaterial = await StudyMaterial.findByIdAndUpdate(
     id,
-    { $set: filteredUpdates },
+    { $set: safeUpdates },
     { new: true, runValidators: true }
-  ).populate("uploadedBy", "name email role");
+  )
+    .populate("uploadedBy", UPLOADER_FIELDS)
+    .select("-likedBy");           // ✅ Never expose likedBy
 
   return updatedMaterial;
 };
 
+/**
+ * Delete a material and its associated Cloudinary file.
+ * Only the uploader or an admin may delete.
+ */
 export const deleteMaterial = async (id, user) => {
   const material = await StudyMaterial.findById(id);
   if (!material) throw new NotFoundError(`No study material found with id: ${id}`);
 
   const requesterId = String(user._id || user.userId);
-  const uploaderId = String(material.uploadedBy);
-  const isAdmin = user.role === "admin";
+  const uploaderId  = String(material.uploadedBy);
+  const isAdmin     = user.role === "admin";
 
   if (requesterId !== uploaderId && !isAdmin) {
     throw new UnauthorizedError("You are not authorized to delete this material");
   }
 
-  // Delete file from Cloudinary before removing the DB document
+  // Delete from Cloudinary first; DB document removed after
   const publicId = extractPublicId(material.fileUrl);
   if (publicId) {
     try {
@@ -165,3 +252,48 @@ export const deleteMaterial = async (id, user) => {
   return material;
 };
 
+/**
+ * Atomically increment a numeric engagement metric (downloads only via API).
+ * Views are incremented internally by getMaterialById.
+ */
+export const incrementMetric = async (id, field) => {
+  // ✅ Whitelist — never use user input directly as a field name
+  const ALLOWED_METRICS = new Set(["views", "downloads"]);
+  if (!ALLOWED_METRICS.has(field)) {
+    throw new BadRequestError(`Invalid metric field: ${field}`);
+  }
+
+  const material = await StudyMaterial.findByIdAndUpdate(
+    id,
+    { $inc: { [`metrics.${field}`]: 1 } },
+    { new: true }
+  ).select("metrics");             // ✅ Fetch only what's needed
+
+  if (!material) throw new NotFoundError(`No study material found with id: ${id}`);
+  return material;
+};
+
+/**
+ * Toggle a like for a specific user on a material.
+ * Uses $addToSet / $pull to prevent duplicate likes atomically.
+ * Returns { message, likes } — never exposes the full likedBy array.
+ */
+export const toggleLike = async (id, userId) => {
+  // First check if user already liked (lean read for speed)
+  const check = await StudyMaterial.findById(id).select("likedBy metrics.likes").lean();
+  if (!check) throw new NotFoundError(`No study material found with id: ${id}`);
+
+  const alreadyLiked = check.likedBy.some((uid) => String(uid) === userId);
+
+  const updateOp = alreadyLiked
+    ? { $pull: { likedBy: userId }, $inc: { "metrics.likes": -1 } }  // Unlike
+    : { $addToSet: { likedBy: userId }, $inc: { "metrics.likes": 1 } }; // Like
+
+  const updated = await StudyMaterial.findByIdAndUpdate(id, updateOp, { new: true })
+    .select("metrics.likes");      // ✅ Only return the count, not the full likedBy array
+
+  return {
+    message: alreadyLiked ? "Material unliked" : "Material liked",
+    likes:   updated.metrics.likes,
+  };
+};
