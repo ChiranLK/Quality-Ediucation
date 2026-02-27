@@ -57,36 +57,6 @@ This system promotes **accessible, structured, and collaborative digital educati
 - ⚡ Avoids API call if message is already English (optimization)
 - 🔄 **Translation on both create and update** operations
 
-### 📚 Study Materials & Resources
-👨‍💻 Developed by **ALAHAKOON PB** — Student ID: `IT23405240`
-
-- 📤 **Upload study materials** — PDF, DOC, DOCX, PPT, PPTX, TXT, images (max 5 MB) via Cloudinary
-- 📋 **View & search** — full-text keyword search across title, description, and tags
-- 🔍 **Filter** by subject, grade, and status (active / archived / pending)
-- 📄 **Pagination & sorting** — latest, oldest, by subject or title
-- ✏️ **Update** — edit metadata or replace file (old Cloudinary file auto-deleted)
-- 🗑️ **Delete** — removes from DB and Cloudinary storage atomically
-- 👤 **My Uploads** — tutors can view only their own materials
-- 📊 **Engagement metrics** — view count (auto), download counter, like/unlike toggle
-- 🔒 **Role-based access** — only tutors/admins can upload, update, or delete
-- 🛡️ **Security** — NoSQL injection protection, likedBy array hidden, Cloudinary rollback on failure
-
-### 📅 Peer Learning & Tutoring Sessions
-👨‍💻 Developed by **SERASINGHE CS** — Student ID: `IT23401976`
-
-- 🎯 **Create & Manage Sessions** — Tutors can create, update, and delete tutoring sessions
-- 📆 **Google Calendar Integration** — Automatic event creation when tutors create sessions
-- 👥 **Join & Leave Sessions** — Students can enroll/unenroll in available sessions
-- 🔢 **Capacity Management** — Automatic tracking of enrolled students vs. max capacity
-- 🔍 **Advanced Filtering** — Filter by subject, grade, tutor, date, and availability
-- 📋 **My Sessions** — View enrolled sessions and sessions created by tutor
-- 🎓 **Tutor-specific Sessions** — Get all sessions by a particular tutor
-- ⏰ **Schedule Management** — Date, time, and duration tracking for all sessions
-- 🔒 **Role-based access** — Only tutors can create/modify sessions, students can join
-- ✅ **Real-time availability** — Auto-calculate available spots and prevent overbooking
-
----
-
 ## 🏗️ System Architecture
 
 ```
@@ -148,6 +118,75 @@ This system promotes **accessible, structured, and collaborative digital educati
 - 📅 **Google Calendar API** - Automatic event creation for tutoring sessions
 
 ---
+## 🌍 Translation Workflow
+
+```mermaid
+graph LR
+    A[User Submits Message] --> B{Contains Sinhala?}
+    B -->|Yes| C[Call Google Gemini API]
+    B -->|No| D[Store Original Message]
+    C --> E{Translation Success?}
+    E -->|Yes| F[Store Translated Message]
+    E -->|No| G[Store Original + Log Error]
+    F --> H[Save to Database]
+    D --> H
+    G --> H
+    H --> I[Return Response to User]
+```
+
+**Translation Features:**
+- 🔍 Automatically detects Sinhala characters (Unicode range: 0D80-0DFF)
+- 🤖 Uses Google Gemini 2.5 Flash model for translation
+- ⚡ 10-second timeout for translation requests
+- 💾 Stores only the final (translated or original) message
+- 🔄 Works on both create and update operations
+- 📊 Returns `translationPerformed` flag in response
+
+---
+
+### Testing Flow
+1. ✅ Register a student account
+2. ✅ Register a tutor account
+3. ✅ Login with student credentials
+4. ✅ Create a help request (try Sinhala text)
+5. ✅ View all messages
+6. ✅ Update message (try Sinhala text)
+7. ✅ Delete message
+8. ✅ Login with tutor credentials
+9. ✅ View all student requests
+
+
+
+### 📚 Study Materials & Resources
+👨‍💻 Developed by **ALAHAKOON PB** — Student ID: `IT23405240`
+
+- 📤 **Upload study materials** — PDF, DOC, DOCX, PPT, PPTX, TXT, images (max 5 MB) via Cloudinary
+- 📋 **View & search** — full-text keyword search across title, description, and tags
+- 🔍 **Filter** by subject, grade, and status (active / archived / pending)
+- 📄 **Pagination & sorting** — latest, oldest, by subject or title
+- ✏️ **Update** — edit metadata or replace file (old Cloudinary file auto-deleted)
+- 🗑️ **Delete** — removes from DB and Cloudinary storage atomically
+- 👤 **My Uploads** — tutors can view only their own materials
+- 📊 **Engagement metrics** — view count (auto), download counter, like/unlike toggle
+- 🔒 **Role-based access** — only tutors/admins can upload, update, or delete
+- 🛡️ **Security** — NoSQL injection protection, likedBy array hidden, Cloudinary rollback on failure
+
+### 📅 Peer Learning & Tutoring Sessions
+👨‍💻 Developed by **SERASINGHE CS** — Student ID: `IT23401976`
+
+- 🎯 **Create & Manage Sessions** — Tutors can create, update, and delete tutoring sessions
+- 📆 **Google Calendar Integration** — Automatic event creation when tutors create sessions
+- 👥 **Join & Leave Sessions** — Students can enroll/unenroll in available sessions
+- 🔢 **Capacity Management** — Automatic tracking of enrolled students vs. max capacity
+- 🔍 **Advanced Filtering** — Filter by subject, grade, tutor, date, and availability
+- 📋 **My Sessions** — View enrolled sessions and sessions created by tutor
+- 🎓 **Tutor-specific Sessions** — Get all sessions by a particular tutor
+- ⏰ **Schedule Management** — Date, time, and duration tracking for all sessions
+- 🔒 **Role-based access** — Only tutors can create/modify sessions, students can join
+- ✅ **Real-time availability** — Auto-calculate available spots and prevent overbooking
+
+---
+
 
 ## 📂 Project Structure
 
@@ -1035,31 +1074,6 @@ GOOGLE_REDIRECT_URI=your_redirect_uri
 
 ---
 
-## 🌍 Translation Workflow
-
-```mermaid
-graph LR
-    A[User Submits Message] --> B{Contains Sinhala?}
-    B -->|Yes| C[Call Google Gemini API]
-    B -->|No| D[Store Original Message]
-    C --> E{Translation Success?}
-    E -->|Yes| F[Store Translated Message]
-    E -->|No| G[Store Original + Log Error]
-    F --> H[Save to Database]
-    D --> H
-    G --> H
-    H --> I[Return Response to User]
-```
-
-**Translation Features:**
-- 🔍 Automatically detects Sinhala characters (Unicode range: 0D80-0DFF)
-- 🤖 Uses Google Gemini 2.5 Flash model for translation
-- ⚡ 10-second timeout for translation requests
-- 💾 Stores only the final (translated or original) message
-- 🔄 Works on both create and update operations
-- 📊 Returns `translationPerformed` flag in response
-
----
 
 ## 🔐 Security Considerations
 
@@ -1085,16 +1099,6 @@ graph LR
 2. Import the workspace globals: `workspace.postman_globals.json`
 3. Set the base URL: `http://localhost:5000`
 
-### Testing Flow
-1. ✅ Register a student account
-2. ✅ Register a tutor account
-3. ✅ Login with student credentials
-4. ✅ Create a help request (try Sinhala text)
-5. ✅ View all messages
-6. ✅ Update message (try Sinhala text)
-7. ✅ Delete message
-8. ✅ Login with tutor credentials
-9. ✅ View all student requests
 
 ### 📚 Study Materials Testing (IT23405240)
 
