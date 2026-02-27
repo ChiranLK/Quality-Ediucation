@@ -50,22 +50,12 @@ const materialStorage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "study_materials",
-    resource_type: "auto",
-    allowed_formats: [
-      "pdf",
-      "doc",
-      "docx",
-      "ppt",
-      "pptx",
-      "jpg",
-      "jpeg",
-      "png",
-      "gif",
-      "webp",
-      "txt",
-    ],
+    resource_type: "raw", // "raw" accepts all file types: pdf, doc, docx, txt, images, etc.
+    // No allowed_formats here — MIME validation is handled by materialFileFilter above
   },
 });
+
+
 
 /**
  * Multer instance for study material uploads
@@ -73,11 +63,53 @@ const materialStorage = new CloudinaryStorage({
  */
 export const uploadMaterial = multer({
   storage: materialStorage,
-  fileFilter: materialFileFilter, // ✅ Added file type validation
+  fileFilter: materialFileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5 MB
   },
 });
+
+/**
+ * Multer error handler for study material uploads.
+ * Must come directly after uploadMaterial.single() in the middleware chain.
+ * Converts Multer errors into structured 400 responses instead of 500 crashes.
+ */
+export const handleUploadError = (err, req, res, next) => {
+  if (!err) return next();
+
+  // Multer-specific errors
+  if (err.code === "LIMIT_FILE_SIZE") {
+    return res.status(400).json({
+      success: false,
+      message: "File too large. Maximum allowed size is 5 MB.",
+      statusCode: 400,
+      timestamp: new Date().toISOString(),
+    });
+  }
+  if (err.code === "LIMIT_UNEXPECTED_FILE") {
+    return res.status(400).json({
+      success: false,
+      message: `Unexpected field. Use "file" as the form-data field name.`,
+      statusCode: 400,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  // BadRequestError thrown by fileFilter (unsupported MIME type)
+  if (err.statusCode === 400 || err.name === "BadRequestError") {
+    return res.status(400).json({
+      success: false,
+      message: err.message,
+      statusCode: 400,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  // Unknown upload error — pass to global error handler
+  next(err);
+};
+
+
 
 // ---------------------
 // Local-disk storage for other features (e.g. message images)

@@ -68,16 +68,24 @@ const studyMaterialSchema = new mongoose.Schema(
     },
 
     /**
-     * Tags for better searchability
+     * Tags for better searchability (max 10 tags per material)
      */
-    tags: [
-      {
-        type: String,
-        trim: true,
-        lowercase: true,
-        maxlength: [30, "Tag cannot exceed 30 characters"],
+    tags: {
+      type: [
+        {
+          type: String,
+          trim: true,
+          lowercase: true,
+          maxlength: [30, "Each tag cannot exceed 30 characters"],
+        },
+      ],
+      validate: {
+        validator: (arr) => arr.length <= 10,
+        message: "A material cannot have more than 10 tags",
       },
-    ],
+      default: [],
+    },
+
 
     /**
      * User who uploaded this material (reference to User model)
@@ -111,6 +119,16 @@ const studyMaterialSchema = new mongoose.Schema(
     },
 
     /**
+     * Users who liked this material (prevents duplicate likes)
+     * select:false — never returned in queries unless explicitly projected
+     */
+    likedBy: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+      select: false,
+      default: [],
+    },
+
+    /**
      * Status (active, archived, pending review)
      */
     status: {
@@ -119,9 +137,12 @@ const studyMaterialSchema = new mongoose.Schema(
       default: "active",
       index: true,
     },
+
   },
   {
-    timestamps: true, // Adds createdAt and updatedAt
+    timestamps: true,           // Adds createdAt and updatedAt
+    toJSON:  { virtuals: true }, // Include virtual fields in JSON responses
+    toObject: { virtuals: true },
   },
 );
 
@@ -138,13 +159,11 @@ studyMaterialSchema.index({ subject: 1, grade: 1 });
 studyMaterialSchema.index({ uploadedBy: 1, createdAt: -1 });
 
 /**
- * Virtual - Get uploader's name (populated when fetching)
+ * Virtual: convenient display name from populated uploadedBy
+ * Works when uploadedBy is populated with at least the fullName field
  */
 studyMaterialSchema.virtual("uploaderName").get(function () {
-  if (this.uploadedBy && this.uploadedBy.fullName) {
-    return this.uploadedBy.fullName;
-  }
-  return "Unknown User";
+  return this.uploadedBy?.fullName ?? "Unknown";
 });
 
 export default mongoose.model("StudyMaterial", studyMaterialSchema);

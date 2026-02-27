@@ -1,8 +1,12 @@
 import mongoose from "mongoose";
 import Progress from "../models/ProgressModel.js";
+import User from "../models/UserModel.js";
 
 const STUDENT_ROLE = process.env.STUDENT_ROLE || "user";
 const TUTOR_ROLE = process.env.TUTOR_ROLE || "organizer";
+
+// Helper: validate ObjectId
+const isValidId = (id) => mongoose.Types.ObjectId.isValid(id);
 
 /**
  * POST /api/progress

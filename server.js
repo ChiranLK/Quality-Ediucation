@@ -4,6 +4,7 @@ dotenv.config();
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import emailRoutes from "./Routes/emailRoutes.js";
 
 import connectDB from "./Config/db.js";
 
@@ -11,13 +12,16 @@ import connectDB from "./Config/db.js";
 import authRouter from "./Routes/authRouter.js";
 import feedbackRouter from "./Routes/feedbackRouter.js";
 import progressRouter from "./Routes/progressRouter.js";
-import materialRouter from "./Routes/materialRouter.js";
+import feedbackEmailRoutes from "./Routes/feedbackEmailRoutes.js";
 import messageRouter from "./Routes/messageRouter.js";
 import tutoringSessionRouter from "./Routes/tutoringSessionRouter.js";
 import googleCalendarRouter from "./Routes/googleCalenderRouter.js";
+import tutorRouter from "./Routes/tutorRouter.js";
+import materialRouter from "./Routes/materialRouter.js";
 
 // Google Calendar
 import { initCalendar } from "./services/googleCalendarService.js";
+
 
 const app = express();
 
@@ -35,10 +39,12 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/feedbacks", feedbackRouter);
 app.use("/api/progress", progressRouter);
-app.use("/api/materials", materialRouter);
+app.use("/api/email", emailRoutes);
+app.use("/api/email", feedbackEmailRoutes);
 app.use("/api/messages", messageRouter);
 app.use("/api/tutoring-sessions", tutoringSessionRouter);
-app.use("/api/google-calendar", googleCalendarRouter);
+app.use("/api/tutors", tutorRouter);
+app.use("/api/materials", materialRouter);
 
 // Init Google Calendar
 initCalendar();
