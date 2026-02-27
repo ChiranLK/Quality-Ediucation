@@ -8,6 +8,7 @@
 ![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge)
 ![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)
 ![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)
+![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white)
 ![Google Gemini](https://img.shields.io/badge/Google%20Gemini-8E75B2?style=for-the-badge&logo=google&logoColor=white)
 
 </div>
@@ -55,6 +56,21 @@ This system promotes **accessible, structured, and collaborative digital educati
 - 💾 Stores translated message in database
 - ⚡ Avoids API call if message is already English (optimization)
 - 🔄 **Translation on both create and update** operations
+
+### 📚 Study Materials & Resources
+
+> 👨‍💻 Developed by **ALAHAKOON PB** — Student ID: `IT23405240`
+
+- 📤 **Upload study materials** — PDF, DOC, DOCX, PPT, PPTX, TXT, images (max 5 MB) via Cloudinary
+- 📋 **View & search** — full-text keyword search across title, description, and tags
+- 🔍 **Filter** by subject, grade, and status (active / archived / pending)
+- 📄 **Pagination & sorting** — latest, oldest, by subject or title
+- ✏️ **Update** — edit metadata or replace file (old Cloudinary file auto-deleted)
+- 🗑️ **Delete** — removes from DB and Cloudinary storage atomically
+- 👤 **My Uploads** — tutors can view only their own materials
+- 📊 **Engagement metrics** — view count (auto), download counter, like/unlike toggle
+- 🔒 **Role-based access** — only tutors/admins can upload, update, or delete
+- 🛡️ **Security** — NoSQL injection protection, likedBy array hidden, Cloudinary rollback on failure
 
 ---
 
@@ -115,6 +131,7 @@ This system promotes **accessible, structured, and collaborative digital educati
 ### Third-Party Integration
 - 🤖 **Google Gemini API** - Sinhala to English translation
 - 📦 **Multer** - File upload handling
+- ☁️ **Cloudinary** - Cloud storage for study material files (PDF, DOC, images)
 
 ---
 
@@ -125,33 +142,43 @@ AF_Backend/
 ├── 📁 Config/
 │   └── db.js                    # Database configuration
 ├── 📁 Controllers/
-│   ├── authController.js        # Authentication logic
-│   ├── messageContoller.js      # Message CRUD + Translation
-│   ├── tutorController.js       # Tutor management
+│   ├── authController.js           # Authentication logic
+│   ├── messageContoller.js         # Message CRUD + Translation
+│   ├── studyMaterialController.js  # Study Materials CRUD & metrics  [IT23405240]
+│   ├── tutorController.js          # Tutor management
 │   └── ...
 ├── 📁 Middleware/
-│   ├── authMiddleware.js        # JWT verification & RBAC
-│   ├── errorHandler.js          # Global error handling
-│   └── ValidatorMiddleware.js   # Input validation
+│   ├── authMiddleware.js           # JWT verification & RBAC
+│   ├── errorHandler.js             # Global error handling
+│   ├── uploadMiddleware.js         # Multer + Cloudinary upload      [IT23405240]
+│   ├── studyMaterialValidation.js  # Study material input validators [IT23405240]
+│   └── ValidatorMiddleware.js      # Auth input validation
 ├── 📁 models/
-│   ├── UserModel.js             # User/Tutor schema
-│   ├── MessageModel.js          # Message schema
+│   ├── UserModel.js                # User/Tutor schema
+│   ├── MessageModel.js             # Message schema
+│   ├── StudyMaterialModel.js       # Study material schema            [IT23405240]
 │   └── ...
 ├── 📁 Routes/
-│   ├── authRouter.js            # Authentication routes
-│   ├── messageRouter.js         # Message routes
-│   ├── tutorRouter.js           # Tutor routes
-│   └── index.js                 # Route aggregator
+│   ├── authRouter.js               # Authentication routes
+│   ├── materialRouter.js           # Study material routes            [IT23405240]
+│   ├── messageRouter.js            # Message routes
+│   ├── tutorRouter.js              # Tutor routes
+│   └── index.js                    # Route aggregator
 ├── 📁 services/
-│   ├── messageService.js        # Translation service
+│   ├── messageService.js           # Translation service
+│   ├── studyMaterialService.js     # Study material business logic    [IT23405240]
 │   └── ...
 ├── 📁 utils/
-│   ├── generateToken.js         # JWT generation
-│   └── passwordUtils.js         # Password hashing
-├── 📁 uploads/                  # File uploads storage
-├── .env                         # Environment variables
-├── server.js                    # Application entry point
-└── package.json                 # Dependencies
+│   ├── generateToken.js            # JWT generation
+│   ├── responseHandler.js          # Standardised API responses       [IT23405240]
+│   ├── validationUtils.js          # ObjectId validation helper       [IT23405240]
+│   └── passwordUtils.js            # Password hashing
+├── 📁 postman/
+│   └── StudyMaterials_Complete.postman_collection.json  # 30 API tests [IT23405240]
+├── 📁 uploads/                     # Local file uploads (messages)
+├── .env                            # Environment variables
+├── server.js                       # Application entry point
+└── package.json                    # Dependencies
 ```
 
 ---
@@ -187,6 +214,11 @@ AF_Backend/
    JWT_EXPIRES_IN=1d
    GEMINI_API_KEY=your_google_gemini_api_key
    NODE_ENV=development
+
+   # Study Materials – Cloudinary (IT23405240)
+   CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+   CLOUDINARY_API_KEY=your_cloudinary_api_key
+   CLOUDINARY_API_SECRET=your_cloudinary_api_secret
    ```
 
 4. **Run the application**
@@ -492,6 +524,135 @@ AF_Backend/
 
 ---
 
+## 📚 Study Materials & Resources API
+
+> 👨‍💻 **ALAHAKOON PB** — `IT23405240`  
+> Base URL: `/api/materials` | Auth: `Bearer <token>` required on all routes
+
+### 1️⃣ Upload Study Material
+
+**Endpoint:** `POST /api/materials`  
+**Access:** Tutor / Admin only  
+**Content-Type:** `multipart/form-data`
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `title` | string | ✅ | 3–150 characters |
+| `description` | string | ✅ | 10–2000 characters |
+| `subject` | string | ✅ | e.g. `mathematics` |
+| `grade` | string | ✅ | e.g. `Grade 9` |
+| `file` | file | ✅ | PDF, DOC, DOCX, PPT, PPTX, TXT, image (max 5 MB) |
+| `tags` | string | ❌ | JSON array string e.g. `["algebra","equations"]` (max 10) |
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Study material uploaded successfully",
+  "data": {
+    "_id": "64f1a2b3c4d5e6f7a8b9c0d1",
+    "title": "Introduction to Algebra",
+    "subject": "mathematics",
+    "grade": "Grade 9",
+    "fileUrl": "https://res.cloudinary.com/...",
+    "metrics": { "views": 0, "downloads": 0, "likes": 0 },
+    "status": "active"
+  }
+}
+```
+
+---
+
+### 2️⃣ Get All Materials (with Filters & Pagination)
+
+**Endpoint:** `GET /api/materials`  
+**Access:** All authenticated users
+
+**Query Parameters:**
+| Param | Example | Description |
+|---|---|---|
+| `subject` | `mathematics` | Filter by subject |
+| `grade` | `Grade 9` | Filter by grade |
+| `status` | `active` | `active` \| `archived` \| `pending` |
+| `keyword` | `algebra` | Full-text search (title, description, tags) |
+| `sort` | `latest` | `latest` \| `oldest` \| `subject` \| `title` |
+| `page` | `1` | Page number (default: 1) |
+| `limit` | `10` | Results per page (default: 10, max: 100) |
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [ /* array of materials */ ],
+  "pagination": {
+    "total": 25,
+    "pages": 3,
+    "currentPage": 1,
+    "limit": 10,
+    "hasMore": true
+  }
+}
+```
+
+---
+
+### 3️⃣ Get My Uploads
+
+**Endpoint:** `GET /api/materials/my`  
+**Access:** Tutor / Admin only  
+Supports same query parameters as Get All.
+
+---
+
+### 4️⃣ Get Single Material
+
+**Endpoint:** `GET /api/materials/:id`  
+**Access:** All authenticated users  
+⚡ Automatically increments `metrics.views` on every call.
+
+---
+
+### 5️⃣ Update Material
+
+**Endpoint:** `PATCH /api/materials/:id`  
+**Access:** Uploader or Admin only  
+**Content-Type:** `multipart/form-data`  
+All fields optional. Attach a new `file` to replace the existing one (old file auto-deleted from Cloudinary).
+
+---
+
+### 6️⃣ Delete Material
+
+**Endpoint:** `DELETE /api/materials/:id`  
+**Access:** Uploader or Admin only  
+Deletes from MongoDB **and** removes the file from Cloudinary.
+
+---
+
+### 7️⃣ Record Download
+
+**Endpoint:** `POST /api/materials/:id/download`  
+**Access:** All authenticated users  
+Increments `metrics.downloads` by 1.
+
+```json
+{ "success": true, "message": "Download recorded", "data": { "downloads": 5 } }
+```
+
+---
+
+### 8️⃣ Like / Unlike Material
+
+**Endpoint:** `POST /api/materials/:id/like`  
+**Access:** All authenticated users  
+Toggle — same endpoint likes on 1st call, unlikes on 2nd call. Prevents duplicate likes per user.
+
+```json
+{ "success": true, "message": "Material liked", "data": { "likes": 12 } }
+```
+
+---
+
 ## 🌍 Translation Workflow
 
 ```mermaid
@@ -529,6 +690,9 @@ graph LR
 | 🔑 API Keys | Secure environment variable storage |
 | 🌐 CORS | Configured for production security |
 | 📝 Error Handling | Custom error classes with safe messages |
+| 🛡️ NoSQL Injection | escapeRegex on dynamic $regex queries (Study Materials) |
+| 🙈 Data Privacy | likedBy array hidden from all API responses (Study Materials) |
+| ☁️ Cloud Rollback | Cloudinary file deleted if DB save fails (Study Materials) |
 
 ---
 
@@ -550,6 +714,16 @@ graph LR
 8. ✅ Login with tutor credentials
 9. ✅ View all student requests
 
+### 📚 Study Materials Testing (IT23405240)
+
+1. Import `postman/StudyMaterials_Complete.postman_collection.json` into Postman
+2. Set Collection Variable `baseUrl` = `http://localhost:5000/api`
+3. Run **Login** — token is auto-saved to `{{token}}`
+4. Run **Upload Material** — material ID auto-saved to `{{materialId}}`
+5. Test filters: `?subject=mathematics`, `?keyword=algebra`, `?grade=Grade 9`
+6. Test metrics: Download counter, Like/Unlike toggle
+7. Test error cases: no file, duplicate title, invalid ID, oversized file
+
 ---
 
 ## 🤝 Contributing
@@ -564,11 +738,12 @@ Contributions are welcome! Please follow these steps:
 
 ---
 
-## 👨‍💻 Author
+## 👨‍💻 Contributors
 
-**H A S Maduwantha**  
-📧 Student ID: IT23472020  
-👥 Group: 122
+| Name | Student ID | Component |
+|---|---|---|
+| H A S Maduwantha | IT23472020 | Authentication, Messages, Translation |
+| **ALAHAKOON PB** | **IT23405240** | **Study Materials & Resources** |
 
 ---
 
@@ -581,7 +756,8 @@ This project is developed as part of an academic curriculum.
 ## 📞 Support
 
 For support or queries, please contact:
-- 📧 Email: IT23472020@my.sliit.lk
+- 📧 IT23472020@my.sliit.lk — H A S Maduwantha
+- 📧 IT23405240@my.sliit.lk — ALAHAKOON PB
 - 🎓 Institution: SLIIT
 
 ---
@@ -590,7 +766,7 @@ For support or queries, please contact:
 
 ### ⭐ If you find this project helpful, please give it a star!
 
-Made with ❤️ by H A S Maduwantha
+Made with ❤️ by H A S Maduwantha & ALAHAKOON PB
 
 </div>
 
