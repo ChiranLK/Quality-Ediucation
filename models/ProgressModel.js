@@ -53,4 +53,7 @@ const ProgressSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Prevent duplicates per tutor+student+topic (so we can "upsert" updates)
+ProgressSchema.index({ student: 1, tutor: 1, topic: 1 }, { unique: true });
+
 export default mongoose.model("Progress", ProgressSchema);

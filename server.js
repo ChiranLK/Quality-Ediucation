@@ -1,19 +1,24 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import connectDB from "./Config/db.js";
 import cookieParser from "cookie-parser";
+import emailRoutes from "./Routes/emailRoutes.js";
 
 // Import Routes
 import authRouter from "./Routes/authRouter.js";
 import feedbackRouter from "./Routes/feedbackRouter.js";
 import progressRouter from "./Routes/progressRouter.js";
+import feedbackEmailRoutes from "./Routes/feedbackEmailRoutes.js";
+
 
 // If you have these route files, uncomment the imports + app.use lines below
 import messageRouter from "./Routes/messageRouter.js";
 import tutoringSessionRouter from "./Routes/tutoringSessionRouter.js";
 
-dotenv.config();
+
 const app = express();
 
 // Middleware
@@ -30,6 +35,8 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/feedbacks", feedbackRouter);
 app.use("/api/progress", progressRouter);
+app.use("/api/email", emailRoutes);
+app.use("/api/email", feedbackEmailRoutes);
 
 // Uncomment if these exist
 app.use("/api/messages", messageRouter);

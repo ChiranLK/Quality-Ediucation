@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Feedback from "../models/FeedbackModel.js";
 import User from "../models/UserModel.js";
+import { sendFeedbackNotificationEmail } from "../services/feedbackMailService.js";
 
 const STUDENT_ROLE = process.env.STUDENT_ROLE || "user";
 const TUTOR_ROLE = process.env.TUTOR_ROLE || "organizer";
@@ -54,6 +55,18 @@ export const submitFeedback = async (req, res) => {
       payload,
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
+
+    sendFeedbackNotificationEmail({
+      studentName: req.user.fullName || "Student",
+      studentEmail: req.user.email || "unknown",
+      tutorName: tutor.fullName,
+      tutorEmail: tutor.email,
+      rating: numRating,
+      message: (message || "").trim(),
+      sessionId: sessionId || null,
+    }).catch((e) => {
+      console.error("Feedback notification email failed:", e.message);
+    });
 
     return res.status(201).json({ message: "Feedback saved", feedback: saved });
   } catch (err) {
