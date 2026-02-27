@@ -1268,17 +1268,17 @@
   },
   "variable": [
     {
-      "id": "dbaf7648-03ab-458a-b01d-d27bca937d5e",
+      "id": "2740983e-c758-4b93-84eb-cc28bdec24b0",
       "key": "baseUrl",
       "value": "http://localhost:5000/api"
     },
     {
-      "id": "d012dd39-c0fb-4dac-a415-152ede7073f0",
+      "id": "47b55af3-4d48-4838-96e5-ccb2a2a76bdf",
       "key": "token",
       "value": "PASTE_YOUR_TOKEN_HERE"
     },
     {
-      "id": "0355dbdf-041e-4e18-b5f1-b880d91bff39",
+      "id": "04f8f1f6-f876-4c47-89a9-3f39b001dae5",
       "key": "materialId",
       "value": "PASTE_MATERIAL_ID_HERE"
     }

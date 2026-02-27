@@ -73,7 +73,16 @@ export const validateStudyMaterialInput = withValidationErrors([
     .isLength({ max: 20 })
     .withMessage("Grade cannot exceed 20 characters"),
   // fileUrl is NOT validated here — it comes from Multer/Cloudinary via req.file
-  body("tags").optional().isArray().withMessage("Tags must be an array"),
+  body("tags")
+    .optional()
+    .custom((value) => {
+      let arr = value;
+      if (typeof value === "string") {
+        try { arr = JSON.parse(value); } catch { arr = value.split(","); }
+      }
+      if (!Array.isArray(arr)) throw new Error("Tags must be an array or string format");
+      return true;
+    }),
 ]);
 
 export const validateStudyMaterialUpdate = withValidationErrors([
@@ -98,5 +107,14 @@ export const validateStudyMaterialUpdate = withValidationErrors([
     .isLength({ max: 20 })
     .withMessage("Grade cannot exceed 20 characters"),
   // fileUrl comes from Multer/Cloudinary via req.file, not body
-  body("tags").optional().isArray().withMessage("Tags must be an array"),
+  body("tags")
+    .optional()
+    .custom((value) => {
+      let arr = value;
+      if (typeof value === "string") {
+        try { arr = JSON.parse(value); } catch { arr = value.split(","); }
+      }
+      if (!Array.isArray(arr)) throw new Error("Tags must be an array or string format");
+      return true;
+    }),
 ]);
