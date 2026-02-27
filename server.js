@@ -12,12 +12,11 @@ import authRouter from "./Routes/authRouter.js";
 import feedbackRouter from "./Routes/feedbackRouter.js";
 import progressRouter from "./Routes/progressRouter.js";
 import feedbackEmailRoutes from "./Routes/feedbackEmailRoutes.js";
-
-
-// If you have these route files, uncomment the imports + app.use lines below
 import messageRouter from "./Routes/messageRouter.js";
 import tutoringSessionRouter from "./Routes/tutoringSessionRouter.js";
 import googleCalendarRouter from "./Routes/googleCalenderRouter.js";
+import tutorRouter from "./Routes/tutorRouter.js";
+import materialRouter from "./Routes/materialRouter.js";
 
 // Import Error Handler
 import { errorHandler } from "./Middleware/errorHandler.js";
@@ -41,10 +40,10 @@ app.use("/api/feedbacks", feedbackRouter);
 app.use("/api/progress", progressRouter);
 app.use("/api/email", emailRoutes);
 app.use("/api/email", feedbackEmailRoutes);
-
-// Uncomment if these exist
 app.use("/api/messages", messageRouter);
 app.use("/api/tutoring-sessions", tutoringSessionRouter);
+app.use("/api/tutors", tutorRouter);
+app.use("/api/materials", materialRouter);
 
 // 404 Handler
 app.use((req, res) => {
