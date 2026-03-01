@@ -1418,7 +1418,7 @@ For support or queries, please contact:
 
 ### ⭐ If you find this project helpful, please give it a star!
 
-Made with ❤️ by H A S Maduwantha, ALAHAKOON PB, SERASINGHE CS & NIMADITH LMH
+Made by H A S Maduwantha, ALAHAKOON PB, SERASINGHE CS & NIMADITH LMH
 
 </div>
 
