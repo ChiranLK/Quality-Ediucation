@@ -116,6 +116,7 @@ This system promotes **accessible, structured, and collaborative digital educati
 - 📦 **Multer** - File upload handling
 - ☁️ **Cloudinary** - Cloud storage for study material files (PDF, DOC, images)
 - 📅 **Google Calendar API** - Automatic event creation for tutoring sessions
+- 📧 **Nodemailer + Mailtrap (SMTP)** - Feedback notification emails to tutors and admins
 
 ---
 ## 🌍 Translation Workflow
@@ -185,6 +186,19 @@ graph LR
 - 🔒 **Role-based access** — Only tutors can create/modify sessions, students can join
 - ✅ **Real-time availability** — Auto-calculate available spots and prevent overbooking
 
+### ⭐ Feedback, Ratings & Progress Tracking
+👨‍💻 Developed by **NIMADITH LMH** — Student ID: `IT23242272`
+
+- ✍️ **Submit Tutor Feedback** — Students submit ratings (1–5 stars) and written feedback for tutors, optionally linked to a specific session
+- 🔄 **Upsert Feedback** — One feedback per student+tutor+session enforced via a unique compound index; re-submitting updates the existing record
+- ⭐ **View Tutor Ratings** — Anyone can query aggregated rating stats: average score, total count, and a full 1★–5★ breakdown (MongoDB aggregation pipeline)
+- 📋 **View Feedback Details** — Tutors/admins see the full message list; students can view all feedback they have personally submitted
+- 🗑️ **Delete Feedback** — Students delete their own feedback; admins can delete any entry
+- 📊 **Track Student Progress** — Tutors/admins create and update student progress records with topic, completion percentage (0–100%), and freeform notes
+- 👤 **Role-Based Progress Access** — Students view only their own progress; tutors see only their assigned students; admins have full unrestricted access
+- 📧 **SMTP Email Notifications** — Automatic HTML + plain-text email sent to the tutor and/or admin upon every feedback submission via Nodemailer + Mailtrap (SMTP)
+- 🔒 **Role-based access control** — Only students can submit feedback; only tutors/admins can update student progress
+
 ---
 
 
@@ -200,6 +214,9 @@ AF_Backend/
 │   ├── studyMaterialController.js     # Study Materials CRUD & metrics  [IT23405240]
 │   ├── tutoringSessionController.js   # Tutoring Sessions CRUD           [IT23401976]
 │   ├── tutorController.js             # Tutor management
+│   ├── feedbackController.js          # Feedback & Ratings CRUD         [IT23242272]
+│   ├── progressController.js          # Student Progress Tracking       [IT23242272]
+│   ├── feedbackEmailController.js     # Feedback email notification     [IT23242272]
 │   └── ...
 ├── 📁 Middleware/
 │   ├── authMiddleware.js              # JWT verification & RBAC
@@ -213,6 +230,8 @@ AF_Backend/
 │   ├── MessageModel.js                # Message schema
 │   ├── StudyMaterialModel.js          # Study material schema            [IT23405240]
 │   ├── TutoringSessionModel.js        # Tutoring session schema          [IT23401976]
+│   ├── FeedbackModel.js               # Feedback & Ratings schema        [IT23242272]
+│   ├── ProgressModel.js               # Student Progress schema          [IT23242272]
 │   └── ...
 ├── 📁 Routes/
 │   ├── authRouter.js                  # Authentication routes
@@ -221,12 +240,16 @@ AF_Backend/
 │   ├── tutoringSessionRouter.js       # Tutoring session routes          [IT23401976]
 │   ├── tutorRouter.js                 # Tutor routes
 │   ├── googleCalenderRouter.js        # Google Calendar integration      [IT23401976]
+│   ├── feedbackRouter.js              # Feedback & Ratings routes        [IT23242272]
+│   ├── progressRouter.js              # Student Progress routes          [IT23242272]
+│   ├── feedbackEmailRoutes.js         # Feedback email notify route      [IT23242272]
 │   └── index.js                       # Route aggregator
 ├── 📁 services/
 │   ├── messageService.js              # Translation service
 │   ├── studyMaterialService.js        # Study material business logic    [IT23405240]
 │   ├── tutoringSessionService.js      # Tutoring session logic           [IT23401976]
 │   ├── googleCalendarService.js       # Google Calendar integration      [IT23401976]
+│   ├── feedbackMailService.js         # Feedback SMTP email service      [IT23242272]
 │   └── ...
 ├── 📁 utils/
 │   ├── generateToken.js               # JWT generation
@@ -281,6 +304,18 @@ AF_Backend/
    CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
    CLOUDINARY_API_KEY=your_cloudinary_api_key
    CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+
+   # Feedback & Progress – SMTP Email (IT23242272)
+   SEND_FEEDBACK_EMAIL=true
+   FEEDBACK_EMAIL_TO_TUTOR=true
+   FEEDBACK_EMAIL_TO_ADMIN=true
+   ADMIN_NOTIFY_EMAIL=admin@qualityapp.com
+   MAIL_HOST=smtp.mailtrap.io
+   MAIL_PORT=2525
+   MAIL_USER=your_mailtrap_username
+   MAIL_PASS=your_mailtrap_password
+   MAIL_FROM_NAME=Quality Education
+   MAIL_FROM_EMAIL=no-reply@qualityedu.com
    ```
 
 4. **Run the application**
@@ -1074,6 +1109,222 @@ GOOGLE_REDIRECT_URI=your_redirect_uri
 
 ---
 
+## ⭐ Feedback, Ratings & Progress API
+👨‍💻 Developed by **NIMADITH LMH** — Student ID: `IT23242272`
+
+> Base URL: `/api/feedbacks` & `/api/progress` | Auth: `Bearer <token>` required on all routes
+
+---
+
+### 1️⃣ Submit / Update Feedback
+
+**Endpoint:** `POST /api/feedbacks`
+**Access:** Student only
+
+**Request Body:**
+```json
+{
+  "tutorId": "64f1a2b3c4d5e6f7a8b9c0d2",
+  "rating": 5,
+  "message": "Excellent session, very clear explanations!",
+  "sessionId": "64f1a2b3c4d5e6f7a8b9c0d1"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Feedback saved",
+  "feedback": {
+    "_id": "64f1a2b3c4d5e6f7a8b9c0f9",
+    "student": "64f1a2b3c4d5e6f7a8b9c0d3",
+    "tutor": "64f1a2b3c4d5e6f7a8b9c0d2",
+    "session": "64f1a2b3c4d5e6f7a8b9c0d1",
+    "rating": 5,
+    "message": "Excellent session, very clear explanations!",
+    "createdAt": "2026-02-27T10:30:00.000Z"
+  }
+}
+```
+
+> ✅ Automatically sends an HTML notification email to the tutor and/or admin via SMTP (Mailtrap).
+
+---
+
+### 2️⃣ Get My Submitted Feedbacks
+
+**Endpoint:** `GET /api/feedbacks/me`
+**Access:** Authenticated student
+
+**Response:**
+```json
+{
+  "count": 2,
+  "feedbacks": [
+    {
+      "_id": "64f1a2b3c4d5e6f7a8b9c0f9",
+      "tutor": { "fullName": "John Doe", "email": "john@example.com", "role": "organizer" },
+      "rating": 5,
+      "message": "Excellent session!",
+      "createdAt": "2026-02-27T10:30:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+### 3️⃣ Get Tutor Rating Stats
+
+**Endpoint:** `GET /api/feedbacks/tutor/:tutorId/ratings`
+**Access:** Any authenticated user (students use this to evaluate tutors)
+
+**Response:**
+```json
+{
+  "tutorId": "64f1a2b3c4d5e6f7a8b9c0d2",
+  "avgRating": 4.67,
+  "totalRatings": 15,
+  "breakdown": {
+    "1": 0,
+    "2": 1,
+    "3": 1,
+    "4": 4,
+    "5": 9
+  }
+}
+```
+
+---
+
+### 4️⃣ Get Tutor Feedback Messages
+
+**Endpoint:** `GET /api/feedbacks/tutor/:tutorId`
+**Access:** Tutor (self only) or Admin
+
+**Response:**
+```json
+{
+  "count": 3,
+  "feedbacks": [
+    {
+      "_id": "64f1a2b3c4d5e6f7a8b9c0f9",
+      "student": { "fullName": "Jane Smith", "email": "jane@example.com" },
+      "rating": 5,
+      "message": "Very helpful!",
+      "createdAt": "2026-02-27T10:30:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+### 5️⃣ Delete Feedback
+
+**Endpoint:** `DELETE /api/feedbacks/:id`
+**Access:** Feedback owner (student) or Admin
+
+**Response:**
+```json
+{ "message": "Feedback deleted" }
+```
+
+---
+
+### 6️⃣ Create / Update Student Progress
+
+**Endpoint:** `POST /api/progress`
+**Access:** Tutor (own students), Student (self), Admin
+
+**Request Body:**
+```json
+{
+  "studentId": "64f1a2b3c4d5e6f7a8b9c0d3",
+  "tutorId": "64f1a2b3c4d5e6f7a8b9c0d2",
+  "sessionId": "64f1a2b3c4d5e6f7a8b9c0d1",
+  "topic": "Quadratic Equations",
+  "completionPercent": 75,
+  "notes": "Student grasped factoring; needs more practice on the quadratic formula."
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Progress saved",
+  "progress": {
+    "_id": "64f1a2b3c4d5e6f7a8b9c0e1",
+    "student": "64f1a2b3c4d5e6f7a8b9c0d3",
+    "tutor": "64f1a2b3c4d5e6f7a8b9c0d2",
+    "session": "64f1a2b3c4d5e6f7a8b9c0d1",
+    "topic": "Quadratic Equations",
+    "completionPercent": 75,
+    "notes": "Student grasped factoring; needs more practice on the quadratic formula.",
+    "updatedAt": "2026-02-27T12:00:00.000Z"
+  }
+}
+```
+
+---
+
+### 7️⃣ View My Progress (Student)
+
+**Endpoint:** `GET /api/progress/me`
+**Access:** Authenticated student
+
+**Response:**
+```json
+{
+  "count": 3,
+  "progress": [
+    {
+      "_id": "64f1a2b3c4d5e6f7a8b9c0e1",
+      "tutor": { "fullName": "John Doe", "email": "john@example.com" },
+      "topic": "Quadratic Equations",
+      "completionPercent": 75,
+      "notes": "...",
+      "updatedAt": "2026-02-27T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+### 8️⃣ View Progress by Student ID
+
+**Endpoint:** `GET /api/progress/student/:studentId`
+**Access:** The student (self), their tutor, or Admin
+
+---
+
+### 9️⃣ View Progress by Tutor
+
+**Endpoint:** `GET /api/progress/tutor/:tutorId`
+**Access:** Tutor (self) or Admin — returns all student progress records for that tutor
+
+---
+
+### 📧 SMTP Feedback Email Notification Workflow
+
+```mermaid
+graph LR
+    A[Student Submits Feedback] --> B[Save to MongoDB]
+    B --> C{SEND_FEEDBACK_EMAIL=true?}
+    C -->|Yes| D{Who to notify?}
+    C -->|No| E[Silent - no email]
+    D -->|FEEDBACK_EMAIL_TO_TUTOR=true| F[Email Tutor]
+    D -->|FEEDBACK_EMAIL_TO_ADMIN=true| G[Email Admin]
+    F --> H[Nodemailer → Mailtrap SMTP]
+    G --> H
+    H --> I[HTML + Plain-text email delivered]
+```
+
+**Email contains:** Tutor name, Student name, Rating (★/5), Session ID, and the full feedback message.
+
+---
+
 
 ## 🔐 Security Considerations
 
@@ -1110,6 +1361,17 @@ GOOGLE_REDIRECT_URI=your_redirect_uri
 6. Test metrics: Download counter, Like/Unlike toggle
 7. Test error cases: no file, duplicate title, invalid ID, oversized file
 
+### ⭐ Feedback, Ratings & Progress Testing (IT23242272)
+
+1. Login as **student** — use token for feedback submission
+2. `POST /api/feedbacks` — submit a rating (1–5) + message for a tutor; check Mailtrap inbox for notification email
+3. `GET /api/feedbacks/tutor/:tutorId/ratings` — verify aggregated avg rating and star breakdown
+4. Login as **tutor** — `GET /api/feedbacks/tutor/:tutorId` to view student messages
+5. `POST /api/progress` — (as tutor) log a student's progress with topic + completion %
+6. Login as **student** — `GET /api/progress/me` to verify progress records
+7. Test role guardrails: tutors submitting feedback should receive `403 Forbidden`
+8. Test duplicate feedback: re-submit same student+tutor+session — should update, not duplicate
+
 ---
 
 ## 🤝 Contributing
@@ -1131,6 +1393,7 @@ Contributions are welcome! Please follow these steps:
 | H A S Maduwantha | IT23472020 | Authentication, Messages, Translation |
 | **ALAHAKOON PB** | **IT23405240** | **Study Materials & Resources** |
 | **SERASINGHE CS** | **IT23401976** | **Peer Learning & Tutoring Sessions** |
+| **NIMADITH LMH** | **IT23242272** | **Feedback, Ratings & Progress Tracking** |
 
 ---
 
@@ -1146,6 +1409,7 @@ For support or queries, please contact:
 - 📧 IT23472020@my.sliit.lk — H A S Maduwantha
 - 📧 IT23405240@my.sliit.lk — ALAHAKOON PB
 - 📧 IT23401976@my.sliit.lk — SERASINGHE CS
+- 📧 IT23242272@my.sliit.lk — NIMADITH LMH
 - 🎓 Institution: SLIIT
 
 ---
@@ -1154,7 +1418,7 @@ For support or queries, please contact:
 
 ### ⭐ If you find this project helpful, please give it a star!
 
-Made with ❤️ by H A S Maduwantha, ALAHAKOON PB & SERASINGHE CS
+Made with ❤️ by H A S Maduwantha, ALAHAKOON PB, SERASINGHE CS & NIMADITH LMH
 
 </div>
 
