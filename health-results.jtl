@@ -8,3 +8,4 @@ timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success
 
 /",2631,0,1,1,http://localhost:5000/health,0,0,30
 1772801692918,26,Health Endpoint Test,200,OK,Thread Group 1-1,text,true,,298,122,1,1,http://localhost:5000/health,23,0,13
+1772803459804,22,Health Endpoint Test,200,OK,Thread Group 1-1,text,true,,298,122,1,1,http://localhost:5000/health,18,0,13
