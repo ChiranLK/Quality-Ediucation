@@ -36,12 +36,15 @@ jobs:
           tar -xzf apache-jmeter-5.6.3.tgz
           mv apache-jmeter-5.6.3 jmeter
 
-      - name: Run JMeter test
+      - name: Run JMeter tests
         run: |
           ./jmeter/bin/jmeter -n -t tests/health-test.jmx -l results.jtl
+          ./jmeter/bin/jmeter -n -t tests/root-test.jmx -l root-results.jtl
 
       - name: Upload JMeter results
         uses: actions/upload-artifact@v4
         with:
           name: jmeter-results
-          path: results.jtl
+          path: |
+            results.jtl
+            root-results.jtl

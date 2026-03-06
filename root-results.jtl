@@ -1,0 +1,2 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1772802784530,24,Root Endpoint Test,200,OK,Thread Group 1-1,text,true,,306,116,1,1,http://localhost:5000/,21,0,15
