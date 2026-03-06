@@ -1,0 +1,10 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1772801151617,26,Health Endpoint Test,200,OK,Thread Group 1-1,text,true,,298,122,1,1,http://localhost:5000/health,23,0,18
+1772801276866,30,Health Endpoint Test,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:5000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused: connect",Thread Group 1-1,text,false,"Test failed: code expected to equal /
+
+****** received  : [[[Non HTTP response code: org.apache.http.conn.HttpHostConnectException]]]
+
+****** comparison: [[[200                                                                  ]]]
+
+/",2631,0,1,1,http://localhost:5000/health,0,0,30
+1772801692918,26,Health Endpoint Test,200,OK,Thread Group 1-1,text,true,,298,122,1,1,http://localhost:5000/health,23,0,13

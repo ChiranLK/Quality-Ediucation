@@ -36,6 +36,10 @@ app.get("/", (req, res) => {
   res.json({ message: "Welcome to AF Backend API" });
 });
 
+app.get("/health", (req, res) => {
+  res.status(200).json({ message: "Server is working" });
+});
+
 app.use("/api/auth", authRouter);
 app.use("/api/feedbacks", feedbackRouter);
 app.use("/api/progress", progressRouter);
