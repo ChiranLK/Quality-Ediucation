@@ -40,6 +40,7 @@ jobs:
         run: |
           ./jmeter/bin/jmeter -n -t tests/health-test.jmx -l results.jtl
           ./jmeter/bin/jmeter -n -t tests/root-test.jmx -l root-results.jtl
+          ./jmeter/bin/jmeter -n -t tests/invalid-route-test.jmx -l invalid-route-results.jtl
 
       - name: Upload JMeter results
         uses: actions/upload-artifact@v4

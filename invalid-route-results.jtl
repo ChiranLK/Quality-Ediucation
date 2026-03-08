@@ -1,0 +1,2 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1772980244532,42,HTTP Request,404,Not Found,Thread Group 1-1,text,true,,456,129,1,1,http://localhost:5000/invalid-route,38,0,27
