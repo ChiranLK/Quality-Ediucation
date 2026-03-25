@@ -1,5 +1,5 @@
-import StudyMaterial from "../models/StudyMaterialModel.js";
 import { StatusCodes } from "http-status-codes";
+<<<<<<< HEAD
 import { BadRequestError, NotFoundError, UnauthorizedError } from "../errors/customErrors.js";
 import { cloudinary } from "../Middleware/uploadMiddleware.js";
 
@@ -28,112 +28,124 @@ export const createStudyMaterial = async (req, res) => {
     grade: grade.trim(),
     fileUrl: req.file.path,
     uploadedBy: uploaderId,
+=======
+import { BadRequestError } from "../errors/customErrors.js";
+import * as studyMaterialService from "../services/studyMaterialService.js";
+import {
+  paginatedResponse,
+  successResponse,
+} from "../utils/responseHandler.js";
+import { validateObjectId } from "../utils/validationUtils.js";
+import { asyncHandler } from "../Middleware/asyncHandler.js";
+
+/**
+ * POST /api/materials
+ * Upload a new study material (Tutor/Admin only)
+ */
+export const createStudyMaterial = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    throw new BadRequestError("Please upload a file (PDF, DOC, image, etc.)");
+  }
+
+  const uploaderId = req.user._id || req.user.userId;
+  const materialData = {
+    ...req.body,
+    fileUrl: req.file.path, // Cloudinary secure URL
+>>>>>>> origin/main
   };
-  if (tags && Array.isArray(tags)) {
-    materialData.tags = tags.map((t) => String(t).trim().toLowerCase());
-  }
 
-  const material = await StudyMaterial.create(materialData);
-  res
-    .status(StatusCodes.CREATED)
-    .json({ msg: "Study material uploaded", material });
-};
-
-// GET /api/materials
-// Public — any authenticated user can browse materials
-export const getAllStudyMaterials = async (req, res) => {
-  const { subject, grade, keyword } = req.query;
-
-  // --- build filter object ---
-  const filter = {};
-
-  if (subject) {
-    // stored lowercase; normalise the incoming value too
-    filter.subject = subject.trim().toLowerCase();
-  }
-
-  if (grade) {
-    filter.grade = grade.trim();
-  }
-
-  if (keyword) {
-    // case-insensitive partial match on title
-    filter.title = { $regex: keyword.trim(), $options: "i" };
-  }
-
-  // --- sorting ---
-  const SORT_OPTIONS = {
-    latest:  { createdAt: -1 }, // newest first (default)
-    subject: { subject: 1 },    // alphabetical A → Z
-  };
-  const sortKey  = req.query.sort && SORT_OPTIONS[req.query.sort] ? req.query.sort : "latest";
-  const sortObj  = SORT_OPTIONS[sortKey];
-
-  // --- pagination ---
-  const page = Math.max(1, parseInt(req.query.page, 10) || 1);
-  const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 10));
-  const skip = (page - 1) * limit;
-
-  // run count and data queries in parallel for performance
-  const [totalCount, materials] = await Promise.all([
-    StudyMaterial.countDocuments(filter),
-    StudyMaterial.find(filter)
-      .populate("uploadedBy", "name email role")
-      .sort(sortObj)
-      .skip(skip)
-      .limit(limit),
-  ]);
-
-  const totalPages = Math.ceil(totalCount / limit);
-
-  res.status(StatusCodes.OK).json({
-    totalCount,
-    totalPages,
-    currentPage: page,
-    limit,
-    materials,
-  });
-};
-
-// GET /api/materials/:id
-// Any authenticated user can fetch a single material
-export const getSingleStudyMaterial = async (req, res) => {
-  const { id } = req.params;
-
-  const material = await StudyMaterial.findById(id).populate(
-    "uploadedBy",
-    "name email role",
+  const material = await studyMaterialService.createMaterial(
+    materialData,
+    uploaderId,
   );
 
-  if (!material) {
-    throw new NotFoundError(`No study material found with id: ${id}`);
+  res
+    .status(StatusCodes.CREATED)
+    .json(successResponse("Study material uploaded successfully", material));
+});
+
+/**
+ * GET /api/materials
+ * Get all study materials with pagination, filtering, and search
+ * Query params: page, limit, subject, grade, keyword, sort, status
+ */
+export const getAllStudyMaterials = asyncHandler(async (req, res) => {
+  const result = await studyMaterialService.getAllMaterials(req.query);
+
+  res.status(StatusCodes.OK).json(
+    paginatedResponse("Materials retrieved successfully", result.materials, {
+      totalCount: result.totalCount,
+      totalPages: result.totalPages,
+      currentPage: result.currentPage,
+      limit: result.limit,
+    }),
+  );
+});
+
+/**
+ * GET /api/materials/my
+ * Get materials uploaded by the currently logged-in tutor/admin
+ * Query params: page, limit, subject, grade, keyword, sort, status
+ */
+export const getMyMaterials = asyncHandler(async (req, res) => {
+  const uploaderId = req.user._id || req.user.userId;
+  const result = await studyMaterialService.getAllMaterials({
+    ...req.query,
+    uploadedBy: String(uploaderId),
+  });
+
+  res.status(StatusCodes.OK).json(
+    paginatedResponse("Your materials retrieved successfully", result.materials, {
+      totalCount: result.totalCount,
+      totalPages: result.totalPages,
+      currentPage: result.currentPage,
+      limit: result.limit,
+    }),
+  );
+});
+
+/**
+ * GET /api/materials/:id
+ * Get a single study material by ID (increments view count)
+ */
+export const getSingleStudyMaterial = asyncHandler(async (req, res) => {
+  validateObjectId(req.params.id);
+
+  const material = await studyMaterialService.getMaterialById(req.params.id);
+
+  res
+    .status(StatusCodes.OK)
+    .json(successResponse("Material retrieved successfully", material));
+});
+
+/**
+ * PATCH /api/materials/:id
+ * Update a study material (uploader or admin only)
+ */
+export const updateStudyMaterial = asyncHandler(async (req, res) => {
+  validateObjectId(req.params.id);
+
+  const updates = { ...req.body };
+
+  // If a new file was uploaded, replace the URL
+  if (req.file) {
+    updates.fileUrl = req.file.path;
   }
 
-  res.status(StatusCodes.OK).json({ material });
-};
+  const updatedMaterial = await studyMaterialService.updateMaterial(
+    req.params.id,
+    updates,
+    req.user,
+  );
 
-// PATCH /api/materials/:id
-// Only the original uploader OR an admin may update
-export const updateStudyMaterial = async (req, res) => {
-  const { id } = req.params;
-
-  // 1. Find the document first so we can check ownership
-  const material = await StudyMaterial.findById(id);
-  if (!material) {
-    throw new NotFoundError(`No study material found with id: ${id}`);
-  }
-
-  // 2. Authorization check
-  const requesterId = String(req.user._id || req.user.userId);
-  const uploaderId  = String(material.uploadedBy);
-  const isAdmin     = req.user.role === "admin";
-
-  if (requesterId !== uploaderId && !isAdmin) {
-    throw new UnauthorizedError(
-      "You are not authorized to update this material",
+  res
+    .status(StatusCodes.OK)
+    .json(
+      successResponse("Study material updated successfully", updatedMaterial),
     );
-  }
+});
 
+<<<<<<< HEAD
   // 3. Build the update payload — only allow safe fields
   const { title, description, subject, grade, tags } = req.body || {};
   const updates = {};
@@ -150,37 +162,51 @@ export const updateStudyMaterial = async (req, res) => {
   if (tags !== undefined && Array.isArray(tags)) {
     updates.tags = tags.map((t) => String(t).trim().toLowerCase());
   }
+=======
+/**
+ * DELETE /api/materials/:id
+ * Delete a study material (uploader or admin only)
+ */
+export const deleteStudyMaterial = asyncHandler(async (req, res) => {
+  validateObjectId(req.params.id);
 
-  if (Object.keys(updates).length === 0) {
-    throw new BadRequestError("No valid fields provided for update");
-  }
+  await studyMaterialService.deleteMaterial(req.params.id, req.user);
+>>>>>>> origin/main
 
-  // 4. Apply update — return the new document after update
-  const updated = await StudyMaterial.findByIdAndUpdate(
-    id,
-    { $set: updates },
-    { new: true, runValidators: true },
-  ).populate("uploadedBy", "name email role");
+  res
+    .status(StatusCodes.OK)
+    .json(successResponse("Study material deleted successfully"));
+});
 
-  res.status(StatusCodes.OK).json({ msg: "Study material updated", material: updated });
-};
+/**
+ * POST /api/materials/:id/download
+ * Increment download count for a material
+ */
+export const incrementDownload = asyncHandler(async (req, res) => {
+  validateObjectId(req.params.id);
 
-// DELETE /api/materials/:id
-// Only the original uploader OR an admin may delete
-export const deleteStudyMaterial = async (req, res) => {
-  const { id } = req.params;
+  const material = await studyMaterialService.incrementMetric(
+    req.params.id,
+    "downloads",
+  );
 
-  // 1. Fetch document first to check ownership
-  const material = await StudyMaterial.findById(id);
-  if (!material) {
-    throw new NotFoundError(`No study material found with id: ${id}`);
-  }
+  res
+    .status(StatusCodes.OK)
+    .json(successResponse("Download recorded", { downloads: material.metrics.downloads }));
+});
 
-  // 2. Authorization check
-  const requesterId = String(req.user._id || req.user.userId);
-  const uploaderId  = String(material.uploadedBy);
-  const isAdmin     = req.user.role === "admin";
+/**
+ * POST /api/materials/:id/like
+ * Toggle like on a material (like if not liked, unlike if already liked)
+ * Uses userid tracking to prevent duplicate likes
+ */
+export const toggleLike = asyncHandler(async (req, res) => {
+  validateObjectId(req.params.id);
 
+  const userId = String(req.user._id || req.user.userId);
+  const result = await studyMaterialService.toggleLike(req.params.id, userId);
+
+<<<<<<< HEAD
   if (requesterId !== uploaderId && !isAdmin) {
     throw new UnauthorizedError(
       "You are not authorized to delete this material",
@@ -209,3 +235,9 @@ export const deleteStudyMaterial = async (req, res) => {
 
   res.status(StatusCodes.OK).json({ msg: "Study material deleted successfully" });
 };
+=======
+  res
+    .status(StatusCodes.OK)
+    .json(successResponse(result.message, { likes: result.likes }));
+});
+>>>>>>> origin/main

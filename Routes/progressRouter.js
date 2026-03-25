@@ -1,11 +1,8 @@
 import express from "express";
+import { upsertProgress, getMyProgress, getProgressByTutor, getProgressByStudent } from "../Controllers/progressController.js";
+
 import { protect } from "../Middleware/authMiddleware.js";
-import {
-  upsertProgress,
-  getMyProgress,
-  getProgressByStudent,
-  getProgressByTutor,
-} from "../Controllers/progressController.js";
+
 
 const router = express.Router();
 

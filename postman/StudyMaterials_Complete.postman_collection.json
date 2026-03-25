@@ -1,0 +1,514 @@
+{
+  "info": {
+    "_postman_id": "sm-quality-education-2026",
+    "name": "📚 Study Materials API – Quality Education",
+    "description": "Complete Postman collection for Study Materials & Resources component.\n\n**Setup:**\n1. Import this file into Postman\n2. Create an Environment with variables: `baseUrl`, `token`, `materialId`\n3. Set `baseUrl` = http://localhost:5000/api\n4. Run 'Login' first, copy token → set `token` variable\n5. After uploading, copy the `_id` → set `materialId`",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api", "type": "string" },
+    { "key": "token", "value": "PASTE_YOUR_TOKEN_HERE", "type": "string" },
+    { "key": "materialId", "value": "PASTE_MATERIAL_ID_HERE", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "🔐 Auth (Setup)",
+      "item": [
+        {
+          "name": "Register Tutor",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Test Tutor\",\n  \"email\": \"tutor@test.com\",\n  \"password\": \"Test@1234\",\n  \"phoneNumber\": \"0771234567\",\n  \"location\": \"Colombo\",\n  \"role\": \"tutor\",\n  \"subjects\": [\"mathematics\", \"science\"]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "✅ Expected: 201 – 'Tutor registered successfully'"
+          }
+        },
+        {
+          "name": "Login → Copy token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.token) {",
+                  "  pm.collectionVariables.set('token', json.token);",
+                  "  console.log('Token saved automatically!');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"tutor@test.com\",\n  \"password\": \"Test@1234\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "✅ Expected: 200 – Token auto-saved to {{token}} variable via test script"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📤 Upload Material",
+      "item": [
+        {
+          "name": "Upload Material (Success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.data && json.data._id) {",
+                  "  pm.collectionVariables.set('materialId', json.data._id);",
+                  "  console.log('Material ID saved: ' + json.data._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/materials", "host": ["{{baseUrl}}"], "path": ["materials"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Introduction to Algebra", "type": "text" },
+                { "key": "description", "value": "A comprehensive guide to algebraic expressions and equations for grade 9 students.", "type": "text" },
+                { "key": "subject", "value": "mathematics", "type": "text" },
+                { "key": "grade", "value": "Grade 9", "type": "text" },
+                { "key": "tags", "value": "[\"algebra\",\"equations\",\"math\"]", "type": "text", "description": "JSON string array" },
+                { "key": "file", "type": "file", "src": [], "description": "Select any PDF, DOC, DOCX, PPT, TXT, or image file (max 5MB)" }
+              ]
+            },
+            "description": "✅ Expected: 201 – Material created. Material ID auto-saved to {{materialId}}.\n\n⚠️ Select a real file in the 'file' field before sending."
+          }
+        },
+        {
+          "name": "Upload Material 2 (For Delete Test)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/materials", "host": ["{{baseUrl}}"], "path": ["materials"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Physics: Laws of Motion", "type": "text" },
+                { "key": "description", "value": "Complete notes on Newton's three laws of motion for grade 11 students with examples.", "type": "text" },
+                { "key": "subject", "value": "physics", "type": "text" },
+                { "key": "grade", "value": "Grade 11", "type": "text" },
+                { "key": "file", "type": "file", "src": [], "description": "Select a file" }
+              ]
+            },
+            "description": "Upload a second material. Copy the _id from response for the DELETE test."
+          }
+        },
+        {
+          "name": "ERROR – No File Attached",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/materials", "host": ["{{baseUrl}}"], "path": ["materials"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Missing File Test", "type": "text" },
+                { "key": "description", "value": "This request has no file attached to test the error handler.", "type": "text" },
+                { "key": "subject", "value": "science", "type": "text" },
+                { "key": "grade", "value": "Grade 10", "type": "text" }
+              ]
+            },
+            "description": "❌ Expected: 400 – 'Please upload a file (PDF, DOC, image, etc.)'"
+          }
+        },
+        {
+          "name": "ERROR – Missing Title (Validation)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/materials", "host": ["{{baseUrl}}"], "path": ["materials"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "description", "value": "This upload is missing the title field intentionally.", "type": "text" },
+                { "key": "subject", "value": "history", "type": "text" },
+                { "key": "grade", "value": "Grade 11", "type": "text" },
+                { "key": "file", "type": "file", "src": [] }
+              ]
+            },
+            "description": "❌ Expected: 400 – 'Title is required'"
+          }
+        },
+        {
+          "name": "ERROR – Duplicate Upload",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/materials", "host": ["{{baseUrl}}"], "path": ["materials"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Introduction to Algebra", "type": "text", "description": "Same title+subject as existing" },
+                { "key": "description", "value": "A comprehensive guide to algebraic expressions and equations for grade 9 students.", "type": "text" },
+                { "key": "subject", "value": "mathematics", "type": "text" },
+                { "key": "grade", "value": "Grade 9", "type": "text" },
+                { "key": "file", "type": "file", "src": [] }
+              ]
+            },
+            "description": "❌ Expected: 400 – 'A material titled X already exists for subject Y'"
+          }
+        },
+        {
+          "name": "ERROR – No Auth Token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/materials", "host": ["{{baseUrl}}"], "path": ["materials"] },
+            "body": { "mode": "formdata", "formdata": [] },
+            "description": "❌ Expected: 401 – 'Not authorized, no token'"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📋 Get All Materials",
+      "item": [
+        {
+          "name": "Get All (Default Page 1, Limit 10)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/materials", "host": ["{{baseUrl}}"], "path": ["materials"] },
+            "description": "✅ Expected: 200 – Paginated list with pagination metadata"
+          }
+        },
+        {
+          "name": "Filter – By Subject",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/materials?subject=mathematics",
+              "host": ["{{baseUrl}}"], "path": ["materials"],
+              "query": [{ "key": "subject", "value": "mathematics" }]
+            },
+            "description": "✅ Filter by subject (case-insensitive)"
+          }
+        },
+        {
+          "name": "Filter – By Grade",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/materials?grade=Grade 9",
+              "host": ["{{baseUrl}}"], "path": ["materials"],
+              "query": [{ "key": "grade", "value": "Grade 9" }]
+            },
+            "description": "✅ Filter by grade level"
+          }
+        },
+        {
+          "name": "Filter – By Subject + Grade",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/materials?subject=mathematics&grade=Grade 9",
+              "host": ["{{baseUrl}}"], "path": ["materials"],
+              "query": [{ "key": "subject", "value": "mathematics" }, { "key": "grade", "value": "Grade 9" }]
+            },
+            "description": "✅ Combined subject + grade filter"
+          }
+        },
+        {
+          "name": "Filter – By Status",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/materials?status=active",
+              "host": ["{{baseUrl}}"], "path": ["materials"],
+              "query": [{ "key": "status", "value": "active", "description": "active | archived | pending" }]
+            },
+            "description": "✅ Filter by status: active | archived | pending"
+          }
+        },
+        {
+          "name": "Search – Keyword",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/materials?keyword=algebra",
+              "host": ["{{baseUrl}}"], "path": ["materials"],
+              "query": [{ "key": "keyword", "value": "algebra" }]
+            },
+            "description": "✅ Full-text search across title, description, and tags"
+          }
+        },
+        {
+          "name": "Pagination – Page 2, Limit 5",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/materials?page=2&limit=5",
+              "host": ["{{baseUrl}}"], "path": ["materials"],
+              "query": [{ "key": "page", "value": "2" }, { "key": "limit", "value": "5" }]
+            },
+            "description": "✅ Page 2 with 5 results per page"
+          }
+        },
+        {
+          "name": "Sort – By Title A→Z",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/materials?sort=title",
+              "host": ["{{baseUrl}}"], "path": ["materials"],
+              "query": [{ "key": "sort", "value": "title", "description": "latest | oldest | subject | title" }]
+            },
+            "description": "✅ Sort options: latest (default) | oldest | subject | title"
+          }
+        },
+        {
+          "name": "All Filters Combined",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/materials?subject=mathematics&grade=Grade 9&keyword=algebra&sort=latest&page=1&limit=5&status=active",
+              "host": ["{{baseUrl}}"], "path": ["materials"],
+              "query": [
+                { "key": "subject", "value": "mathematics" },
+                { "key": "grade", "value": "Grade 9" },
+                { "key": "keyword", "value": "algebra" },
+                { "key": "sort", "value": "latest" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "5" },
+                { "key": "status", "value": "active" }
+              ]
+            },
+            "description": "✅ All query parameters combined"
+          }
+        },
+        {
+          "name": "ERROR – No Auth",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/materials", "host": ["{{baseUrl}}"], "path": ["materials"] },
+            "description": "❌ Expected: 401 – Unauthorized"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🗂️ My Uploads",
+      "item": [
+        {
+          "name": "Get My Uploads",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/materials/my", "host": ["{{baseUrl}}"], "path": ["materials", "my"] },
+            "description": "✅ Returns only materials uploaded by the logged-in tutor/admin"
+          }
+        },
+        {
+          "name": "My Uploads – With Filters",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/materials/my?subject=mathematics&page=1&limit=5",
+              "host": ["{{baseUrl}}"], "path": ["materials", "my"],
+              "query": [
+                { "key": "subject", "value": "mathematics" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "5" }
+              ]
+            },
+            "description": "✅ My uploads with filters + pagination"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔍 Get Single Material",
+      "item": [
+        {
+          "name": "Get Single Material (views++)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/materials/{{materialId}}", "host": ["{{baseUrl}}"], "path": ["materials", "{{materialId}}"] },
+            "description": "✅ Expected: 200 – Returns material. metrics.views is incremented on every call."
+          }
+        },
+        {
+          "name": "ERROR – Invalid ID Format",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/materials/not-a-valid-id", "host": ["{{baseUrl}}"], "path": ["materials", "not-a-valid-id"] },
+            "description": "❌ Expected: 400 – 'Invalid ID format'"
+          }
+        },
+        {
+          "name": "ERROR – Not Found (valid but missing ID)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/materials/64f1a2b3c4d5e6f7a8b9c0d1", "host": ["{{baseUrl}}"], "path": ["materials", "64f1a2b3c4d5e6f7a8b9c0d1"] },
+            "description": "❌ Expected: 404 – 'No study material found with id'"
+          }
+        }
+      ]
+    },
+    {
+      "name": "✏️ Update Material",
+      "item": [
+        {
+          "name": "Update Metadata Only (No File)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/materials/{{materialId}}", "host": ["{{baseUrl}}"], "path": ["materials", "{{materialId}}"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Introduction to Algebra – Updated Edition", "type": "text" },
+                { "key": "description", "value": "An updated comprehensive guide to algebraic expressions for grade 9 students covering all key topics and practice exercises.", "type": "text" }
+              ]
+            },
+            "description": "✅ Update title and description only. File on Cloudinary stays unchanged."
+          }
+        },
+        {
+          "name": "Update With New File",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/materials/{{materialId}}", "host": ["{{baseUrl}}"], "path": ["materials", "{{materialId}}"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Algebra Guide – Final Version", "type": "text" },
+                { "key": "file", "type": "file", "src": [], "description": "New file replaces old Cloudinary file" }
+              ]
+            },
+            "description": "✅ Upload a new file — old Cloudinary file is deleted automatically"
+          }
+        },
+        {
+          "name": "Update Status to Archived",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/materials/{{materialId}}", "host": ["{{baseUrl}}"], "path": ["materials", "{{materialId}}"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "status", "value": "archived", "type": "text", "description": "active | archived | pending" }
+              ]
+            },
+            "description": "✅ Archive a material"
+          }
+        },
+        {
+          "name": "ERROR – Not Owner",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer ANOTHER_USERS_TOKEN_HERE" }],
+            "url": { "raw": "{{baseUrl}}/materials/{{materialId}}", "host": ["{{baseUrl}}"], "path": ["materials", "{{materialId}}"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [{ "key": "title", "value": "Unauthorized Edit", "type": "text" }]
+            },
+            "description": "❌ Expected: 403 – 'You are not authorized to update this material'"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🗑️ Delete Material",
+      "item": [
+        {
+          "name": "Delete Material",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/materials/{{materialId}}", "host": ["{{baseUrl}}"], "path": ["materials", "{{materialId}}"] },
+            "description": "✅ Expected: 200 – Deletes from MongoDB AND removes file from Cloudinary"
+          }
+        },
+        {
+          "name": "ERROR – Not Owner",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer ANOTHER_USERS_TOKEN_HERE" }],
+            "url": { "raw": "{{baseUrl}}/materials/{{materialId}}", "host": ["{{baseUrl}}"], "path": ["materials", "{{materialId}}"] },
+            "description": "❌ Expected: 403 – Forbidden"
+          }
+        },
+        {
+          "name": "ERROR – Invalid ID",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/materials/invalid-id-here", "host": ["{{baseUrl}}"], "path": ["materials", "invalid-id-here"] },
+            "description": "❌ Expected: 400 – Invalid ID format"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📊 Metrics",
+      "item": [
+        {
+          "name": "Record Download",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/materials/{{materialId}}/download", "host": ["{{baseUrl}}"], "path": ["materials", "{{materialId}}", "download"] },
+            "description": "✅ Expected: 200 – Increments download count. Returns new download count.\n\nNo request body needed."
+          }
+        },
+        {
+          "name": "Like Material",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/materials/{{materialId}}/like", "host": ["{{baseUrl}}"], "path": ["materials", "{{materialId}}", "like"] },
+            "description": "✅ 1st call: 'Material liked', likes=1\n✅ 2nd call: 'Material unliked', likes=0\n\nToggle — prevents duplicate likes for the same user. No body needed."
+          }
+        },
+        {
+          "name": "Unlike Material (Call Like Again)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/materials/{{materialId}}/like", "host": ["{{baseUrl}}"], "path": ["materials", "{{materialId}}", "like"] },
+            "description": "✅ Call same like endpoint again to unlike"
+          }
+        }
+      ]
+    }
+  ]
+}
