@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "./App.css";
-import LoginPage from "./pages/userdashboard/login.jsx";
+import LoginPage from "./pages/login.jsx";
 
 export default function App() {
   const [user, setUser] = useState(null);
