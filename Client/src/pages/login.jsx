@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import customFetch from "../../utils/customfetch";
+import customFetch from "../utils/customfetch";
 import { Eye, EyeOff, Mail, Lock, BookOpen, ArrowRight } from "lucide-react";
 
 export default function LoginPage({ onLogin }) {
