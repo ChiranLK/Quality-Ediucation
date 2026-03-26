@@ -1,8 +1,4 @@
-/* =========================================
-   App-level global styles — login page
-   ========================================= */
 
-/* Gradient animated background */
 .auth-bg {
   background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 50%, #fdf4ff 100%);
   background-size: 400% 400%;
