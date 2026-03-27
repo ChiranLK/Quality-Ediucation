@@ -19,7 +19,7 @@ export default function UserDashboard({ user, onLogout }) {
   const [activePage, setActivePage] = useState("Ask Help");
 
   return (
-    <div className="min-h-screen flex bg-[#f7f8fc] font-sans">
+    <div className="min-h-screen flex bg-[#f7f8fc] dark:bg-gray-950 font-sans">
 
       {/* ── Sidebar ── */}
       <Sidebar

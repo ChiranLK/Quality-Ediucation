@@ -1,7 +1,5 @@
 import { body, validationResult } from "express-validator";
 import { BadRequestError } from "../errors/customErrors.js";
-<<<<<<< HEAD
-=======
 import { cloudinary } from "./uploadMiddleware.js";
 
 /**
@@ -18,18 +16,10 @@ const extractPublicId = (url) => {
     return null;
   }
 };
->>>>>>> origin/main
 
 const withValidationErrors = (validateValues) => {
   return [
     validateValues,
-<<<<<<< HEAD
-    (req, res, next) => {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        const errorMessages = errors.array().map((err) => err.msg);
-        throw new BadRequestError(errorMessages.join(", "));
-=======
     async (req, res, next) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -51,7 +41,6 @@ const withValidationErrors = (validateValues) => {
 
         next(new BadRequestError(errorMessages.join(", ")));
         return;
->>>>>>> origin/main
       }
       next();
     },
@@ -83,10 +72,6 @@ export const validateStudyMaterialInput = withValidationErrors([
     .isString()
     .isLength({ max: 20 })
     .withMessage("Grade cannot exceed 20 characters"),
-<<<<<<< HEAD
-  body("tags").optional().isArray().withMessage("Tags must be an array"),
-  // Note: fileUrl is no longer validated here because multer handles file binary uploading
-=======
   // fileUrl is NOT validated here — it comes from Multer/Cloudinary via req.file
   body("tags")
     .optional()
@@ -98,7 +83,6 @@ export const validateStudyMaterialInput = withValidationErrors([
       if (!Array.isArray(arr)) throw new Error("Tags must be an array or string format");
       return true;
     }),
->>>>>>> origin/main
 ]);
 
 export const validateStudyMaterialUpdate = withValidationErrors([
@@ -122,9 +106,6 @@ export const validateStudyMaterialUpdate = withValidationErrors([
     .isString()
     .isLength({ max: 20 })
     .withMessage("Grade cannot exceed 20 characters"),
-<<<<<<< HEAD
-  body("tags").optional().isArray().withMessage("Tags must be an array"),
-=======
   // fileUrl comes from Multer/Cloudinary via req.file, not body
   body("tags")
     .optional()
@@ -136,5 +117,4 @@ export const validateStudyMaterialUpdate = withValidationErrors([
       if (!Array.isArray(arr)) throw new Error("Tags must be an array or string format");
       return true;
     }),
->>>>>>> origin/main
 ]);

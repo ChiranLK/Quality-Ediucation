@@ -4,6 +4,7 @@ import LoginPage from "./pages/login.jsx";
 import UserDashboard from "./pages/userdashboard/userDashboard.jsx";
 import TutorDashboard from "./pages/tutordashboard/tutorDashboard.jsx";
 import AdminDashboard from "./pages/admindashboard/adminDashboard.jsx";
+import { DarkModeProvider } from "./context/DarkModeContext.jsx";
 
 const DASHBOARDS = {
   user: UserDashboard,
@@ -12,6 +13,14 @@ const DASHBOARDS = {
 };
 
 export default function App() {
+  return (
+    <DarkModeProvider>
+      <AppContent />
+    </DarkModeProvider>
+  );
+}
+
+function AppContent() {
   const [user, setUser] = useState(() => {
     const stored = localStorage.getItem("user");
     return stored ? JSON.parse(stored) : null;
@@ -34,5 +43,3 @@ export default function App() {
 
   return <LoginPage onLogin={handleLogin} />;
 }
-
-

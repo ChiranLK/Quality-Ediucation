@@ -1,34 +1,4 @@
 import { StatusCodes } from "http-status-codes";
-<<<<<<< HEAD
-import { BadRequestError, NotFoundError, UnauthorizedError } from "../errors/customErrors.js";
-import { cloudinary } from "../Middleware/uploadMiddleware.js";
-
-// POST /api/materials
-// Only tutors and admins may upload
-export const createStudyMaterial = async (req, res) => {
-  const { title, description, subject, grade, tags } = req.body || {};
-
-  // required fields
-  if (!title || !description || !subject || !grade) {
-    throw new BadRequestError(
-      "title, description, subject, and grade are required",
-    );
-  }
-
-  if (!req.file) {
-    throw new BadRequestError("Please provide a file to upload");
-  }
-
-  // attach uploader (protect adds full user, authenticateUser adds {userId})
-  const uploaderId = req.user.userId || req.user._id;
-  const materialData = {
-    title: title.trim(),
-    description: description.trim(),
-    subject: subject.trim().toLowerCase(),
-    grade: grade.trim(),
-    fileUrl: req.file.path,
-    uploadedBy: uploaderId,
-=======
 import { BadRequestError } from "../errors/customErrors.js";
 import * as studyMaterialService from "../services/studyMaterialService.js";
 import {
@@ -51,7 +21,6 @@ export const createStudyMaterial = asyncHandler(async (req, res) => {
   const materialData = {
     ...req.body,
     fileUrl: req.file.path, // Cloudinary secure URL
->>>>>>> origin/main
   };
 
   const material = await studyMaterialService.createMaterial(
@@ -145,24 +114,6 @@ export const updateStudyMaterial = asyncHandler(async (req, res) => {
     );
 });
 
-<<<<<<< HEAD
-  // 3. Build the update payload — only allow safe fields
-  const { title, description, subject, grade, tags } = req.body || {};
-  const updates = {};
-
-  if (title       !== undefined) updates.title       = title.trim();
-  if (description !== undefined) updates.description = description.trim();
-  if (subject     !== undefined) updates.subject     = subject.trim().toLowerCase();
-  if (grade       !== undefined) updates.grade       = grade.trim();
-  
-  if (req.file) {
-    updates.fileUrl = req.file.path;
-  }
-
-  if (tags !== undefined && Array.isArray(tags)) {
-    updates.tags = tags.map((t) => String(t).trim().toLowerCase());
-  }
-=======
 /**
  * DELETE /api/materials/:id
  * Delete a study material (uploader or admin only)
@@ -171,7 +122,6 @@ export const deleteStudyMaterial = asyncHandler(async (req, res) => {
   validateObjectId(req.params.id);
 
   await studyMaterialService.deleteMaterial(req.params.id, req.user);
->>>>>>> origin/main
 
   res
     .status(StatusCodes.OK)
@@ -206,38 +156,7 @@ export const toggleLike = asyncHandler(async (req, res) => {
   const userId = String(req.user._id || req.user.userId);
   const result = await studyMaterialService.toggleLike(req.params.id, userId);
 
-<<<<<<< HEAD
-  if (requesterId !== uploaderId && !isAdmin) {
-    throw new UnauthorizedError(
-      "You are not authorized to delete this material",
-    );
-  }
-
-  // 3. Delete file from Cloudinary
-  if (material.fileUrl && material.fileUrl.includes("cloudinary.com")) {
-    const urlParts = material.fileUrl.split("/");
-    const fileNameWithExt = urlParts[urlParts.length - 1];
-    const folder = urlParts[urlParts.length - 2];
-    if (folder === "study_materials") {
-      const publicId = `${folder}/${fileNameWithExt.split(".")[0]}`;
-      try {
-        await cloudinary.uploader.destroy(publicId, { resource_type: "raw" });
-        await cloudinary.uploader.destroy(publicId, { resource_type: "image" });
-        await cloudinary.uploader.destroy(publicId, { resource_type: "video" });
-      } catch (err) {
-        console.error("Cloudinary deletion error:", err);
-      }
-    }
-  }
-
-  // 4. Delete document
-  await StudyMaterial.findByIdAndDelete(id);
-
-  res.status(StatusCodes.OK).json({ msg: "Study material deleted successfully" });
-};
-=======
   res
     .status(StatusCodes.OK)
     .json(successResponse(result.message, { likes: result.likes }));
 });
->>>>>>> origin/main

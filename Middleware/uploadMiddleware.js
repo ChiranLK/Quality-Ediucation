@@ -1,40 +1,15 @@
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
-<<<<<<< HEAD
-import dotenv from "dotenv";
-
-dotenv.config();
-
-=======
 import { BadRequestError } from "../errors/customErrors.js";
 
 // Cloudinary configuration (reads from .env)
->>>>>>> origin/main
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-<<<<<<< HEAD
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: "study_materials",
-    resource_type: "auto",
-    allowed_formats: ["pdf", "doc", "docx", "ppt", "pptx", "jpg", "jpeg", "png", "txt"],
-  },
-});
-
-export const upload = multer({
-  storage: storage,
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
-  },
-});
-
-=======
 // Allowed MIME types for study materials
 const ALLOWED_MATERIAL_MIMES = {
   "application/pdf": "pdf",
@@ -203,5 +178,4 @@ export const uploadMessageImage = (req, res, next) => {
   });
 };
 
->>>>>>> origin/main
 export { cloudinary };

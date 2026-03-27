@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import customFetch from "../utils/customfetch";
 import { Eye, EyeOff, Mail, Lock, BookOpen, ArrowRight } from "lucide-react";
+import DarkModeToggle from "../components/DarkModeToggle";
 
 export default function LoginPage({ onLogin }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -35,7 +36,11 @@ export default function LoginPage({ onLogin }) {
     }
   };
   return (
-    <div className="auth-bg min-h-screen flex">
+    <div className="auth-bg min-h-screen flex dark:bg-gray-950 relative">
+      {/* Dark mode toggle — top-right corner */}
+      <div className="absolute top-4 right-4 z-20">
+        <DarkModeToggle />
+      </div>
       {/* Left decorative panel */}
       <motion.div
         initial={{ x: -80, opacity: 0 }}
@@ -78,7 +83,7 @@ export default function LoginPage({ onLogin }) {
           initial={{ y: 40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.15, ease: "easeOut" }}
-          className="glass-card w-full max-w-md px-8 py-10"
+          className="glass-card dark:bg-gray-900 dark:border dark:border-gray-800 w-full max-w-md px-8 py-10"
         >
           {/* Mobile logo */}
           <div className="flex items-center gap-2 mb-10 lg:hidden">
@@ -88,8 +93,8 @@ export default function LoginPage({ onLogin }) {
             <span className="text-lg font-bold text-gray-800">TutorConnect</span>
           </div>
 
-          <h2 className="text-3xl font-bold text-gray-900 mb-1">Sign in</h2>
-          <p className="text-gray-500 text-sm mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-1">Sign in</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mb-8">
             Don&apos;t have an account?{" "}
             <a href="#" className="text-indigo-600 font-medium hover:underline">
               Create one free
@@ -99,7 +104,7 @@ export default function LoginPage({ onLogin }) {
           {/* Google SSO button */}
           <button
             type="button"
-            className="w-full flex items-center justify-center gap-3 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-medium py-3 rounded-xl text-sm transition-colors shadow-sm mb-6"
+            className="w-full flex items-center justify-center gap-3 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium py-3 rounded-xl text-sm transition-colors shadow-sm mb-6"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -119,7 +124,7 @@ export default function LoginPage({ onLogin }) {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="email">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5" htmlFor="email">
                 Email address
               </label>
               <div className="relative">
@@ -133,7 +138,7 @@ export default function LoginPage({ onLogin }) {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="you@example.com"
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                 />
               </div>
             </div>
@@ -141,7 +146,7 @@ export default function LoginPage({ onLogin }) {
             {/* Password */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-sm font-medium text-gray-700" htmlFor="password">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="password">
                   Password
                 </label>
                 <a href="#" className="text-xs text-indigo-600 hover:underline font-medium">
@@ -159,7 +164,7 @@ export default function LoginPage({ onLogin }) {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Enter your password"
-                  className="w-full pl-10 pr-11 py-3 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                  className="w-full pl-10 pr-11 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                 />
                 <button
                   type="button"
@@ -190,7 +195,7 @@ export default function LoginPage({ onLogin }) {
                   )}
                 </div>
               </div>
-              <span className="text-sm text-gray-600">Remember me for 30 days</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">Remember me for 30 days</span>
             </label>
 
             {/* Error message */}
@@ -224,7 +229,7 @@ export default function LoginPage({ onLogin }) {
             </motion.button>
           </form>
 
-          <p className="text-center text-xs text-gray-400 mt-8">
+          <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-8">
             By signing in, you agree to our{" "}
             <a href="#" className="underline hover:text-gray-600">Terms</a> and{" "}
             <a href="#" className="underline hover:text-gray-600">Privacy Policy</a>.

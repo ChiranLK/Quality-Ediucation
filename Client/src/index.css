@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Enable class-based dark mode for Tailwind v4 */
+@custom-variant dark (&:is(.dark *));
+
 /* Smooth scrolling & box-sizing reset */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -16,4 +19,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: #f8fafc;
   color: #0f172a;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dark body, body:is(.dark *) {
+  background-color: #030712;
+  color: #f1f5f9;
 }

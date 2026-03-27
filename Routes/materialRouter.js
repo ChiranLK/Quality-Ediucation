@@ -10,15 +10,11 @@ import {
   toggleLike,
 } from "../Controllers/studyMaterialController.js";
 import { protect, authorizePermissions } from "../Middleware/authMiddleware.js";
-<<<<<<< HEAD
-import { upload } from "../Middleware/uploadMiddleware.js";
-=======
 import {
   validateStudyMaterialInput,
   validateStudyMaterialUpdate,
 } from "../Middleware/studyMaterialValidation.js";
 import { uploadMaterial, handleUploadError } from "../Middleware/uploadMiddleware.js";
->>>>>>> origin/main
 
 const router = Router();
 
@@ -45,15 +41,6 @@ router.get("/my", protect, authorizePermissions("tutor", "admin"), getMyMaterial
  */
 router.get("/:id", protect, getSingleStudyMaterial);
 
-<<<<<<< HEAD
-// PATCH /api/materials/:id — uploader or admin only
-router.patch("/:id", protect, upload.single("file"), updateStudyMaterial);
-
-// DELETE /api/materials/:id — uploader or admin only
-router.delete("/:id", protect, deleteStudyMaterial);
-
-// POST /api/materials — only tutors and admins can upload
-=======
 /**
  * @route   POST /api/materials
  * @access  Private (Tutor/Admin only)
@@ -67,18 +54,13 @@ router.delete("/:id", protect, deleteStudyMaterial);
  *   5. validateInput    — validate req.body (deletes file if invalid)
  *   6. createStudyMat   — controller
  */
->>>>>>> origin/main
 router.post(
   "/",
   protect,
   authorizePermissions("tutor", "admin"),
-<<<<<<< HEAD
-  upload.single("file"),
-=======
   uploadMaterial.single("file"),     // ✅ MUST run first to parse multipart/form-data
   handleUploadError,
   validateStudyMaterialInput,        // ✅ Validates parsed body, cleans up file if error
->>>>>>> origin/main
   createStudyMaterial,
 );
 

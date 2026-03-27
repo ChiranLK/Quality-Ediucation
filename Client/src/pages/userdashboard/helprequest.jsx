@@ -40,7 +40,7 @@ function Field({ label, icon: Icon, required, error, children }) {
       animate={{ opacity: 1, y: 0 }}
       className="flex flex-col gap-1.5"
     >
-      <label className="flex items-center gap-1.5 text-sm font-semibold text-gray-700">
+      <label className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 dark:text-gray-300">
         <Icon className="w-3.5 h-3.5 text-indigo-400" />
         {label}
         {required && <span className="text-red-500 text-xs">*</span>}
@@ -74,11 +74,11 @@ function CustomSelect({ value, onChange, options, placeholder, error }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border text-sm bg-white transition-all
-          ${error ? "border-red-300 focus:ring-red-300" : "border-gray-200 focus:ring-indigo-200"}
+        className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border text-sm bg-white dark:bg-gray-800 transition-all
+          ${error ? "border-red-300 focus:ring-red-300" : "border-gray-200 dark:border-gray-700 focus:ring-indigo-200"}
           focus:outline-none focus:ring-2 focus:border-transparent hover:border-indigo-300`}
       >
-        <span className={selected ? "text-gray-800 font-medium" : "text-gray-400"}>
+        <span className={selected ? "text-gray-800 dark:text-gray-100 font-medium" : "text-gray-400 dark:text-gray-500"}>
           {selected ? (
             <span className="flex items-center gap-2">
               {selected.flag && <span>{selected.flag}</span>}
@@ -98,14 +98,14 @@ function CustomSelect({ value, onChange, options, placeholder, error }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.97 }}
             transition={{ duration: 0.15 }}
-            className="absolute z-30 mt-1.5 w-full bg-white border border-gray-100 rounded-xl shadow-lg overflow-hidden max-h-52 overflow-y-auto"
+            className="absolute z-30 mt-1.5 w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden max-h-52 overflow-y-auto"
           >
             {options.map((opt) => (
               <li
                 key={opt.value}
                 onClick={() => { onChange(opt.value); setOpen(false); }}
                 className={`flex items-center gap-2.5 px-4 py-2.5 text-sm cursor-pointer transition-colors
-                  ${value === opt.value ? "bg-indigo-50 text-indigo-700 font-semibold" : "text-gray-700 hover:bg-gray-50"}`}
+                  ${value === opt.value ? "bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-semibold" : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"}`}
               >
                 {opt.flag && <span className="text-base">{opt.flag}</span>}
                 {opt.color
@@ -210,8 +210,8 @@ export default function HelpRequest({ user }) {
             <BookOpen className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Ask for Help</h1>
-            <p className="text-xs text-gray-400">Your request will be visible to all available tutors</p>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Ask for Help</h1>
+            <p className="text-xs text-gray-400 dark:text-gray-500">Your request will be visible to all available tutors</p>
           </div>
         </div>
 
@@ -253,7 +253,7 @@ export default function HelpRequest({ user }) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.5 }}
-        className="bg-white rounded-2xl border border-gray-100 shadow-sm p-7"
+        className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-7"
       >
         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-6">
 
@@ -266,9 +266,9 @@ export default function HelpRequest({ user }) {
                 onChange={(e) => handleChange("title", e.target.value)}
                 maxLength={TITLE_MAX}
                 placeholder="e.g. I need help understanding integration by parts"
-                className={`w-full px-4 py-3 rounded-xl border text-sm text-gray-800 placeholder-gray-400 bg-white
+                className={`w-full px-4 py-3 rounded-xl border text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-800
                   focus:outline-none focus:ring-2 focus:border-transparent transition-all
-                  ${errors.title ? "border-red-300 focus:ring-red-200" : "border-gray-200 focus:ring-indigo-200 hover:border-indigo-300"}`}
+                  ${errors.title ? "border-red-300 focus:ring-red-200" : "border-gray-200 dark:border-gray-700 focus:ring-indigo-200 hover:border-indigo-300"}`}
               />
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
                 <CharCount value={form.title} max={TITLE_MAX} />
@@ -326,9 +326,9 @@ export default function HelpRequest({ user }) {
                 maxLength={MSG_MAX}
                 rows={5}
                 placeholder="Describe your problem in detail so tutors can help you better…"
-                className={`w-full px-4 py-3 rounded-xl border text-sm text-gray-800 placeholder-gray-400 bg-white resize-none
+                className={`w-full px-4 py-3 rounded-xl border text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-800 resize-none
                   focus:outline-none focus:ring-2 focus:border-transparent transition-all leading-relaxed
-                  ${errors.message ? "border-red-300 focus:ring-red-200" : "border-gray-200 focus:ring-indigo-200 hover:border-indigo-300"}`}
+                  ${errors.message ? "border-red-300 focus:ring-red-200" : "border-gray-200 dark:border-gray-700 focus:ring-indigo-200 hover:border-indigo-300"}`}
               />
               <div className="absolute right-3 bottom-3">
                 <CharCount value={form.message} max={MSG_MAX} />
@@ -361,7 +361,7 @@ export default function HelpRequest({ user }) {
             )}
           </motion.button>
 
-          <p className="text-center text-xs text-gray-400 -mt-2">
+          <p className="text-center text-xs text-gray-400 dark:text-gray-500 -mt-2">
             Once published, tutors can view and respond to your request publicly.
           </p>
         </form>

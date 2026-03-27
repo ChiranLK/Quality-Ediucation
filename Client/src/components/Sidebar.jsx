@@ -11,7 +11,7 @@ export default function Sidebar({ links, activeLabel, onNavigate, user, onLogout
       initial={{ x: -80, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="w-20 lg:w-60 bg-white border-r border-gray-100 flex flex-col py-6 px-3 lg:px-5 gap-2 shadow-sm shrink-0"
+      className="w-20 lg:w-60 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 flex flex-col py-6 px-3 lg:px-5 gap-2 shadow-sm shrink-0"
     >
       {/* ── Logo ── */}
       <div className="flex items-center gap-3 mb-8 px-2">
@@ -21,7 +21,7 @@ export default function Sidebar({ links, activeLabel, onNavigate, user, onLogout
         >
           <BookOpen className="w-5 h-5 text-white" />
         </motion.div>
-        <span className="hidden lg:block text-base font-bold text-gray-800 tracking-tight">
+        <span className="hidden lg:block text-base font-bold text-gray-800 dark:text-gray-100 tracking-tight">
           TutorConnect
         </span>
       </div>
@@ -37,8 +37,8 @@ export default function Sidebar({ links, activeLabel, onNavigate, user, onLogout
               onClick={() => onNavigate(label)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors w-full text-left
                 ${isActive
-                  ? "bg-indigo-50 text-indigo-600"
-                  : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
+                  ? "bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400"
+                  : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-800 dark:hover:text-gray-200"
                 }`}
             >
               <Icon className="w-5 h-5 shrink-0" />
@@ -55,21 +55,21 @@ export default function Sidebar({ links, activeLabel, onNavigate, user, onLogout
       </nav>
 
       {/* ── User & logout ── */}
-      <div className="border-t border-gray-100 pt-4 mt-4">
+      <div className="border-t border-gray-100 dark:border-gray-800 pt-4 mt-4">
         <div className="flex items-center gap-3 px-2 mb-3">
-          <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
-            <User className="w-4 h-4 text-indigo-600" />
+          <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center shrink-0">
+            <User className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
           </div>
           <div className="hidden lg:block overflow-hidden">
-            <p className="text-xs font-semibold text-gray-800 truncate">{user?.name}</p>
-            <p className="text-xs text-gray-400 truncate">{user?.email}</p>
+            <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 truncate">{user?.name}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{user?.email}</p>
           </div>
         </div>
 
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={onLogout}
-          className="flex items-center gap-2 w-full px-3 py-2 rounded-xl text-sm text-red-500 hover:bg-red-50 transition-colors font-medium"
+          className="flex items-center gap-2 w-full px-3 py-2 rounded-xl text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950 transition-colors font-medium"
         >
           <LogOut className="w-4 h-4 shrink-0" />
           <span className="hidden lg:block">Logout</span>
