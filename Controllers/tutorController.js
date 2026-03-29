@@ -1,4 +1,5 @@
 import User from "../models/UserModel.js";
+import Feedback from "../models/FeedbackModel.js";
 import { StatusCodes } from "http-status-codes";
 
 // Get all tutors with optional filtering and pagination
@@ -98,6 +99,50 @@ export const getTutorById = async (req, res) => {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
       msg: "Failed to fetch tutor",
+      error: error.message,
+    });
+  }
+};
+
+// Get students for a tutor
+export const getTutorStudents = async (req, res) => {
+  try {
+    const { tutorId } = req.params;
+    
+    // Only tutors can view their own students, admins can view any tutor's students
+    if (req.user.role === 'tutor' && String(req.user._id) !== String(tutorId)) {
+      return res.status(StatusCodes.FORBIDDEN).json({
+        success: false,
+        msg: 'You can only view your own students',
+      });
+    }
+
+    // Get unique students who have given feedback to this tutor
+    const feedbacks = await Feedback.find({ tutor: tutorId }).distinct('student');
+    
+    // Fetch student details
+    const students = await User.find({ 
+      _id: { $in: feedbacks },
+      role: 'user'
+    }).select('-password -resetPasswordToken -resetPasswordExpiry').sort({ fullName: 1 });
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      count: students.length,
+      students: students.map(student => ({
+        _id: student._id,
+        fullName: student.fullName,
+        email: student.email,
+        phoneNumber: student.phoneNumber,
+        location: student.location,
+        avatar: student.avatar,
+        createdAt: student.createdAt,
+      })),
+    });
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      msg: 'Failed to fetch students',
       error: error.message,
     });
   }

@@ -52,7 +52,7 @@ export const validateRegisterInput = withValidationError([
   body("location").notEmpty().withMessage("Location is required").trim(),
   body("role")
     .optional()
-    .isIn(["user", "admin", "organizer", "tutor"])
+    .isIn(["user", "admin", "tutor"])
     .withMessage("Invalid role"),
   // Conditional validation for tutors - subjects are required
   body("subjects")
