@@ -1163,7 +1163,7 @@ GOOGLE_REDIRECT_URI=your_redirect_uri
   "feedbacks": [
     {
       "_id": "64f1a2b3c4d5e6f7a8b9c0f9",
-      "tutor": { "fullName": "John Doe", "email": "john@example.com", "role": "organizer" },
+      "tutor": { "fullName": "John Doe", "email": "john@example.com", "role": "tutor" },
       "rating": 5,
       "message": "Excellent session!",
       "createdAt": "2026-02-27T10:30:00.000Z"

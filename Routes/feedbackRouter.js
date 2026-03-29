@@ -6,11 +6,13 @@ import {
   getTutorFeedbacks,
   getTutorRatingStats,
   deleteFeedback,
+  getAllFeedbacks,
 } from "../Controllers/feedbackController.js";
 
 const router = express.Router();
 
 router.post("/", protect, submitFeedback);
+router.get("/", protect, getAllFeedbacks);
 router.get("/me", protect, getMyFeedbacks);
 
 // rating stats can be used by students to view tutor ratings
