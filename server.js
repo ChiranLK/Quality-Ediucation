@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import emailRoutes from "./Routes/emailRoutes.js";
 
 import connectDB from "./Config/db.js";
+import { errorHandler } from "./Middleware/errorHandler.js";
 
 // Routes
 import authRouter from "./Routes/authRouter.js";
@@ -52,6 +53,9 @@ app.use("/api/materials", materialRouter);
 
 // Init Google Calendar
 initCalendar();
+
+// Error Handler Middleware - MUST be last
+app.use(errorHandler);
 
 console.log("CLIENT ID:", process.env.GOOGLE_CLIENT_ID);
 console.log("REFRESH TOKEN:", process.env.GOOGLE_REFRESH_TOKEN ? "Exists" : "Missing");
