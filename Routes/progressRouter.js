@@ -8,8 +8,11 @@ const router = express.Router();
 
 router.post("/", protect, upsertProgress);
 
-router.get("/me", protect, getMyProgress);
+// More specific routes FIRST (with parameters before generic /me)
 router.get("/student/:studentId", protect, getProgressByStudent);
 router.get("/tutor/:tutorId", protect, getProgressByTutor);
+
+// Generic routes LAST
+router.get("/me", protect, getMyProgress);
 
 export default router;

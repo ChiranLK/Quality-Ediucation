@@ -4,25 +4,21 @@ import {
   getTutorsBySubject,
   getAvailableSubjects,
   getTutorById,
+  getTutorStudents,
 } from "../Controllers/tutorController.js";
-import { authenticateUser, authorizePermissions } from "../Middleware/authMiddleware.js";
+import { protect } from "../Middleware/authMiddleware.js";
 
 const router = Router();
 
-// Get all available subjects (public for testing)
+// Public routes (no authentication required)
 router.get("/subjects", getAvailableSubjects);
-
-// Get all tutors with optional filters (public for testing)
 router.get("/", getAllTutors);
 
-// Protected routes below (require authentication)
-router.use(authenticateUser);
-router.use(authorizePermissions("user", "admin", "tutor"));
+// Protected routes (require Authorization header token) - MUST come before generic :id route
+router.get("/:tutorId/my-students", protect, getTutorStudents);
 
-// Get tutors by subject
+// More public routes
 router.get("/subject/:subject", getTutorsBySubject);
-
-// Get tutor by ID
 router.get("/:id", getTutorById);
 
 export default router;

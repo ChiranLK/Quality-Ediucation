@@ -4,7 +4,7 @@ import User from "../models/UserModel.js";
 import { sendFeedbackNotificationEmail } from "../services/feedbackMailService.js";
 
 const STUDENT_ROLE = process.env.STUDENT_ROLE || "user";
-const TUTOR_ROLE = process.env.TUTOR_ROLE || "organizer";
+const TUTOR_ROLE = process.env.TUTOR_ROLE || "tutor";
 
 /**
  * POST /api/feedbacks
@@ -34,10 +34,14 @@ export const submitFeedback = async (req, res) => {
     }
 
     const tutor = await User.findById(tutorId).select("_id role fullName email");
+    console.log('Tutor lookup result:', { id: tutorId, role: tutor?.role, fullName: tutor?.fullName });
+    console.log('TUTOR_ROLE constant:', TUTOR_ROLE);
+    
     if (!tutor) return res.status(404).json({ message: "Tutor not found" });
 
     // enforce "tutor" role if you want strictness:
     if (tutor.role !== TUTOR_ROLE && tutor.role !== "admin") {
+      console.log('Role check failed - Expected:', TUTOR_ROLE, 'Got:', tutor.role);
       return res.status(400).json({ message: "Target user is not a tutor" });
     }
 
@@ -55,6 +59,21 @@ export const submitFeedback = async (req, res) => {
       payload,
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
+
+    // Update tutor's rating in tutorProfile
+    const allFeedback = await Feedback.find({ tutor: tutorId });
+    if (allFeedback.length > 0) {
+      const averageRating = allFeedback.reduce((sum, fb) => sum + fb.rating, 0) / allFeedback.length;
+      await User.findByIdAndUpdate(
+        tutorId,
+        {
+          "tutorProfile.rating.average": parseFloat(averageRating.toFixed(1)),
+          "tutorProfile.rating.count": allFeedback.length,
+        },
+        { new: true }
+      );
+      console.log(`Updated tutor rating: avg=${averageRating.toFixed(1)}, count=${allFeedback.length}`);
+    }
 
     sendFeedbackNotificationEmail({
       studentName: req.user.fullName || "Student",
@@ -170,6 +189,40 @@ export const getTutorRatingStats = async (req, res) => {
     );
   } catch (err) {
     return res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+/**
+ * GET /api/feedbacks
+ * admin can view all feedbacks
+ */
+export const getAllFeedbacks = async (req, res) => {
+  try {
+    // Only admins can view all feedbacks
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ message: "Only admins can access all feedbacks" });
+    }
+
+    const feedbacks = await Feedback.find()
+      .populate("student", "fullName email")
+      .populate("tutor", "fullName email")
+      .sort({ createdAt: -1 });
+
+    return res.json({ 
+      success: true,
+      count: feedbacks.length, 
+      feedbacks: feedbacks.map(fb => ({
+        _id: fb._id,
+        rating: fb.rating,
+        message: fb.message,
+        studentName: fb.student?.fullName || "Unknown",
+        tutorId: fb.tutor?._id,
+        tutorName: fb.tutor?.fullName,
+        createdAt: fb.createdAt,
+      }))
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: "Server error", error: err.message });
   }
 };
 
