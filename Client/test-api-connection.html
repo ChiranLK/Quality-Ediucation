@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Connection Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .success { color: green; background: #efe; padding: 10px; margin: 10px 0; }
+        .error { color: red; background: #fee; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>API Connection Test</h1>
+    
+    <div class="test-section">
+        <h3>1. Check Backend Connectivity</h3>
+        <button onclick="testHealth()">Test /health</button>
+        <div id="health-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>2. Check Token Storage</h3>
+        <button onclick="checkTokenStorage()">Check Tokens</button>
+        <div id="storage-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Test /all-users with Token</h3>
+        <button onclick="testAllUsers()">Test /all-users</button>
+        <div id="users-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>4. Raw Fetch Request</h3>
+        <button onclick="rawFetch()">Raw Fetch</button>
+        <div id="raw-result"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+
+        function testHealth() {
+            fetch(`${API_URL}/health`)
+                .then(r => r.json())
+                .then(d => {
+                    document.getElementById('health-result').innerHTML = 
+                        `<div class="success">✓ Backend is reachable: ${JSON.stringify(d)}</div>`;
+                })
+                .catch(e => {
+                    document.getElementById('health-result').innerHTML = 
+                        `<div class="error">✗ Error: ${e.message}</div>`;
+                });
+        }
+
+        function checkTokenStorage() {
+            const adminToken = localStorage.getItem('adminAuthToken');
+            const tutorToken = sessionStorage.getItem('tutorAuthToken');
+            const userToken = localStorage.getItem('userAuthToken');
+            
+            const adminProfile = localStorage.getItem('adminProfileData');
+            const tutorProfile = sessionStorage.getItem('tutorProfileData');
+            const userProfile = localStorage.getItem('userProfileData');
+            
+            let html = '<div>';
+            html += adminToken ? `<div class="success">✓ adminAuthToken: ${adminToken.substring(0, 20)}...</div>` : '<div class="error">✗ No adminAuthToken</div>';
+            html += tutorToken ? `<div class="success">✓ tutorAuthToken: ${tutorToken.substring(0, 20)}...</div>` : '<div class="error">✗ No tutorAuthToken</div>';
+            html += userToken ? `<div class="success">✓ userAuthToken: ${userToken.substring(0, 20)}...</div>` : '<div class="error">✗ No userAuthToken</div>';
+            
+            html += '<hr>';
+            html += adminProfile ? `<div class="success">✓ adminProfileData stored</div>` : '<div class="error">✗ No adminProfileData</div>';
+            html += tutorProfile ? `<div class="success">✓ tutorProfileData stored</div>` : '<div class="error">✗ No tutorProfileData</div>';
+            html += userProfile ? `<div class="success">✓ userProfileData stored</div>` : '<div class="error">✗ No userProfileData</div>';
+            html += '</div>';
+            
+            document.getElementById('storage-result').innerHTML = html;
+        }
+
+        function testAllUsers() {
+            const adminToken = localStorage.getItem('adminAuthToken');
+            const tutorToken = sessionStorage.getItem('tutorAuthToken');
+            const userToken = localStorage.getItem('userAuthToken');
+            
+            const token = userToken || adminToken || tutorToken;
+            
+            if (!token) {
+                document.getElementById('users-result').innerHTML = 
+                    '<div class="error">✗ No token found in storage!</div>';
+                return;
+            }
+
+            fetch(`${API_URL}/auth/all-users`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(r => {
+                    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                    return r.json();
+                })
+                .then(d => {
+                    const html = `<div class="success">
+                        ✓ Success! Got ${d.count || d.users?.length || 0} users<br>
+                        Response keys: ${Object.keys(d).join(', ')}<br>
+                        <pre>${JSON.stringify(d, null, 2).substring(0, 500)}...</pre>
+                    </div>`;
+                    document.getElementById('users-result').innerHTML = html;
+                })
+                .catch(e => {
+                    document.getElementById('users-result').innerHTML = 
+                        `<div class="error">✗ Error: ${e.message}</div>`;
+                });
+        }
+
+        function rawFetch() {
+            const adminToken = localStorage.getItem('adminAuthToken');
+            
+            console.log('Raw fetch test:', {
+                token: adminToken ? adminToken.substring(0, 20) + '...' : 'NONE',
+                hasToken: !!adminToken
+            });
+
+            if (adminToken) {
+                console.log('Making request with admin token...');
+                fetch(`${API_URL}/auth/all-users`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${adminToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(r => {
+                        console.log('Response status:', r.status);
+                        console.log('Response headers:', Object.fromEntries(r.headers.entries()));
+                        return r.text();
+                    })
+                    .then(text => {
+                        console.log('Response text:', text.substring(0, 200));
+                        try {
+                            const data = JSON.parse(text);
+                            document.getElementById('raw-result').innerHTML = 
+                                `<div class="success">✓ Got response: <pre>${JSON.stringify(data, null, 2).substring(0, 300)}</pre></div>`;
+                        } catch (e) {
+                            document.getElementById('raw-result').innerHTML = 
+                                `<div class="error">✗ Failed to parse JSON: ${text.substring(0, 100)}</div>`;
+                        }
+                    })
+                    .catch(e => {
+                        console.error('Fetch error:', e);
+                        document.getElementById('raw-result').innerHTML = 
+                            `<div class="error">✗ Fetch error: ${e.message}</div>`;
+                    });
+            } else {
+                document.getElementById('raw-result').innerHTML = 
+                    '<div class="error">✗ No admin token, cannot test</div>';
+            }
+        }
+    </script>
+</body>
+</html>
