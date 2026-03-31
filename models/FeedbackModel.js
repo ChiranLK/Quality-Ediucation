@@ -6,13 +6,11 @@ const FeedbackSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true,
     },
     tutor: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true,
     },
 
     // Optional link to a tutoring session (you already have tutoringsessions collection)
@@ -20,7 +18,6 @@ const FeedbackSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "TutoringSession",
       default: null,
-      index: true,
     },
 
     rating: {
@@ -39,7 +36,10 @@ const FeedbackSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// One feedback per student+tutor+session (if session=null, it becomes one feedback total per student+tutor)
-FeedbackSchema.index({ student: 1, tutor: 1, session: 1 }, { unique: true });
+// Index for faster queries (removed unique constraint to allow multiple feedbacks per student-tutor pair)
+FeedbackSchema.index({ student: 1, tutor: 1 });
+FeedbackSchema.index({ student: 1 });
+FeedbackSchema.index({ tutor: 1 });
+FeedbackSchema.index({ session: 1 });
 
 export default mongoose.model("Feedback", FeedbackSchema);

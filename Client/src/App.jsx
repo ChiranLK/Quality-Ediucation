@@ -22,8 +22,19 @@ export default function App() {
 
 function AppContent() {
   const [user, setUser] = useState(() => {
-    const stored = localStorage.getItem("user");
-    return stored ? JSON.parse(stored) : null;
+    // Check sessionStorage first (tab-specific session), then localStorage (persistent remember-me)
+    const sessionStored = sessionStorage.getItem("user");
+    if (sessionStored) return JSON.parse(sessionStored);
+    
+    const persistedStored = localStorage.getItem("user");
+    if (persistedStored) {
+      // If found in localStorage (from 'remember me'), restore to sessionStorage for current tab
+      const user = JSON.parse(persistedStored);
+      const token = localStorage.getItem("token");
+      if (token) sessionStorage.setItem("token", token);
+      return user;
+    }
+    return null;
   });
 
   const handleLogin = (data) => {
@@ -32,6 +43,10 @@ function AppContent() {
 
   const handleLogout = () => {
     setUser(null);
+    // Clear session-specific auth data
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
+    // Also clear persistent auth data (if any)
     localStorage.removeItem("token");
     localStorage.removeItem("user");
   };
