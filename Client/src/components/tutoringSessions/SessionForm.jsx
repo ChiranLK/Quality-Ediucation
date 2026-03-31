@@ -4,35 +4,50 @@ import { X } from 'lucide-react';
 
 const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
   const [formData, setFormData] = useState({
-    title: '',
     subject: '',
-    date: '',
-    startTime: '',
-    endTime: '',
-    maxStudents: 10,
     description: '',
+    schedule: {
+      date: '',
+      startTime: '',
+      endTime: '',
+    },
+    capacity: {
+      maxParticipants: 10,
+    },
+    level: '',
+    tags: [],
   });
 
   useEffect(() => {
     if (session) {
-      setFormData({
-        title: session.title || '',
+      setFormData({ // eslint-disable-line react-hooks/set-state-in-effect
         subject: session.subject || '',
-        date: session.date ? new Date(session.date).toISOString().split('T')[0] : '',
-        startTime: session.startTime || '',
-        endTime: session.endTime || '',
-        maxStudents: session.maxStudents || 10,
         description: session.description || '',
+        schedule: {
+          date: session.schedule?.date ? new Date(session.schedule.date).toISOString().split('T')[0] : '',
+          startTime: session.schedule?.startTime || '',
+          endTime: session.schedule?.endTime || '',
+        },
+        capacity: {
+          maxParticipants: session.capacity?.maxParticipants || 10,
+        },
+        level: session.level || '',
+        tags: session.tags || [],
       });
     } else {
       setFormData({
-        title: '',
         subject: '',
-        date: '',
-        startTime: '',
-        endTime: '',
-        maxStudents: 10,
         description: '',
+        schedule: {
+          date: '',
+          startTime: '',
+          endTime: '',
+        },
+        capacity: {
+          maxParticipants: 10,
+        },
+        level: '',
+        tags: [],
       });
     }
   }, [session, isOpen]);
@@ -44,10 +59,31 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    
+    if (name.startsWith('schedule.')) {
+      const fieldName = name.split('.')[1];
+      setFormData(prev => ({
+        ...prev,
+        schedule: {
+          ...prev.schedule,
+          [fieldName]: value,
+        },
+      }));
+    } else if (name.startsWith('capacity.')) {
+      const fieldName = name.split('.')[1];
+      setFormData(prev => ({
+        ...prev,
+        capacity: {
+          ...prev.capacity,
+          [fieldName]: fieldName === 'maxParticipants' ? parseInt(value) || 0 : value,
+        },
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   if (!isOpen) return null;
@@ -70,21 +106,7 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Title
-            </label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-100"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Subject
+              Subject *
             </label>
             <input
               type="text"
@@ -92,18 +114,34 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
               value={formData.subject}
               onChange={handleChange}
               required
+              placeholder="e.g., Mathematics, Physics, English"
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-100"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Date
+              Description *
+            </label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              required
+              placeholder="Describe the session topic and objectives (10-500 characters)"
+              rows="3"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-100"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Date *
             </label>
             <input
               type="date"
-              name="date"
-              value={formData.date}
+              name="schedule.date"
+              value={formData.schedule.date}
               onChange={handleChange}
               required
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-100"
@@ -113,12 +151,12 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Start Time
+                Start Time (HH:MM) *
               </label>
               <input
                 type="time"
-                name="startTime"
-                value={formData.startTime}
+                name="schedule.startTime"
+                value={formData.schedule.startTime}
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-100"
@@ -126,12 +164,12 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                End Time
+                End Time (HH:MM) *
               </label>
               <input
                 type="time"
-                name="endTime"
-                value={formData.endTime}
+                name="schedule.endTime"
+                value={formData.schedule.endTime}
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-100"
@@ -141,14 +179,15 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Max Students
+              Max Participants (1-100) *
             </label>
             <input
               type="number"
-              name="maxStudents"
-              value={formData.maxStudents}
+              name="capacity.maxParticipants"
+              value={formData.capacity.maxParticipants}
               onChange={handleChange}
               min="1"
+              max="100"
               required
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-100"
             />
@@ -156,15 +195,19 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Description
+              Level
             </label>
-            <textarea
-              name="description"
-              value={formData.description}
+            <select
+              name="level"
+              value={formData.level}
               onChange={handleChange}
-              rows="3"
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-100"
-            />
+            >
+              <option value="">Select Level</option>
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
           </div>
 
           <div className="flex gap-3 pt-4">

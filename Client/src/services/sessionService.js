@@ -5,8 +5,8 @@ export const sessionService = {
   // Get all sessions for the tutor
   async getSessions(tutorId) {
     try {
-      const response = await customFetch(`/api/tutors/${tutorId}/sessions`);
-      return response;
+      const response = await customFetch(`/tutoring-sessions?tutorId=${tutorId}`);
+      return response.data;
     } catch (error) {
       console.error('Error fetching sessions:', error);
       throw error;
@@ -16,11 +16,8 @@ export const sessionService = {
   // Create a new session
   async createSession(sessionData) {
     try {
-      const response = await customFetch('/api/sessions', {
-        method: 'POST',
-        body: JSON.stringify(sessionData),
-      });
-      return response;
+      const response = await customFetch.post('/tutoring-sessions', sessionData);
+      return response.data;
     } catch (error) {
       console.error('Error creating session:', error);
       throw error;
@@ -30,11 +27,8 @@ export const sessionService = {
   // Update a session
   async updateSession(sessionId, sessionData) {
     try {
-      const response = await customFetch(`/api/sessions/${sessionId}`, {
-        method: 'PUT',
-        body: JSON.stringify(sessionData),
-      });
-      return response;
+      const response = await customFetch.put(`/tutoring-sessions/${sessionId}`, sessionData);
+      return response.data;
     } catch (error) {
       console.error('Error updating session:', error);
       throw error;
@@ -44,10 +38,8 @@ export const sessionService = {
   // Delete a session
   async deleteSession(sessionId) {
     try {
-      const response = await customFetch(`/api/sessions/${sessionId}`, {
-        method: 'DELETE',
-      });
-      return response;
+      const response = await customFetch.delete(`/tutoring-sessions/${sessionId}`);
+      return response.data;
     } catch (error) {
       console.error('Error deleting session:', error);
       throw error;
@@ -57,8 +49,8 @@ export const sessionService = {
   // Get session details
   async getSessionDetails(sessionId) {
     try {
-      const response = await customFetch(`/api/sessions/${sessionId}`);
-      return response;
+      const response = await customFetch(`/tutoring-sessions/${sessionId}`);
+      return response.data;
     } catch (error) {
       console.error('Error fetching session details:', error);
       throw error;

@@ -21,9 +21,9 @@ export const initCalendar = () => {
     });
 
     calendar = google.calendar({ version: "v3", auth: oauth2Client });
-    console.log("Google Calendar initialized");
+    console.log("✅ Google Calendar initialized");
   } else {
-    console.warn("Google Calendar disabled: missing credentials");
+    console.warn("⚠️ Google Calendar disabled: missing credentials");
   }
 };
 

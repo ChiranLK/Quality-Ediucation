@@ -29,7 +29,7 @@ const SessionList = ({ tutorId, onViewDetails }) => {
       }
       setIsFormOpen(false);
       setEditingSession(null);
-    } catch (err) {
+    } catch (err) { // eslint-disable-line no-unused-vars
       // Error is handled in the hook
     }
   };
@@ -38,7 +38,7 @@ const SessionList = ({ tutorId, onViewDetails }) => {
     if (window.confirm('Are you sure you want to delete this session?')) {
       try {
         await deleteSession(sessionId);
-      } catch (err) {
+      } catch (err) { // eslint-disable-line no-unused-vars
         // Error is handled in the hook
       }
     }

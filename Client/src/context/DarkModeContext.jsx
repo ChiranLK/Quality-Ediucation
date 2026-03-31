@@ -25,7 +25,7 @@ export function DarkModeProvider({ children }) {
   );
 }
 
-export function useDarkMode() {
+export function useDarkMode() { // eslint-disable-line react-refresh/only-export-components
   const ctx = useContext(DarkModeContext);
   if (!ctx) throw new Error("useDarkMode must be used within DarkModeProvider");
   return ctx;
