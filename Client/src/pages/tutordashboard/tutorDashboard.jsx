@@ -1,20 +1,31 @@
-import { BookOpen, Users, CalendarDays, LogOut, User, ArrowLeft } from "lucide-react";
+import { BookOpen, Users, CalendarDays, LogOut, User, ArrowLeft, Star, TrendingUp, MessageSquare } from "lucide-react";
 import DarkModeToggle from "../../components/DarkModeToggle";
 import SessionList from "./sessions/SessionList";
 import SessionDetails from "./sessions/SessionDetails";
+import { StudentProgress, TutorRatings, TutorFeedbacks } from "../../components/feedback/index.js";
+import TutorHome from "./tutorHome";
+import MySessions from "./components/MySessions";
+import StudentProgressManager from "./components/StudentProgressManager";
 import { useState } from "react";
 
 export default function TutorDashboard({ user, onLogout }) {
-  const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard', 'sessions', 'session-details'
+  const [currentView, setCurrentView] = useState('dashboard'); // Changed from 'dashboard' to 'dashboard'
   const [selectedSessionId, setSelectedSessionId] = useState(null);
 
   const handleViewSessions = () => {
     setCurrentView('sessions');
   };
 
-  const handleViewSessionDetails = (sessionId) => {
-    setSelectedSessionId(sessionId);
-    setCurrentView('session-details');
+  const handleViewProgress = () => {
+    setCurrentView('progress');
+  };
+
+  const handleViewRatings = () => {
+    setCurrentView('ratings');
+  };
+
+  const handleViewFeedbacks = () => {
+    setCurrentView('feedbacks');
   };
 
   const handleBackToDashboard = () => {
@@ -29,12 +40,39 @@ export default function TutorDashboard({ user, onLogout }) {
 
   const renderContent = () => {
     switch (currentView) {
+      case 'dashboard':
+        return (
+          <TutorHome user={user} onNavigate={(view) => setCurrentView(view)} />
+        );
       case 'sessions':
         return (
-          <SessionList
-            tutorId={user.id}
-            onViewDetails={handleViewSessionDetails}
-          />
+          <div className="p-6 overflow-y-auto flex-1">
+            <div className="mb-4">
+              <button
+                onClick={handleBackToDashboard}
+                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium mb-4"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Dashboard
+              </button>
+            </div>
+            <MySessions user={user} />
+          </div>
+        );
+      case 'progress':
+        return (
+          <div className="p-6 overflow-y-auto flex-1">
+            <div className="mb-4">
+              <button
+                onClick={handleBackToDashboard}
+                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium mb-4"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Dashboard
+              </button>
+            </div>
+            <StudentProgressManager user={user} />
+          </div>
         );
       case 'session-details':
         return (
@@ -43,36 +81,39 @@ export default function TutorDashboard({ user, onLogout }) {
             onBack={handleBackToSessions}
           />
         );
+      case 'ratings':
+        return (
+          <div className="p-6 overflow-y-auto flex-1">
+            <div className="mb-4">
+              <button
+                onClick={handleBackToDashboard}
+                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium mb-4"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Dashboard
+              </button>
+            </div>
+            <TutorRatings tutorId={user._id} />
+          </div>
+        );
+      case 'feedbacks':
+        return (
+          <div className="p-6 overflow-y-auto flex-1">
+            <div className="mb-4">
+              <button
+                onClick={handleBackToDashboard}
+                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium mb-4"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Dashboard
+              </button>
+            </div>
+            <TutorFeedbacks tutorId={user._id} />
+          </div>
+        );
       default:
         return (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            <div
-              className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer hover:shadow-md transition-shadow"
-              onClick={handleViewSessions}
-            >
-              <div className="bg-emerald-50 dark:bg-emerald-900/40 w-10 h-10 rounded-xl flex items-center justify-center mb-4">
-                <CalendarDays className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-1">My Sessions</h3>
-              <p className="text-gray-400 dark:text-gray-500 text-sm">View upcoming and past sessions.</p>
-            </div>
-
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-              <div className="bg-teal-50 dark:bg-teal-900/40 w-10 h-10 rounded-xl flex items-center justify-center mb-4">
-                <Users className="w-5 h-5 text-teal-600 dark:text-teal-400" />
-              </div>
-              <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-1">My Students</h3>
-              <p className="text-gray-400 dark:text-gray-500 text-sm">See students assigned to you.</p>
-            </div>
-
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-              <div className="bg-indigo-50 dark:bg-indigo-900/40 w-10 h-10 rounded-xl flex items-center justify-center mb-4">
-                <BookOpen className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-              </div>
-              <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-1">Study Materials</h3>
-              <p className="text-gray-400 dark:text-gray-500 text-sm">Upload and manage resources.</p>
-            </div>
-          </div>
+          <TutorHome user={user} onNavigate={(view) => setCurrentView(view)} />
         );
     }
   };
@@ -123,7 +164,17 @@ export default function TutorDashboard({ user, onLogout }) {
               Back to Dashboard
             </button>
           </div>
-        ) : null}
+        ) : (
+          <div className="mb-6">
+            <button
+              onClick={handleBackToDashboard}
+              className="flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-medium mb-4"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Dashboard
+            </button>
+          </div>
+        )}
 
         {renderContent()}
       </main>

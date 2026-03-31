@@ -53,12 +53,8 @@ export const submitFeedback = async (req, res) => {
       message: (message || "").trim(),
     };
 
-    // If duplicate exists, update it (because unique index)
-    const saved = await Feedback.findOneAndUpdate(
-      { student: req.user._id, tutor: tutorId, session: sessionId || null },
-      payload,
-      { upsert: true, new: true, setDefaultsOnInsert: true }
-    );
+    // Create new feedback record (allows multiple feedbacks per student-tutor pair)
+    const saved = await Feedback.create(payload);
 
     // Update tutor's rating in tutorProfile
     const allFeedback = await Feedback.find({ tutor: tutorId });
@@ -70,7 +66,7 @@ export const submitFeedback = async (req, res) => {
           "tutorProfile.rating.average": parseFloat(averageRating.toFixed(1)),
           "tutorProfile.rating.count": allFeedback.length,
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       console.log(`Updated tutor rating: avg=${averageRating.toFixed(1)}, count=${allFeedback.length}`);
     }
@@ -89,6 +85,26 @@ export const submitFeedback = async (req, res) => {
 
     return res.status(201).json({ message: "Feedback saved", feedback: saved });
   } catch (err) {
+    // Handle MongoDB duplicate key error from old unique index
+    if (err.code === 11000) {
+      // Drop the old index and retry
+      try {
+        await Feedback.collection.dropIndex('student_1_tutor_1_session_1');
+        console.log('Dropped old unique index, retrying...');
+        const payload = {
+          student: req.user._id,
+          tutor: tutorId,
+          rating: numRating,
+          message: (message || "").trim(),
+          session: sessionId || null,
+        };
+        const saved = await Feedback.create(payload);
+        return res.status(201).json({ message: "Feedback saved", feedback: saved });
+      } catch (retryErr) {
+        console.error('Retry failed:', retryErr.message);
+        return res.status(500).json({ message: "Server error after index drop", error: retryErr.message });
+      }
+    }
     return res.status(500).json({ message: "Server error", error: err.message });
   }
 };

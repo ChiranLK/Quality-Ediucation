@@ -24,6 +24,11 @@ export default function LoginPage({ onLogin }) {
         email: formData.email,
         password: formData.password,
       });
+      // Store in sessionStorage for tab-specific session (independent across tabs)
+      sessionStorage.setItem("token", data.token);
+      sessionStorage.setItem("user", JSON.stringify(data.user));
+      
+      // Optionally also store in localStorage if 'remember me' is checked (persistent across sessions)
       if (formData.remember) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
