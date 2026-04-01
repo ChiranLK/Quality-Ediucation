@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, BookOpen, HelpCircle, Settings, TrendingUp, MessageSquare } from "lucide-react";
+import { Home, BookOpen, HelpCircle, Settings, TrendingUp, MessageSquare, ArrowLeft } from "lucide-react";
 import { Sidebar, DashboardNavbar } from "../../components/index.js";
 import HelpRequest from "./helprequest.jsx";
 import UserHome from "./userHome.jsx";
@@ -50,6 +50,13 @@ export default function UserDashboard({ user, onLogout }) {
           {/* Progress view */}
           {activePage === "Progress" && (
             <div className="flex-1 overflow-y-auto p-6">
+              <button
+                onClick={() => setActivePage("Home")}
+                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium mb-4"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Home
+              </button>
               <MyProgress />
             </div>
           )}
@@ -58,6 +65,13 @@ export default function UserDashboard({ user, onLogout }) {
           {activePage === "Feedbacks" && (
             <div className="flex-1 overflow-y-auto">
               <div className="p-6 space-y-4">
+                <button
+                  onClick={() => setActivePage("Home")}
+                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium mb-2"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to Home
+                </button>
                 {/* Tab buttons */}
                 <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
                   <button
@@ -105,14 +119,32 @@ export default function UserDashboard({ user, onLogout }) {
           {/* Ask Help view */}
           {activePage === "Ask Help" && (
             <div className="flex-1 overflow-y-auto">
-              <HelpRequest user={user} />
+              <div className="p-6">
+                <button
+                  onClick={() => setActivePage("Home")}
+                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium mb-4"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to Home
+                </button>
+                <HelpRequest user={user} />
+              </div>
             </div>
           )}
 
           {/* Placeholder for other pages */}
           {activePage !== "Ask Help" && activePage !== "Progress" && activePage !== "Feedbacks" && activePage !== "Home" && (
-            <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">
-              <p>{activePage} — coming soon</p>
+            <div className="flex-1 overflow-y-auto p-6">
+              <button
+                onClick={() => setActivePage("Home")}
+                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium mb-4"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Home
+              </button>
+              <div className="flex items-center justify-center min-h-[60vh] text-gray-400 text-sm">
+                <p>{activePage} — coming soon</p>
+              </div>
             </div>
           )}
 

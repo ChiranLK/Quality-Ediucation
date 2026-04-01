@@ -3,10 +3,12 @@ const router = express.Router();
 const authRouter = require("./authRouter");
 const feedbackRouter = require("./feedbackRouter");
 const progressRouter = require("./progressRouter");
+import tutorRouter from "./tutorRouter.js";
 
 router.use("/auth", authRouter);
 router.use("/feedbacks", feedbackRouter);
 router.use("/progress", progressRouter);
+router.use("/tutor", tutorRouter);
 
 // Define your routes here
 router.get('/test', (req, res) => {

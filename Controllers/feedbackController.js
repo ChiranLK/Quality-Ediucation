@@ -244,7 +244,7 @@ export const getAllFeedbacks = async (req, res) => {
 
 /**
  * DELETE /api/feedbacks/:id
- * student deletes own feedback, admin deletes any
+ * student deletes own feedback, tutor deletes feedback about themselves, admin deletes any
  */
 export const deleteFeedback = async (req, res) => {
   try {
@@ -258,13 +258,139 @@ export const deleteFeedback = async (req, res) => {
 
     const isAdmin = req.user.role === "admin";
     const isOwner = String(feedback.student) === String(req.user._id);
+    const isTutorRecipient = String(feedback.tutor) === String(req.user._id);
 
-    if (!isAdmin && !isOwner) {
+    if (!isAdmin && !isOwner && !isTutorRecipient) {
       return res.status(403).json({ message: "Forbidden" });
     }
 
     await Feedback.deleteOne({ _id: id });
     return res.json({ message: "Feedback deleted" });
+  } catch (err) {
+    return res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+/**
+ * PUT /api/feedbacks/admin/:id
+ * admin can update any feedback (rating, message)
+ */
+export const updateFeedbackAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rating, message } = req.body;
+
+    // Only admin can update
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ message: "Only admins can update feedbacks" });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid feedback id" });
+    }
+
+    const feedback = await Feedback.findById(id);
+    if (!feedback) return res.status(404).json({ message: "Feedback not found" });
+
+    // Validate rating if provided
+    if (rating) {
+      const numRating = Number(rating);
+      if (numRating < 1 || numRating > 5) {
+        return res.status(400).json({ message: "rating must be between 1 and 5" });
+      }
+      feedback.rating = numRating;
+    }
+
+    // Update message if provided
+    if (message !== undefined) {
+      feedback.message = (message || "").trim();
+    }
+
+    const updated = await feedback.save();
+
+    // Recalculate tutor rating after update
+    const allFeedback = await Feedback.find({ tutor: feedback.tutor });
+    if (allFeedback.length > 0) {
+      const averageRating = allFeedback.reduce((sum, fb) => sum + fb.rating, 0) / allFeedback.length;
+      await User.findByIdAndUpdate(
+        feedback.tutor,
+        {
+          "tutorProfile.rating.average": parseFloat(averageRating.toFixed(1)),
+          "tutorProfile.rating.count": allFeedback.length,
+        },
+        { returnDocument: 'after' }
+      );
+    }
+
+    return res.json({ message: "Feedback updated", feedback: updated });
+  } catch (err) {
+    return res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+/**
+ * POST /api/feedbacks/admin/create
+ * admin can create feedback on behalf of a student for any tutor
+ */
+export const createFeedbackAdmin = async (req, res) => {
+  try {
+    // Only admin can create feedback on behalf of others
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ message: "Only admins can create feedback" });
+    }
+
+    const { studentId, tutorId, rating, message, sessionId } = req.body;
+
+    if (!studentId || !mongoose.Types.ObjectId.isValid(studentId)) {
+      return res.status(400).json({ message: "Valid studentId is required" });
+    }
+
+    if (!tutorId || !mongoose.Types.ObjectId.isValid(tutorId)) {
+      return res.status(400).json({ message: "Valid tutorId is required" });
+    }
+
+    const numRating = Number(rating);
+    if (!numRating || numRating < 1 || numRating > 5) {
+      return res.status(400).json({ message: "rating must be between 1 and 5" });
+    }
+
+    if (sessionId && !mongoose.Types.ObjectId.isValid(sessionId)) {
+      return res.status(400).json({ message: "Invalid sessionId" });
+    }
+
+    // Verify student exists
+    const student = await User.findById(studentId).select("_id fullName email role");
+    if (!student) return res.status(404).json({ message: "Student not found" });
+
+    // Verify tutor exists
+    const tutor = await User.findById(tutorId).select("_id fullName email role");
+    if (!tutor) return res.status(404).json({ message: "Tutor not found" });
+
+    const payload = {
+      student: studentId,
+      tutor: tutorId,
+      session: sessionId || null,
+      rating: numRating,
+      message: (message || "").trim(),
+    };
+
+    const saved = await Feedback.create(payload);
+
+    // Update tutor's rating
+    const allFeedback = await Feedback.find({ tutor: tutorId });
+    if (allFeedback.length > 0) {
+      const averageRating = allFeedback.reduce((sum, fb) => sum + fb.rating, 0) / allFeedback.length;
+      await User.findByIdAndUpdate(
+        tutorId,
+        {
+          "tutorProfile.rating.average": parseFloat(averageRating.toFixed(1)),
+          "tutorProfile.rating.count": allFeedback.length,
+        },
+        { returnDocument: 'after' }
+      );
+    }
+
+    return res.status(201).json({ message: "Feedback created by admin", feedback: saved });
   } catch (err) {
     return res.status(500).json({ message: "Server error", error: err.message });
   }

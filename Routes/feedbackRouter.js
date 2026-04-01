@@ -7,11 +7,14 @@ import {
   getTutorRatingStats,
   deleteFeedback,
   getAllFeedbacks,
+  updateFeedbackAdmin,
+  createFeedbackAdmin,
 } from "../Controllers/feedbackController.js";
 
 const router = express.Router();
 
 router.post("/", protect, submitFeedback);
+router.post("/admin/create", protect, createFeedbackAdmin);
 router.get("/", protect, getAllFeedbacks);
 router.get("/me", protect, getMyFeedbacks);
 
@@ -21,6 +24,7 @@ router.get("/tutor/:tutorId/ratings", protect, getTutorRatingStats);
 // full feedback list (restricted to tutor self/admin)
 router.get("/tutor/:tutorId", protect, getTutorFeedbacks);
 
+router.put("/admin/:id", protect, updateFeedbackAdmin);
 router.delete("/:id", protect, deleteFeedback);
 
 export default router;

@@ -147,3 +147,43 @@ export const getTutorStudents = async (req, res) => {
     });
   }
 };
+
+// Get all available students (for tutors to add progress)
+export const getAllStudents = async (req, res) => {
+  try {
+    // Only tutors and admins can fetch students
+    if (req.user.role !== 'tutor' && req.user.role !== 'admin') {
+      return res.status(StatusCodes.FORBIDDEN).json({
+        success: false,
+        msg: 'Only tutors and admins can access this resource',
+      });
+    }
+
+    const { search } = req.query;
+    let query = { role: 'user' }; // Fetch users with role 'user' (students)
+
+    // Search by name or email
+    if (search) {
+      query.$or = [
+        { fullName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    const students = await User.find(query)
+      .select('_id fullName name email phoneNumber location avatar')
+      .sort({ fullName: 1 });
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      count: students.length,
+      students,
+    });
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      msg: 'Failed to fetch students',
+      error: error.message,
+    });
+  }
+};

@@ -161,6 +161,29 @@ export const getProgressByTutor = async (req, res) => {
 };
 
 /**
+ * GET /api/progress
+ * Admin only - view all student progress records
+ */
+export const getAllProgress = async (req, res) => {
+  try {
+    const isAdmin = req.user.role === "admin";
+
+    if (!isAdmin) {
+      return res.status(403).json({ message: "Only admins can view all progress records" });
+    }
+
+    const list = await Progress.find()
+      .populate("student", "fullName email role")
+      .populate("tutor", "fullName email role")
+      .sort({ updatedAt: -1 });
+
+    return res.json({ count: list.length, progress: list });
+  } catch (err) {
+    return res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+/**
  * DELETE /api/progress/:id
  * Tutor or admin can delete progress records
  */

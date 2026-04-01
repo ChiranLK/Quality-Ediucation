@@ -46,36 +46,10 @@ export default function TutorDashboard({ user, onLogout }) {
         );
       case 'My Sessions':
       case 'sessions':
-        return (
-          <div className="p-6 overflow-y-auto flex-1">
-            <div className="mb-4">
-              <button
-                onClick={handleBackToDashboard}
-                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium mb-4"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back to Dashboard
-              </button>
-            </div>
-            <MySessions user={user} />
-          </div>
-        );
+        return <MySessions user={user} />;
       case 'Student Progress':
       case 'progress':
-        return (
-          <div className="p-6 overflow-y-auto flex-1">
-            <div className="mb-4">
-              <button
-                onClick={handleBackToDashboard}
-                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium mb-4"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back to Dashboard
-              </button>
-            </div>
-            <StudentProgressManager user={user} />
-          </div>
-        );
+        return <StudentProgressManager user={user} />;
       case 'session-details':
         return (
           <SessionDetails
@@ -85,36 +59,10 @@ export default function TutorDashboard({ user, onLogout }) {
         );
       case 'Your Ratings':
       case 'ratings':
-        return (
-          <div className="p-6 overflow-y-auto flex-1">
-            <div className="mb-4">
-              <button
-                onClick={handleBackToDashboard}
-                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium mb-4"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back to Dashboard
-              </button>
-            </div>
-            <TutorRatings tutorId={user._id} />
-          </div>
-        );
+        return <TutorRatings tutorId={user._id} />;
       case 'Feedbacks':
       case 'feedbacks':
-        return (
-          <div className="p-6 overflow-y-auto flex-1">
-            <div className="mb-4">
-              <button
-                onClick={handleBackToDashboard}
-                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium mb-4"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back to Dashboard
-              </button>
-            </div>
-            <TutorFeedbacks tutorId={user._id} />
-          </div>
-        );
+        return <TutorFeedbacks tutorId={user._id} />;
       default:
         return (
           <TutorHome user={user} onNavigate={(view) => setCurrentView(view)} />

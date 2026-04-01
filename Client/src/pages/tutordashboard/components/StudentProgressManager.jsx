@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Loader, AlertCircle, Trash2, Plus, X, Save } from 'lucide-react';
 import ProgressCard from '../../../components/feedback/ProgressCard';
 import customFetch from '../../../utils/customfetch';
@@ -9,9 +9,26 @@ export default function StudentProgressManager({ user }) {
   const [error, setError] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [editForm, setEditForm] = useState({ topic: '', completionPercent: 0, notes: '' });
+  const [editForm, setEditForm] = useState({ studentId: '', studentName: '', topic: '', completionPercent: 0, notes: '' });
   const [newForm, setNewForm] = useState({ studentId: '', topic: '', completionPercent: 0, notes: '' });
   const [students, setStudents] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showStudentDropdown, setShowStudentDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    // Handle click outside dropdown
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowStudentDropdown(false);
+      }
+    };
+
+    if (showStudentDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showStudentDropdown]);
 
   useEffect(() => {
     fetchProgress();
@@ -38,27 +55,66 @@ export default function StudentProgressManager({ user }) {
           (data.sessions || [])
             .filter(s => String(s.tutorId?._id || s.tutorId) === String(user?._id))
             .map(s => [s.studentId?._id, s.studentId])
+            .filter(([id, student]) => id && student) // Filter out null values
         ).values()
       ];
+      console.log('Fetched students from tutoring sessions:', uniqueStudents);
       setStudents(uniqueStudents);
+      
+      // If no students found from tutoring sessions, try fetching all students
+      if (uniqueStudents.length === 0) {
+        console.log('No students from tutoring sessions, fetching all available students...');
+        try {
+          const { data: studentsData } = await customFetch.get('/tutors/students/all');
+          console.log('Fetched all students:', studentsData);
+          setStudents(studentsData.students || []);
+        } catch (usersErr) {
+          console.error('Failed to fetch all students:', usersErr);
+        }
+      }
     } catch (err) {
-      console.error('Failed to fetch students:', err);
+      console.error('Failed to fetch tutoring sessions:', err);
+      setStudents([]);
     }
   };
 
   const handleEditClick = (prog) => {
+    const studentId = typeof prog.studentId === 'string' ? prog.studentId : prog.studentId?._id;
+    
+    // Try to get student name from multiple sources
+    let studentName = 'Unknown Student';
+    
+    // First check if studentId is an object with student details
+    if (typeof prog.studentId === 'object' && prog.studentId) {
+      studentName = prog.studentId.fullName || prog.studentId.name || prog.studentId.email || 'Unknown Student';
+    } else if (typeof prog.studentId === 'string') {
+      // If it's a string, look it up in the students array
+      const student = students.find(s => s._id === studentId);
+      if (student) {
+        studentName = student.fullName || student.name || student.email || 'Unknown Student';
+      }
+    }
+    
     setEditingId(prog._id);
     setEditForm({
+      studentId: studentId,
+      studentName: studentName,
       topic: prog.topic,
       completionPercent: prog.completionPercent,
       notes: prog.notes,
     });
   };
 
-  const handleSaveProgress = async (progressId, studentId) => {
+  const handleSaveProgress = async (progressId) => {
     try {
-      await customFetch.post('/progress', {
-        studentId,
+      if (!editForm.studentId) {
+        alert('Please select a student');
+        return;
+      }
+
+      const { data } = await customFetch.post('/progress', {
+        _id: progressId,
+        studentId: editForm.studentId,
         tutorId: user?._id,
         topic: editForm.topic,
         completionPercent: editForm.completionPercent,
@@ -66,7 +122,7 @@ export default function StudentProgressManager({ user }) {
       });
 
       setProgress(
-        progress.map((p) => (p._id === progressId ? { ...p, ...editForm } : p))
+        progress.map((p) => (p._id === progressId ? { ...p, ...data.progress } : p))
       );
       setEditingId(null);
     } catch (err) {
@@ -109,6 +165,30 @@ export default function StudentProgressManager({ user }) {
       alert(err.response?.data?.message || 'Failed to delete progress');
     }
   };
+
+  // Filter students based on search query
+  const filteredStudents = students.filter(student => {
+    if (!student) return false;
+    const fullName = student.fullName || student.name || '';
+    const email = student.email || '';
+    const searchLower = searchQuery.toLowerCase();
+    return fullName.toLowerCase().includes(searchLower) || email.toLowerCase().includes(searchLower);
+  });
+
+  // Handle dropdown toggle - fetch students if empty
+  const handleToggleDropdown = async () => {
+    if (students.length === 0 && !showStudentDropdown) {
+      console.log('Students list is empty, fetching...');
+      await fetchStudents();
+    }
+    setShowStudentDropdown(!showStudentDropdown);
+  };
+
+  // Get selected student name
+  const selectedStudent = students.find(s => s._id === newForm.studentId);
+  const selectedStudentName = selectedStudent 
+    ? (selectedStudent.fullName || selectedStudent.name || 'Unknown Student')
+    : 'Select a student...';
 
   if (loading) {
     return (
@@ -154,18 +234,76 @@ export default function StudentProgressManager({ user }) {
         <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 mb-6">
           <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Add New Progress</h3>
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Student</label>
-              <select
-                value={newForm.studentId}
-                onChange={(e) => setNewForm({ ...newForm, studentId: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select a student...</option>
-                {students.map(s => (
-                  <option key={s._id} value={s._id}>{s.fullName}</option>
-                ))}
-              </select>
+            {/* Searchable Student Dropdown */}
+            <div ref={dropdownRef}>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Student {students.length > 0 && <span className="text-gray-500">({students.length})</span>}
+              </label>
+              <div className="relative">
+                {/* Search/Display Button */}
+                <button
+                  type="button"
+                  onClick={handleToggleDropdown}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex justify-between items-center"
+                >
+                  <span className={newForm.studentId ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}>
+                    {newForm.studentId ? selectedStudentName : 'Select a student...'}
+                  </span>
+                  <span className="text-gray-500">▼</span>
+                </button>
+
+                {/* Dropdown Popup */}
+                {showStudentDropdown && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
+                    {/* Search Input */}
+                    <div className="sticky top-0 p-2 border-b border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700">
+                      <input
+                        type="text"
+                        placeholder="Search by name or email..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        autoFocus
+                      />
+                    </div>
+
+                    {/* Student List */}
+                    {filteredStudents.length > 0 ? (
+                      filteredStudents.map((student) => (
+                        <button
+                          key={student._id}
+                          type="button"
+                          onClick={() => {
+                            if (editingId) {
+                              setEditForm({ ...editForm, studentId: student._id, studentName: student.fullName || student.name });
+                            } else {
+                              setNewForm({ ...newForm, studentId: student._id });
+                            }
+                            setShowStudentDropdown(false);
+                            setSearchQuery('');
+                          }}
+                          className={`w-full text-left px-4 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors ${
+                            editingId 
+                              ? editForm.studentId === student._id
+                                ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-900 dark:text-blue-200 font-medium'
+                                : 'text-gray-900 dark:text-gray-200'
+                              : newForm.studentId === student._id
+                              ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-900 dark:text-blue-200 font-medium'
+                              : 'text-gray-900 dark:text-gray-200'
+                          }`}
+                        >
+                          <div className="font-medium">{student.fullName || student.name || 'Unknown Student'}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{student.email || 'No email'}</div>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-4 py-3 text-center text-gray-500 dark:text-gray-400 text-sm">
+                        No students found
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div>
@@ -236,6 +374,13 @@ export default function StudentProgressManager({ user }) {
                   <h3 className="font-semibold text-gray-900 dark:text-white">Edit Progress</h3>
 
                   <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Student</label>
+                    <div className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white">
+                      {editForm.studentName || 'Unknown Student'}
+                    </div>
+                  </div>
+
+                  <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Topic</label>
                     <input
                       type="text"
@@ -278,7 +423,7 @@ export default function StudentProgressManager({ user }) {
                       Cancel
                     </button>
                     <button
-                      onClick={() => handleSaveProgress(prog._id, prog.studentId._id)}
+                      onClick={() => handleSaveProgress(prog._id)}
                       className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
                     >
                       <Save className="w-4 h-4" />
