@@ -64,10 +64,6 @@ export default function TutorHome({ user, onNavigate }) {
   return (
     <div className="flex-1 overflow-y-auto p-6 space-y-6">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 dark:from-emerald-700 dark:to-emerald-800 rounded-lg p-8 text-white shadow-lg">
-        <h1 className="text-3xl font-bold mb-2">Welcome, {user?.fullName || 'Tutor'}!</h1>
-        <p className="text-emerald-100">Manage your sessions and track your students' progress</p>
-      </div>
 
       {error && (
         <div className="flex items-center gap-2 p-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-lg">
@@ -123,7 +119,7 @@ export default function TutorHome({ user, onNavigate }) {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div 
           onClick={() => onNavigate?.('My Sessions')} 
-          className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg p-6 border border-blue-200 dark:border-blue-700 cursor-pointer hover:shadow-md transition-shadow"
+          className=",bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg p-6 border border-blue-200 dark:border-blue-700 cursor-pointer hover:shadow-md transition-shadow"
         >
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-semibold text-gray-900 dark:text-white">My Sessions</h3>
@@ -134,7 +130,7 @@ export default function TutorHome({ user, onNavigate }) {
 
         <div 
           onClick={() => onNavigate?.('Student Progress')} 
-          className="bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20 rounded-lg p-6 border border-teal-200 dark:border-teal-700 cursor-pointer hover:shadow-md transition-shadow"
+          className=",bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20 rounded-lg p-6 border border-teal-200 dark:border-teal-700 cursor-pointer hover:shadow-md transition-shadow"
         >
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-semibold text-gray-900 dark:text-white">Student Progress</h3>
@@ -145,7 +141,7 @@ export default function TutorHome({ user, onNavigate }) {
 
         <div 
           onClick={() => onNavigate?.('Your Ratings')} 
-          className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 rounded-lg p-6 border border-amber-200 dark:border-amber-700 cursor-pointer hover:shadow-md transition-shadow"
+          className=",bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 rounded-lg p-6 border border-amber-200 dark:border-amber-700 cursor-pointer hover:shadow-md transition-shadow"
         >
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-semibold text-gray-900 dark:text-white">Your Ratings</h3>
@@ -156,7 +152,7 @@ export default function TutorHome({ user, onNavigate }) {
 
         <div 
           onClick={() => onNavigate?.('Feedbacks')} 
-          className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg p-6 border border-purple-200 dark:border-purple-700 cursor-pointer hover:shadow-md transition-shadow"
+          className=",bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg p-6 border border-purple-200 dark:border-purple-700 cursor-pointer hover:shadow-md transition-shadow"
         >
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-semibold text-gray-900 dark:text-white">Feedbacks</h3>
