@@ -44,6 +44,7 @@ export default function TutorDashboard({ user, onLogout }) {
         return (
           <TutorHome user={user} onNavigate={(view) => setCurrentView(view)} />
         );
+      case 'My Sessions':
       case 'sessions':
         return (
           <div className="p-6 overflow-y-auto flex-1">
@@ -59,6 +60,7 @@ export default function TutorDashboard({ user, onLogout }) {
             <MySessions user={user} />
           </div>
         );
+      case 'Student Progress':
       case 'progress':
         return (
           <div className="p-6 overflow-y-auto flex-1">
@@ -81,6 +83,7 @@ export default function TutorDashboard({ user, onLogout }) {
             onBack={handleBackToSessions}
           />
         );
+      case 'Your Ratings':
       case 'ratings':
         return (
           <div className="p-6 overflow-y-auto flex-1">
@@ -96,6 +99,7 @@ export default function TutorDashboard({ user, onLogout }) {
             <TutorRatings tutorId={user._id} />
           </div>
         );
+      case 'Feedbacks':
       case 'feedbacks':
         return (
           <div className="p-6 overflow-y-auto flex-1">
