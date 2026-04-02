@@ -362,7 +362,7 @@ export default function HelpRequest({ user }) {
           </motion.button>
 
           <p className="text-center text-xs text-gray-400 dark:text-gray-500 -mt-2">
-            Once published, tutors can view and respond to your request publicly.
+            By submitting, you agree that your request will be publicly visible to all verified tutors on TutorConnect.
           </p>
         </form>
       </motion.div>
