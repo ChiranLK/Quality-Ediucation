@@ -9,27 +9,27 @@ import customFetch from "../../utils/customfetch";
 
 // ─── Static data ────────────────────────────────────────────────
 const CATEGORIES = [
-  { value: "math",       label: "Mathematics",       color: "bg-indigo-100 text-indigo-700" },
-  { value: "science",    label: "Science",            color: "bg-emerald-100 text-emerald-700" },
-  { value: "it",         label: "IT & Programming",   color: "bg-blue-100 text-blue-700" },
-  { value: "english",    label: "English",            color: "bg-yellow-100 text-yellow-700" },
-  { value: "history",    label: "History",            color: "bg-orange-100 text-orange-700" },
-  { value: "geography",  label: "Geography",          color: "bg-teal-100 text-teal-700" },
-  { value: "physics",    label: "Physics",            color: "bg-purple-100 text-purple-700" },
-  { value: "chemistry",  label: "Chemistry",          color: "bg-rose-100 text-rose-700" },
-  { value: "other",      label: "Other",              color: "bg-gray-100 text-gray-700" },
+  { value: "Mathematics",       label: "Mathematics",       color: "bg-indigo-100 text-indigo-700" },
+  { value: "Science",    label: "Science",            color: "bg-emerald-100 text-emerald-700" },
+  { value: "IT & Programming",         label: "IT & Programming",   color: "bg-blue-100 text-blue-700" },
+  { value: "English",    label: "English",            color: "bg-yellow-100 text-yellow-700" },
+  { value: "History",    label: "History",            color: "bg-orange-100 text-orange-700" },
+  { value: "Geography",  label: "Geography",          color: "bg-teal-100 text-teal-700" },
+  { value: "Physics",    label: "Physics",            color: "bg-purple-100 text-purple-700" },
+  { value: "Chemistry",  label: "Chemistry",          color: "bg-rose-100 text-rose-700" },
+  { value: "Other",      label: "Other",              color: "bg-gray-100 text-gray-700" },
 ];
 
 const LANGUAGES = [
-  { value: "en",  label: "English",    flag: "🇬🇧" },
-  { value: "si",  label: "Sinhala",    flag: "🇱🇰" },
-  { value: "ta",  label: "Tamil",      flag: "🇮🇳" },
-  { value: "fr",  label: "French",     flag: "🇫🇷" },
-  { value: "de",  label: "German",     flag: "🇩🇪" },
-  { value: "es",  label: "Spanish",    flag: "🇪🇸" },
-  { value: "zh",  label: "Chinese",    flag: "🇨🇳" },
-  { value: "ar",  label: "Arabic",     flag: "🇸🇦" },
-  { value: "jp",  label: "Japanese",   flag: "🇯🇵" },
+  { value: "English",  label: "English",    flag: "🇬🇧" },
+  { value: "Sinhala",  label: "Sinhala",    flag: "🇱🇰" },
+  { value: "Tamil",      label: "Tamil",      flag: "🇮🇳" },
+  { value: "French",     label: "French",     flag: "🇫🇷" },
+  { value: "German",     label: "German",     flag: "🇩🇪" },
+  { value: "Spanish",    label: "Spanish",    flag: "🇪🇸" },
+  { value: "Chinese",    label: "Chinese",    flag: "🇨🇳" },
+  { value: "Arabic",     label: "Arabic",     flag: "🇸🇦" },
+  { value: "Japanese",   label: "Japanese",   flag: "🇯🇵" },
 ];
 
 // ─── Field wrapper ───────────────────────────────────────────────
@@ -132,8 +132,8 @@ function CharCount({ value, max }) {
 }
 
 // ─── Main component ───────────────────────────────────────────────
-const INITIAL = { title: "", message: "", category: "", language: "en" };
-const TITLE_MAX = 100;
+const INITIAL = { title: "", message: "", category: "", language: "English" };
+const TITLE_MAX = 50;
 const MSG_MAX   = 1000;
 
 export default function HelpRequest({ user }) {
@@ -171,12 +171,11 @@ export default function HelpRequest({ user }) {
 
     setLoading(true);
     try {
-      await customFetch.post("/help-requests", {
+      await customFetch.post("/messages", {
         title:    form.title.trim(),
         message:  form.message.trim(),
         category: form.category,
         language: form.language,
-        studentId: user?._id,
       });
 
       toast.success("Your request has been published to all tutors! 🎉");

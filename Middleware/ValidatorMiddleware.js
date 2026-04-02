@@ -82,24 +82,29 @@ export const validateLoginInput = withValidationError([
 
 // Middleware to handle Message validation
 export const validateMessageInput = withValidationError([
-  body("name")
+  body("title")
     .notEmpty()
-    .withMessage("Name is required")
+    .withMessage("Title is required")
     .isLength({ min: 2, max: 50 })
-    .withMessage("Name must be between 2 and 50 characters")
+    .withMessage("Title must be between 2 and 50 characters")
     .trim(),
-  body("subject")
-    .notEmpty()
-    .withMessage("Subject is required")
-    .isLength({ min: 3, max: 100 })
-    .withMessage("Subject must be between 3 and 100 characters")
-    .trim(),
+
   body("message")
     .notEmpty()
     .withMessage("Message is required")
     .isLength({ min: 10, max: 1000 })
     .withMessage("Message must be between 10 and 1000 characters")
     .trim(),
+  body("category")
+    .notEmpty()
+    .withMessage("Category is required")
+    .trim(),
+
+  body("language")
+    .notEmpty()
+    .withMessage("Language is required")
+    .trim(),
+  
   body("image")
     .optional()
     .custom((value) => {

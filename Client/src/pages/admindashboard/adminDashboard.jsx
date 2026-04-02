@@ -1,4 +1,8 @@
-import { BookOpen, Users, ShieldCheck, LogOut, User, BarChart2, MessageSquare, TrendingUp, ArrowLeft } from "lucide-react";
+import { 
+  BookOpen, Users, ShieldCheck, LogOut, User, BarChart2, 
+  MessageSquare, TrendingUp, ArrowLeft, Calendar, Star, 
+  FileText, Activity, Settings, CheckCircle, AlertCircle, Clock 
+} from "lucide-react";
 import DarkModeToggle from "../../components/DarkModeToggle";
 import { AllFeedbacks, AdminProgress } from "../../components/feedback/index.js";
 import { useState } from "react";

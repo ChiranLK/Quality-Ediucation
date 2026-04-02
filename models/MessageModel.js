@@ -8,21 +8,13 @@ const messageSchema = new mongoose.Schema({
     required: [true, "User is required"]
   },
 
-  name: {
+  title: {
       type: String,
-      required: [true, "Please provide name"],
+      required: [true, "Please provide title"],
       trim: true,
-      minlength: [2, "Name must be at least 2 characters long"],
-      maxlength: [50, "Name cannot exceed 50 characters"],
+      minlength: [2, "Title must be at least 2 characters long"],
+      maxlength: [50, "Title cannot exceed 50 characters"],
     },
-
-  subject: {
-    type: String,
-    required: [true, "Please provide subject"],
-    trim: true,
-    minlength: [3, "Subject must be at least 3 characters long"],
-    maxlength: [100, "Subject cannot exceed 100 characters"]
-  },
 
   message: {
     type: String,
@@ -31,6 +23,38 @@ const messageSchema = new mongoose.Schema({
     minlength: [10, "Message must be at least 10 characters long"],
     maxlength: [1000, "Message cannot exceed 1000 characters"]
   },
+
+   category: {
+      type: String,
+      required: [true, "Please provide category"],
+      enum: [
+        "Mathematics",
+        "Science",
+        "IT & Programming",
+        "English",
+        "History",
+        "Geography",
+        "Physics",
+        "Chemistry",
+        "Other"
+      ],
+    },
+    
+    language: {
+      type: String,
+      required: [true, "Please provide language"],
+      enum: [
+           "English",
+            "Sinhala",
+            "Tamil",
+            "French",
+            "German",
+            "Spanish",
+            "Chinese",
+            "Arabic",
+            "Japanese"
+      ],
+    },
 
   // Flag to indicate if translation was performed
   requiresTranslation: {
