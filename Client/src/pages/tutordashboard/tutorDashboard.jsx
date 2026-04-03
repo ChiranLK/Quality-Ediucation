@@ -6,11 +6,18 @@ import { StudentProgress, TutorRatings, TutorFeedbacks } from "../../components/
 import TutorHome from "./tutorHome";
 import MySessions from "./components/MySessions";
 import StudentProgressManager from "./components/StudentProgressManager";
-import { useState } from "react";
+import StudyMaterials from "./components/StudyMaterials";
+import { useState, useEffect } from "react";
 
 export default function TutorDashboard({ user, onLogout }) {
-  const [currentView, setCurrentView] = useState('dashboard'); // Changed from 'dashboard' to 'dashboard'
+  const [currentView, setCurrentView] = useState(() => {
+    return sessionStorage.getItem('tutorDashboardActiveView') || 'dashboard';
+  });
   const [selectedSessionId, setSelectedSessionId] = useState(null);
+
+  useEffect(() => {
+    sessionStorage.setItem('tutorDashboardActiveView', currentView);
+  }, [currentView]);
 
   const handleViewSessions = () => {
     setCurrentView('sessions');
@@ -63,6 +70,9 @@ export default function TutorDashboard({ user, onLogout }) {
       case 'Feedbacks':
       case 'feedbacks':
         return <TutorFeedbacks tutorId={user._id} />;
+      case 'Study Materials':
+      case 'study-materials':
+        return <StudyMaterials user={user} />;
       default:
         return (
           <TutorHome user={user} onNavigate={(view) => setCurrentView(view)} />
