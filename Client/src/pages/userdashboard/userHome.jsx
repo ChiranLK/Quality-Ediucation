@@ -164,7 +164,7 @@ export default function UserHome({ user, onNavigate }) {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div onClick={() => onNavigate?.('Progress')} className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg p-6 border border-blue-200 dark:border-blue-700 cursor-pointer hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-semibold text-gray-900 dark:text-white">View Progress</h3>
@@ -179,6 +179,14 @@ export default function UserHome({ user, onNavigate }) {
             <ArrowRight className="w-5 h-5 text-purple-600 dark:text-purple-400" />
           </div>
           <p className="text-sm text-gray-700 dark:text-gray-300">Share feedback to help improve the platform</p>
+        </div>
+
+        <div onClick={() => onNavigate?.('Materials')} className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-800/20 rounded-lg p-6 border border-indigo-200 dark:border-indigo-700 cursor-pointer hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-semibold text-gray-900 dark:text-white">Study Materials</h3>
+            <ArrowRight className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+          </div>
+          <p className="text-sm text-gray-700 dark:text-gray-300">Browse and download learning resources</p>
         </div>
       </div>
 

@@ -120,7 +120,7 @@ export default function TutorHome({ user, onNavigate }) {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div 
           onClick={() => onNavigate?.('My Sessions')} 
           className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg p-6 border border-blue-200 dark:border-blue-700 cursor-pointer hover:shadow-md transition-shadow"
@@ -163,6 +163,17 @@ export default function TutorHome({ user, onNavigate }) {
             <ArrowRight className="w-5 h-5 text-purple-600 dark:text-purple-400" />
           </div>
           <p className="text-sm text-gray-700 dark:text-gray-300">Read feedback from students</p>
+        </div>
+
+        <div 
+          onClick={() => onNavigate?.('Study Materials')} 
+          className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-800/20 rounded-lg p-6 border border-indigo-200 dark:border-indigo-700 cursor-pointer hover:shadow-md transition-shadow"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-semibold text-gray-900 dark:text-white">Study Materials</h3>
+            <ArrowRight className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+          </div>
+          <p className="text-sm text-gray-700 dark:text-gray-300">Upload & manage resources</p>
         </div>
       </div>
     </div>

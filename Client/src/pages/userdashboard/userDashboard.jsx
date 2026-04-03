@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Home, BookOpen, HelpCircle, Settings, TrendingUp, MessageSquare, ArrowLeft } from "lucide-react";
 import { Sidebar, DashboardNavbar } from "../../components/index.js";
 import HelpRequest from "./helprequest.jsx";
 import UserHome from "./userHome.jsx";
 import { MyProgress, MyFeedbacks, SubmitFeedback } from "../../components/feedback/index.js";
+import StudentMaterials from "./components/StudentMaterials.jsx";
 
 // ── Static data ────────────────────────────────────────────────────────────────
 
@@ -11,6 +12,7 @@ const SIDEBAR_LINKS = [
   { icon: Home,           label: "Home"      },
   { icon: TrendingUp,     label: "Progress"  },
   { icon: MessageSquare,  label: "Feedbacks" },
+  { icon: BookOpen,       label: "Materials" },
   { icon: BookOpen,       label: "Sessions"  },
   { icon: HelpCircle,     label: "Ask Help"  },
   { icon: Settings,       label: "Settings"  },
@@ -20,8 +22,14 @@ const SIDEBAR_LINKS = [
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export default function UserDashboard({ user, onLogout }) {
-  const [activePage, setActivePage] = useState("Home");
+  const [activePage, setActivePage] = useState(() => {
+    return sessionStorage.getItem('userDashboardActivePage') || "Home";
+  });
   const [feedbackTab, setFeedbackTab] = useState("received"); // 'received' or 'submit'
+
+  useEffect(() => {
+    sessionStorage.setItem('userDashboardActivePage', activePage);
+  }, [activePage]);
 
   return (
     <div className="min-h-screen flex bg-[#f7f8fc] dark:bg-gray-950 font-sans">
@@ -132,8 +140,22 @@ export default function UserDashboard({ user, onLogout }) {
             </div>
           )}
 
+          {/* Materials View */}
+          {activePage === "Materials" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <button
+                onClick={() => setActivePage("Home")}
+                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium mb-4"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Home
+              </button>
+              <StudentMaterials />
+            </div>
+          )}
+
           {/* Placeholder for other pages */}
-          {activePage !== "Ask Help" && activePage !== "Progress" && activePage !== "Feedbacks" && activePage !== "Home" && (
+          {activePage !== "Ask Help" && activePage !== "Progress" && activePage !== "Feedbacks" && activePage !== "Materials" && activePage !== "Home" && (
             <div className="flex-1 overflow-y-auto p-6">
               <button
                 onClick={() => setActivePage("Home")}
