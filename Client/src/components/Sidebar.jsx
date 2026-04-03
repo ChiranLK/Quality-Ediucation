@@ -6,6 +6,12 @@ import { BookOpen, LogOut, User } from "lucide-react";
  * @param {{ links: Array<{icon: React.ElementType, label: string}>, activeLabel: string, onNavigate: (label:string)=>void, user: {name:string, email:string}, onLogout: ()=>void }} props
  */
 export default function Sidebar({ links, activeLabel, onNavigate, user, onLogout }) {
+  const handleLogoClick = () => {
+    // Navigate to the first link (typically "Home" or dashboard)
+    if (links && links.length > 0) {
+      onNavigate(links[0].label);
+    }
+  };
   return (
     <motion.aside
       initial={{ x: -80, opacity: 0 }}
@@ -14,7 +20,10 @@ export default function Sidebar({ links, activeLabel, onNavigate, user, onLogout
       className="w-20 lg:w-60 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 flex flex-col py-6 px-3 lg:px-5 gap-2 shadow-sm shrink-0"
     >
       {/* ── Logo ── */}
-      <div className="flex items-center gap-3 mb-8 px-2">
+      <button
+        onClick={handleLogoClick}
+        className="flex items-center gap-3 mb-8 px-2 cursor-pointer transition-opacity hover:opacity-75 w-full"
+      >
         <motion.div
           whileHover={{ rotate: 10 }}
           className="bg-indigo-600 p-2 rounded-xl shrink-0"
@@ -24,7 +33,7 @@ export default function Sidebar({ links, activeLabel, onNavigate, user, onLogout
         <span className="hidden lg:block text-base font-bold text-gray-800 dark:text-gray-100 tracking-tight">
           TutorConnect
         </span>
-      </div>
+      </button>
 
       {/* ── Nav links ── */}
       <nav className="flex flex-col gap-1 flex-1">
