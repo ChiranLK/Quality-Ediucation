@@ -5,7 +5,8 @@ import {
 } from "lucide-react";
 import DarkModeToggle from "../../components/DarkModeToggle";
 import { AllFeedbacks, AdminProgress } from "../../components/feedback/index.js";
-import { useState } from "react";
+import StudyMaterials from "../tutordashboard/components/StudyMaterials.jsx";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 /* ─── animation variants ─── */
@@ -69,9 +70,15 @@ const STATUS_ICON = {
 
 /* ─── component ─── */
 export default function AdminDashboard({ user, onLogout }) {
-  const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard', 'feedbacks', 'progress'
+  const [currentView, setCurrentView] = useState(() => {
+    return sessionStorage.getItem('adminDashboardActiveView') || 'dashboard';
+  });
   const [search, setSearch] = useState('');
   const [notifOpen, setNotifOpen] = useState(false);
+
+  useEffect(() => {
+    sessionStorage.setItem('adminDashboardActiveView', currentView);
+  }, [currentView]);
 
   const handleViewFeedbacks = () => {
     setCurrentView('feedbacks');
@@ -79,6 +86,10 @@ export default function AdminDashboard({ user, onLogout }) {
 
   const handleViewProgress = () => {
     setCurrentView('progress');
+  };
+
+  const handleViewMaterials = () => {
+    setCurrentView('materials');
   };
 
   const handleBackToDashboard = () => {
@@ -94,6 +105,10 @@ export default function AdminDashboard({ user, onLogout }) {
       case 'progress':
         return (
           <AdminProgress />
+        );
+      case 'materials':
+        return (
+          <StudyMaterials user={user} />
         );
       default:
         return (
@@ -138,6 +153,17 @@ export default function AdminDashboard({ user, onLogout }) {
               </div>
               <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-1">Student Progress</h3>
               <p className="text-gray-400 dark:text-gray-500 text-sm">View all student progress.</p>
+            </div>
+
+            <div
+              className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer hover:shadow-md transition-shadow"
+              onClick={handleViewMaterials}
+            >
+              <div className="bg-indigo-50 dark:bg-indigo-900/40 w-10 h-10 rounded-xl flex items-center justify-center mb-4">
+                <FileText className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-1">Study Materials</h3>
+              <p className="text-gray-400 dark:text-gray-500 text-sm">Upload and manage resources.</p>
             </div>
 
             <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
@@ -265,7 +291,7 @@ export default function AdminDashboard({ user, onLogout }) {
           </>
         )}
 
-        <div className={currentView === 'feedbacks' || currentView === 'progress' ? "bg-white dark:bg-gray-800 rounded-lg p-6" : ""}>
+        <div className={currentView === 'feedbacks' || currentView === 'progress' || currentView === 'materials' ? "bg-white dark:bg-gray-800 rounded-lg p-6" : ""}>
           {renderContent()}
         </div>
       </main>
