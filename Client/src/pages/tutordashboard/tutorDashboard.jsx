@@ -74,13 +74,16 @@ export default function TutorDashboard({ user, onLogout }) {
     <div className="min-h-screen ,bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
       {/* Navbar */}
       <header className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-6 py-4 flex items-center justify-between shadow-sm sticky top-0 z-10">
-        <div className="flex items-center gap-2">
+        <button
+          onClick={handleBackToDashboard}
+          className="flex items-center gap-2 cursor-pointer transition-opacity hover:opacity-75"
+        >
           <div className="bg-emerald-600 p-2 rounded-lg">
             <BookOpen className="w-5 h-5 text-white" />
           </div>
           <span className="text-lg font-bold text-gray-800 dark:text-gray-100">TutorConnect</span>
           <span className="ml-2 text-xs bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 font-semibold px-2 py-0.5 rounded-full">Tutor</span>
-        </div>
+        </button>
         <div className="flex items-center gap-4">
           <DarkModeToggle />
           <div className="flex items-center gap-2">

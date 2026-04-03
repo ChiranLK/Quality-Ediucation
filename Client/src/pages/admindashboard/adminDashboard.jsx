@@ -1,11 +1,12 @@
 import { 
   BookOpen, Users, ShieldCheck, LogOut, User, BarChart2, 
   MessageSquare, TrendingUp, ArrowLeft, Calendar, Star, 
-  FileText, Activity, Settings, CheckCircle, AlertCircle, Clock 
+  FileText, Activity, Settings, CheckCircle, AlertCircle, Clock, Search, Bell
 } from "lucide-react";
 import DarkModeToggle from "../../components/DarkModeToggle";
 import { AllFeedbacks, AdminProgress } from "../../components/feedback/index.js";
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 /* ─── animation variants ─── */
 const fadeUp = {
@@ -69,6 +70,8 @@ const STATUS_ICON = {
 /* ─── component ─── */
 export default function AdminDashboard({ user, onLogout }) {
   const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard', 'feedbacks', 'progress'
+  const [search, setSearch] = useState('');
+  const [notifOpen, setNotifOpen] = useState(false);
 
   const handleViewFeedbacks = () => {
     setCurrentView('feedbacks');
@@ -155,7 +158,10 @@ export default function AdminDashboard({ user, onLogout }) {
     >
       {/* ── Navbar ── */}
       <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 px-6 py-4 flex items-center justify-between shadow-sm sticky top-0 z-20">
-        <div className="flex items-center gap-2">
+        <button
+          onClick={handleBackToDashboard}
+          className="flex items-center gap-2 cursor-pointer transition-opacity hover:opacity-75"
+        >
           <motion.div
             whileHover={{ rotate: 10, scale: 1.1 }}
             className="bg-rose-600 p-2 rounded-lg"
@@ -166,7 +172,7 @@ export default function AdminDashboard({ user, onLogout }) {
           <span className="ml-2 text-xs bg-rose-100 dark:bg-rose-900 text-rose-700 dark:text-rose-300 font-semibold px-2 py-0.5 rounded-full">
             Admin
           </span>
-        </div>
+        </button>
 
         {/* Search bar */}
         <div className="hidden md:flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-full px-4 py-2 w-64">
