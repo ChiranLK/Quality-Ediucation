@@ -6,6 +6,7 @@ import {
   CheckCircle2, Loader2, ChevronDown, X,
 } from "lucide-react";
 import customFetch from "../../utils/customfetch";
+import HelpRequestVideo from "../../components/HelpRequestVideo";
 
 // ─── Static data ────────────────────────────────────────────────
 const CATEGORIES = [
@@ -246,6 +247,9 @@ export default function HelpRequest({ user }) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ── Supporting Video ── */}
+      <HelpRequestVideo />
 
       {/* ── Card form ── */}
       <motion.div
