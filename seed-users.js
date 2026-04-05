@@ -1,8 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import axios from 'axios';
-
 const API_URL = 'http://localhost:5000/api';
 
 const testUsers = [
@@ -24,6 +22,14 @@ const testUsers = [
     subjects: ['Mathematics', 'Physics', 'Chemistry'],
   },
   {
+    email: 'admin@yahoo.com',
+    password: 'Admin123',
+    fullName: 'Yahoo Admin',
+    role: 'admin',
+    phoneNumber: '5555555555',
+    location: 'Colombo, Sri Lanka',
+  },
+  {
     email: 'admin@example.com',
     password: 'password123',
     fullName: 'Admin User',
@@ -38,7 +44,19 @@ async function seedUsers() {
 
   for (const user of testUsers) {
     try {
-      const response = await axios.post(`${API_URL}/auth/register`, user);
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(user)
+      });
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.msg || response.statusText);
+      }
+      
       console.log(`✓ Created ${user.role}: ${user.email}`);
       console.log(`  Name: ${user.fullName}`);
       if (user.subjects) {
@@ -46,10 +64,10 @@ async function seedUsers() {
       }
       console.log();
     } catch (error) {
-      if (error.response?.status === 400 && error.response?.data?.msg?.includes('already exists')) {
+      if (error.message && error.message.includes('already exists')) {
         console.log(`⚠ User already exists: ${user.email}`);
       } else {
-        console.error(`✗ Error creating user ${user.email}:`, error.response?.data?.msg || error.message);
+        console.error(`✗ Error creating user ${user.email}:`, error.message);
       }
     }
   }
