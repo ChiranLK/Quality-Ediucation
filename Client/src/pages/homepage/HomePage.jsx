@@ -5,10 +5,33 @@ import {
   MapPin, Clock, Calendar, Sun, Moon
 } from "lucide-react";
 import { useDarkMode } from "../../context/DarkModeContext";
+import { useState, useEffect } from "react";
 
 
 export default function HomePage({ onNavigate, onNavigateToLogin }) {
   const { darkMode, toggleDarkMode } = useDarkMode();
+  const [activeSection, setActiveSection] = useState("home");
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = ["home", "features", "tutors"];
+      const currentSection = sections.find(section => {
+        const element = document.getElementById(section);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          return rect.top <= 100 && rect.bottom >= 100;
+        }
+        return false;
+      });
+      if (currentSection) {
+        setActiveSection(currentSection);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
 
   // Animation variants
   const containerVariants = {
@@ -42,11 +65,11 @@ export default function HomePage({ onNavigate, onNavigateToLogin }) {
             </div>
             
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#home" className="text-indigo-600 dark:text-indigo-400 font-medium cursor-pointer">Home</a>
-              <a href="#features" className="text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer">Features</a>
-              <a href="#tutors" className="text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer">Tutors</a>
-              <a href="#materials" className="text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer">Study Materials</a>
+              <a href="#home" className={`font-medium transition-colors cursor-pointer ${activeSection === "home" ? "text-indigo-600 dark:text-indigo-400" : "text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400"}`}>Home</a>
+              <a href="#features" className={`font-medium transition-colors cursor-pointer ${activeSection === "features" ? "text-indigo-600 dark:text-indigo-400" : "text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400"}`}>Features</a>
+              <a href="#tutors" className={`font-medium transition-colors cursor-pointer ${activeSection === "tutors" ? "text-indigo-600 dark:text-indigo-400" : "text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400"}`}>Tutors</a>
             </div>
+
 
 
             <div className="flex items-center gap-4">
@@ -102,10 +125,11 @@ export default function HomePage({ onNavigate, onNavigateToLogin }) {
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <button 
                   onClick={onNavigateToLogin}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-full font-semibold transition-all shadow-lg shadow-indigo-200 flex items-center justify-center gap-2"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-full font-semibold transition-all shadow-lg shadow-indigo-200 dark:shadow-none flex items-center justify-center gap-2"
                 >
                   Get Started Now <ArrowRight className="w-5 h-5" />
                 </button>
+
                 <a 
                   href="#features"
                   className="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 px-8 py-4 rounded-full font-semibold transition-all flex items-center justify-center gap-2 shadow-sm"
@@ -219,13 +243,14 @@ export default function HomePage({ onNavigate, onNavigateToLogin }) {
                 className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 hover:shadow-md transition-shadow group"
               >
                 <div className="h-48 bg-slate-200 dark:bg-slate-800 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-indigo-900/20 dark:bg-indigo-900/40 group-hover:bg-transparent transition-colors z-10"></div>
+                  <div className="absolute inset-0 bg-indigo-900/10 group-hover:bg-transparent transition-colors z-10"></div>
                   <img 
                     src={tutor.photo} 
                     alt={tutor.name} 
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 dark:opacity-80"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                 </div>
+
                 <div className="p-5 text-center">
                   <h4 className="text-lg font-bold text-slate-900 dark:text-white">{tutor.name}</h4>
                   <p className="text-sm text-indigo-600 dark:text-indigo-400 font-medium mb-3">{tutor.role}</p>
