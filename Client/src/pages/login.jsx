@@ -4,7 +4,8 @@ import customFetch from "../utils/customfetch";
 import { Eye, EyeOff, Mail, Lock, BookOpen, ArrowRight } from "lucide-react";
 import DarkModeToggle from "../components/DarkModeToggle";
 
-export default function LoginPage({ onLogin }) {
+export default function LoginPage({ onLogin, onBack }) {
+
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -41,7 +42,8 @@ export default function LoginPage({ onLogin }) {
     }
   };
   return (
-    <div className="auth-bg min-h-screen flex dark:bg-gray-950 relative">
+    <div className="auth-bg min-h-screen flex relative transition-colors duration-500">
+
       {/* Dark mode toggle — top-right corner */}
       <div className="absolute top-4 right-4 z-20">
         <DarkModeToggle />
@@ -56,17 +58,22 @@ export default function LoginPage({ onLogin }) {
         {/* pseudo-element circles handled by brand-panel CSS */}
 
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-16">
-            <div className="bg-white/20 p-2.5 rounded-xl">
+          <div 
+            className="flex items-center gap-3 mb-16 cursor-pointer group"
+            onClick={onBack}
+          >
+            <div className="bg-white/20 p-2.5 rounded-xl group-hover:bg-white/30 transition-colors">
               <BookOpen className="w-6 h-6" />
             </div>
             <span className="text-xl font-bold tracking-wide">TutorConnect</span>
           </div>
 
+
           <h1 className="text-4xl font-extrabold leading-tight mb-6">
             Welcome back,<br />keep learning.
           </h1>
-          <p className="text-indigo-200 text-base leading-relaxed max-w-xs">
+          <p className="text-indigo-100/80 text-base leading-relaxed max-w-xs">
+
             Connect with expert tutors, track your progress, and unlock your full learning potential.
           </p>
         </div>
@@ -88,18 +95,25 @@ export default function LoginPage({ onLogin }) {
           initial={{ y: 40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.15, ease: "easeOut" }}
-          className="glass-card dark:bg-gray-900 dark:border dark:border-gray-800 w-full max-w-md px-8 py-10"
+          className="glass-card w-full max-w-md px-8 py-10 dark:ring-2 dark:ring-indigo-600/50"
         >
+
+
           {/* Mobile logo */}
-          <div className="flex items-center gap-2 mb-10 lg:hidden">
-            <div className="bg-indigo-600 p-2 rounded-lg">
+          <div 
+            className="flex items-center gap-2 mb-10 lg:hidden cursor-pointer group"
+            onClick={onBack}
+          >
+            <div className="bg-indigo-600 p-2 rounded-lg group-hover:bg-indigo-700 transition-colors">
               <BookOpen className="w-5 h-5 text-white" />
             </div>
-            <span className="text-lg font-bold text-gray-800">TutorConnect</span>
+            <span className="text-lg font-bold text-slate-800 dark:text-white">TutorConnect</span>
           </div>
 
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-1">Sign in</h2>
-          <p className="text-gray-500 dark:text-gray-400 text-sm mb-8">
+
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">Sign in</h2>
+          <p className="text-gray-500 dark:text-slate-400 text-sm mb-8">
+
             Don&apos;t have an account?{" "}
             <a href="#" className="text-indigo-600 font-medium hover:underline">
               Create one free
@@ -109,8 +123,9 @@ export default function LoginPage({ onLogin }) {
           {/* Google SSO button */}
           <button
             type="button"
-            className="w-full flex items-center justify-center gap-3 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium py-3 rounded-xl text-sm transition-colors shadow-sm mb-6"
+            className="w-full flex items-center justify-center gap-3 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium py-3 rounded-xl text-sm transition-all shadow-sm mb-6"
           >
+
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -143,8 +158,9 @@ export default function LoginPage({ onLogin }) {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="you@example.com"
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/50 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                 />
+
               </div>
             </div>
 
@@ -169,8 +185,9 @@ export default function LoginPage({ onLogin }) {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Enter your password"
-                  className="w-full pl-10 pr-11 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                  className="w-full pl-10 pr-11 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/50 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                 />
+
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
@@ -192,7 +209,7 @@ export default function LoginPage({ onLogin }) {
                   onChange={handleChange}
                   className="sr-only peer"
                 />
-                <div className="w-4 h-4 rounded border border-gray-300 bg-white peer-checked:bg-indigo-600 peer-checked:border-indigo-600 transition-colors flex items-center justify-center">
+                <div className="w-4 h-4 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 peer-checked:bg-indigo-600 peer-checked:border-indigo-600 transition-colors flex items-center justify-center">
                   {formData.remember && (
                     <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 12 10" fill="none">
                       <path d="M1.5 5.5L4.5 8.5L10.5 1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -200,12 +217,12 @@ export default function LoginPage({ onLogin }) {
                   )}
                 </div>
               </div>
-              <span className="text-sm text-gray-600 dark:text-gray-400">Remember me for 30 days</span>
+              <span className="text-sm text-slate-600 dark:text-slate-400">Remember me for 30 days</span>
             </label>
 
             {/* Error message */}
             {error && (
-              <p className="text-red-500 text-sm text-center -mt-1 bg-red-50 border border-red-100 rounded-lg py-2 px-3">
+              <p className="text-red-500 text-sm text-center -mt-1 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-lg py-2 px-3">
                 {error}
               </p>
             )}

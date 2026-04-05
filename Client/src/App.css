@@ -1,9 +1,14 @@
 
 .auth-bg {
-  background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 50%, #fdf4ff 100%);
+  background: linear-gradient(135deg, #f0f4ff 0%, #f5f3ff 50%, #faf5ff 100%);
   background-size: 400% 400%;
-  animation: gradientShift 12s ease infinite;
+  animation: gradientShift 15s ease infinite;
 }
+
+.dark .auth-bg {
+  background: linear-gradient(135deg, #020617 0%, #0f172a 50%, #1e1b4b 100%);
+}
+
 
 @keyframes gradientShift {
   0%   { background-position: 0% 50%; }
@@ -14,9 +19,15 @@
 /* Focus ring polish */
 input:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+  border-color: #4f46e5 !important;
+}
+
+.dark input:focus-visible {
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
   border-color: #6366f1 !important;
 }
+
 
 /* Smooth input transitions */
 input {
@@ -40,10 +51,11 @@ input {
 
 /* Button ripple feel via box-shadow */
 .btn-primary {
-  background: linear-gradient(135deg, #6366f1, #7c3aed);
-  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .btn-primary:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
@@ -55,13 +67,20 @@ input {
 
 /* Glass card */
 .glass-card {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 10px 40px -10px rgba(79, 70, 229, 0.15);
   border-radius: 1.5rem;
 }
+
+.dark .glass-card {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(30, 41, 59, 0.5);
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+}
+
 
 /* Left brand panel gradient */
 .brand-panel {
@@ -104,8 +123,9 @@ input {
   transition: color 0.2s;
 }
 .input-wrapper:focus-within .input-icon {
-  color: #6366f1;
+  color: #4f46e5;
 }
+
 
 /* Divider */
 .or-divider {

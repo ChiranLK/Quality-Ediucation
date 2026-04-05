@@ -78,7 +78,7 @@ function AppContent() {
     case "home":
       return <HomePage onNavigate={(view) => setCurrentView(view)} onNavigateToLogin={() => setCurrentView("login")} />;
     case "login":
-      return <LoginPage onLogin={handleLogin} />;
+      return <LoginPage onLogin={handleLogin} onBack={() => setCurrentView("home")} />;
     case "about":
       return <AboutUs onBack={() => setCurrentView("home")} />;
     case "privacy":
