@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, TrendingUp, Star, MessageSquare, Users, Loader, AlertCircle, ArrowRight, Clock } from 'lucide-react';
+import { 
+  Calendar, TrendingUp, Star, MessageSquare, Users, 
+  Loader, AlertCircle, ArrowRight, Clock, BookOpen 
+} from 'lucide-react';
+
 import customFetch from '../../utils/customfetch';
 
 export default function TutorHome({ user, onNavigate }) {
@@ -15,52 +19,58 @@ export default function TutorHome({ user, onNavigate }) {
 
   useEffect(() => {
     const fetchDashboardData = async () => {
+      if (!user?._id) return;
+      
       try {
         setLoading(true);
         setError(null);
 
-        // Fetch sessions for this tutor
-        const { data: sessionsData } = await customFetch.get(`/tutoring-sessions/tutor/${user?._id}`);
-        const allSessions = sessionsData.sessions || [];
-        
-        // Get current time
+        // Fetch data in parallel for better performance and resilience
+        const [sessionsRes, ratingsRes, feedbacksRes] = await Promise.allSettled([
+          customFetch.get(`/tutoring-sessions/tutor/${user._id}`),
+          customFetch.get(`/feedbacks/tutor/${user._id}/ratings`),
+          customFetch.get(`/feedbacks/tutor/${user._id}`)
+        ]);
+
+        // 1. Process Sessions
+        let allSessions = [];
+        if (sessionsRes.status === 'fulfilled') {
+          allSessions = sessionsRes.value.data.sessions || [];
+        } else if (sessionsRes.reason?.response?.status !== 404) {
+          console.error('Sessions fetch failed:', sessionsRes.reason);
+        }
+
         const now = new Date();
-        
-        // Filter upcoming sessions and sort by date
         const upcomingSessionsList = allSessions
-          .filter(s => {
-            const sessionDate = new Date(s.schedule?.date || s.scheduledDate);
-            return sessionDate > now;
-          })
-          .sort((a, b) => {
-            const dateA = new Date(a.schedule?.date || a.scheduledDate);
-            const dateB = new Date(b.schedule?.date || b.scheduledDate);
-            return dateA - dateB;
-          });
+          .filter(s => new Date(s.schedule?.date || s.scheduledDate) > now)
+          .sort((a, b) => new Date(a.schedule?.date || a.scheduledDate) - new Date(b.schedule?.date || b.scheduledDate));
 
-        const upcomingCount = upcomingSessionsList.length;
-        const nextSessions = upcomingSessionsList.slice(0, 2); // Get next 2 sessions for preview
-        
-        // Get unique students
-        const uniqueStudents = new Set(allSessions.map(s => s.studentId?._id)).size;
+        // 2. Process Ratings
+        let avgRating = 0;
+        if (ratingsRes.status === 'fulfilled') {
+          avgRating = ratingsRes.value.data.averageRating || 0;
+        } else if (ratingsRes.reason?.response?.status !== 404) {
+          console.error('Ratings fetch failed:', ratingsRes.reason);
+        }
 
-        // Fetch ratings
-        const { data: ratingData } = await customFetch.get(`/feedbacks/tutor/${user?._id}/ratings`);
-        const avgRating = ratingData.averageRating || 0;
-
-        // Fetch feedbacks
-        const { data: feedbackData } = await customFetch.get(`/feedbacks/tutor/${user?._id}`);
-        const feedbacksCount = feedbackData.feedbacks ? feedbackData.feedbacks.length : 0;
+        // 3. Process Feedbacks
+        let feedbacksCount = 0;
+        if (feedbacksRes.status === 'fulfilled') {
+          feedbacksCount = feedbacksRes.value.data.feedbacks?.length || 0;
+        } else if (feedbacksRes.reason?.response?.status !== 404) {
+          console.error('Feedbacks fetch failed:', feedbacksRes.reason);
+        }
 
         setStats({
-          upcomingSessions: upcomingCount,
-          studentsCount: uniqueStudents,
+          upcomingSessions: upcomingSessionsList.length,
+          studentsCount: new Set(allSessions.map(s => s.studentId?._id).filter(Boolean)).size,
           averageRating: parseFloat(avgRating),
           feedbacksCount,
-          nextSessions,
+          nextSessions: upcomingSessionsList.slice(0, 2),
         });
+
       } catch (err) {
-        console.error('Failed to fetch dashboard data:', err);
+        console.error('Unexpected dashboard error:', err);
         setError('Failed to load dashboard data');
       } finally {
         setLoading(false);
@@ -171,51 +181,79 @@ export default function TutorHome({ user, onNavigate }) {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-4">
+
         <div 
           onClick={() => onNavigate?.('My Sessions')} 
-          className=",bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg p-6 border border-blue-200 dark:border-blue-700 cursor-pointer hover:shadow-md transition-shadow"
+          className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-100 dark:border-gray-700 cursor-pointer hover:border-indigo-500 hover:shadow-lg transition-all group shadow-sm"
         >
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="font-semibold text-gray-900 dark:text-white">My Sessions</h3>
-            <ArrowRight className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg group-hover:bg-indigo-600 group-hover:text-white transition-colors text-indigo-600 dark:text-indigo-400">
+              <Calendar className="w-5 h-5" />
+            </div>
+            <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-indigo-600 transition-colors" />
           </div>
-          <p className="text-sm text-gray-700 dark:text-gray-300">View and manage your sessions</p>
+          <h3 className="font-bold text-gray-900 dark:text-white mb-1">My Sessions</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed text-left">View and manage your tutoring sessions</p>
         </div>
 
         <div 
           onClick={() => onNavigate?.('Student Progress')} 
-          className=",bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20 rounded-lg p-6 border border-teal-200 dark:border-teal-700 cursor-pointer hover:shadow-md transition-shadow"
+          className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-100 dark:border-gray-700 cursor-pointer hover:border-blue-500 hover:shadow-lg transition-all group shadow-sm"
         >
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="font-semibold text-gray-900 dark:text-white">Student Progress</h3>
-            <ArrowRight className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors text-blue-600 dark:text-blue-400">
+              <TrendingUp className="w-5 h-5" />
+            </div>
+            <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-blue-600 transition-colors" />
           </div>
-          <p className="text-sm text-gray-700 dark:text-gray-300">Track and update progress</p>
+          <h3 className="font-bold text-gray-900 dark:text-white mb-1">Student Progress</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed text-left">Track and update progress</p>
         </div>
 
         <div 
           onClick={() => onNavigate?.('Your Ratings')} 
-          className=",bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 rounded-lg p-6 border border-amber-200 dark:border-amber-700 cursor-pointer hover:shadow-md transition-shadow"
+          className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-100 dark:border-gray-700 cursor-pointer hover:border-amber-500 hover:shadow-lg transition-all group shadow-sm"
         >
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="font-semibold text-gray-900 dark:text-white">Your Ratings</h3>
-            <ArrowRight className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2 bg-amber-50 dark:bg-amber-900/30 rounded-lg group-hover:bg-amber-600 group-hover:text-white transition-colors text-amber-600 dark:text-amber-400">
+              <Star className="w-5 h-5" />
+            </div>
+            <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-amber-600 transition-colors" />
           </div>
-          <p className="text-sm text-gray-700 dark:text-gray-300">View rating statistics</p>
+          <h3 className="font-bold text-gray-900 dark:text-white mb-1">Your Ratings</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed text-left">View rating statistics</p>
         </div>
 
         <div 
           onClick={() => onNavigate?.('Feedbacks')} 
-          className=",bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg p-6 border border-purple-200 dark:border-purple-700 cursor-pointer hover:shadow-md transition-shadow"
+          className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-100 dark:border-gray-700 cursor-pointer hover:border-purple-500 hover:shadow-lg transition-all group shadow-sm"
         >
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="font-semibold text-gray-900 dark:text-white">Feedbacks</h3>
-            <ArrowRight className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg group-hover:bg-purple-600 group-hover:text-white transition-colors text-purple-600 dark:text-purple-400">
+              <MessageSquare className="w-5 h-5" />
+            </div>
+            <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-purple-600 transition-colors" />
           </div>
-          <p className="text-sm text-gray-700 dark:text-gray-300">Read feedback from students</p>
+          <h3 className="font-bold text-gray-900 dark:text-white mb-1">Feedbacks</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed text-left">Read feedback from students</p>
+        </div>
+        
+        <div 
+          onClick={() => onNavigate?.('study-materials')} 
+          className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-100 dark:border-gray-700 cursor-pointer hover:border-indigo-500 hover:shadow-lg transition-all group shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-400"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg group-hover:bg-indigo-600 group-hover:text-white transition-colors text-indigo-600 dark:text-indigo-400">
+              <BookOpen className="w-5 h-5" />
+            </div>
+            <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-indigo-600 transition-colors" />
+          </div>
+          <h3 className="font-bold text-gray-900 dark:text-white mb-1">Study Materials</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed text-left">Upload and manage learning resources</p>
         </div>
       </div>
+
     </div>
   );
 }

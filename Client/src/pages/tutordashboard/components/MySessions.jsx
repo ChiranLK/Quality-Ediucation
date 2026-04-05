@@ -123,11 +123,12 @@ export default function MySessions({ user }) {
           </div>
           <button
             onClick={handleCreate}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
           >
             <Plus className="w-4 h-4" />
             New Session
           </button>
+
         </div>
       </div>
 
@@ -151,11 +152,12 @@ export default function MySessions({ user }) {
           <p className="text-gray-600 dark:text-gray-400 mb-6">Start by creating your first tutoring session</p>
           <button
             onClick={handleCreate}
-            className="inline-flex items-center gap-2 px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+            className="inline-flex items-center gap-2 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
           >
             <Plus className="w-4 h-4" />
             Create Your First Session
           </button>
+
         </div>
       ) : (
         <div className="space-y-3">

@@ -82,44 +82,44 @@ const SessionDetails = ({ sessionId, onBack }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          {/* Session Info */}
+/* Session Info */
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 uppercase tracking-wide text-xs">
               Session Information
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex items-center gap-3">
-                <CalendarDays className="w-5 h-5 text-emerald-600" />
+                <CalendarDays className="w-5 h-5 text-indigo-600" />
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Date</p>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">
+                  <p className="text-[10px] uppercase font-bold text-gray-400 dark:text-gray-500">Date</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                     {formatDate(session.date)}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <Clock className="w-5 h-5 text-emerald-600" />
+                <Clock className="w-5 h-5 text-indigo-600" />
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Time</p>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">
+                  <p className="text-[10px] uppercase font-bold text-gray-400 dark:text-gray-500">Time</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                     {formatTime(session.startTime)} - {formatTime(session.endTime)}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <Users className="w-5 h-5 text-emerald-600" />
+                <Users className="w-5 h-5 text-indigo-600" />
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Students</p>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">
+                  <p className="text-[10px] uppercase font-bold text-gray-400 dark:text-gray-500">Students</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                     {session.enrolledStudents}/{session.maxStudents} enrolled
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <MapPin className="w-5 h-5 text-emerald-600" />
+                <MapPin className="w-5 h-5 text-indigo-600" />
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Location</p>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">
+                  <p className="text-[10px] uppercase font-bold text-gray-400 dark:text-gray-500">Location</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                     {session.location || 'Online'}
                   </p>
                 </div>
@@ -131,12 +131,12 @@ const SessionDetails = ({ sessionId, onBack }) => {
           {session.description && (
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
               <div className="flex items-center gap-2 mb-4">
-                <FileText className="w-5 h-5 text-emerald-600" />
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                <FileText className="w-5 h-5 text-indigo-600" />
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-wide text-xs">
                   Description
                 </h2>
               </div>
-              <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                 {session.description}
               </p>
             </div>
@@ -146,13 +146,13 @@ const SessionDetails = ({ sessionId, onBack }) => {
         <div className="space-y-6">
           {/* Status */}
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Status</h3>
-            <span className={`px-3 py-1 text-sm rounded-full ${
+            <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-3 uppercase tracking-wide text-[10px]">Status</h3>
+            <span className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-full ${
               session.status === 'upcoming'
-                ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
                 : session.status === 'ongoing'
-                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                : 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300'
+                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'
+                : 'bg-gray-100 text-gray-700 dark:bg-gray-700/40 dark:text-gray-300'
             }`}>
               {session.status}
             </span>
@@ -160,20 +160,21 @@ const SessionDetails = ({ sessionId, onBack }) => {
 
           {/* Enrolled Students */}
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Enrolled Students</h3>
+            <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 uppercase tracking-wide text-[10px]">Enrolled Students</h3>
             {session.students && session.students.length > 0 ? (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {session.students.map((student) => (
                   <div key={student.id} className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center">
-                      <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
-                        {student.name.charAt(0)}
+                    <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center">
+                      <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                        {student.name.charAt(0).toUpperCase()}
                       </span>
                     </div>
-                    <span className="text-sm text-gray-700 dark:text-gray-300">{student.name}</span>
+                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{student.name}</span>
                   </div>
                 ))}
               </div>
+
             ) : (
               <p className="text-sm text-gray-500 dark:text-gray-400">No students enrolled yet.</p>
             )}

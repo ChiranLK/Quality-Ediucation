@@ -11,7 +11,7 @@ import customFetch from '../../../utils/customfetch';
 const GRADE_OPTIONS = [
   'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5',
   'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10',
-  'Grade 11', 'Grade 12', 'A/L', 'O/L', 'University', 'Other'
+  'Grade 11', 'Grade 12', 'Grade 13', 'Other'
 ];
 
 const SUBJECT_OPTIONS = [
@@ -19,6 +19,7 @@ const SUBJECT_OPTIONS = [
   'Sinhala', 'History', 'Geography', 'Science', 'ICT',
   'Economics', 'Business Studies', 'Art', 'Music', 'Other'
 ];
+
 
 function getFileIcon(url = '') {
   if (!url) return <File className="w-5 h-5" />;
@@ -51,9 +52,12 @@ function Toast({ toast, onClose }) {
   return (
     <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-2xl text-sm font-medium transition-all animate-in slide-in-from-bottom-4 duration-300 ${
       toast.type === 'success'
-        ? 'bg-emerald-600 text-white'
+        ? 'bg-indigo-600 text-white'
         : 'bg-red-600 text-white'
     }`}>
+
+
+
       {toast.type === 'success'
         ? <CheckCircle className="w-4 h-4 flex-shrink-0" />
         : <AlertCircle className="w-4 h-4 flex-shrink-0" />}
@@ -74,14 +78,26 @@ function MaterialModal({ mode, material, onClose, onSuccess }) {
     grade: material?.grade || '',
     tags: material?.tags?.join(', ') || '',
     status: material?.status || 'active',
+    manualSubject: '',
   });
+  const [showManualSubject, setShowManualSubject] = useState(material?.subject && !SUBJECT_OPTIONS.map(s => s.toLowerCase()).includes(material.subject.toLowerCase()));
+
   const [file, setFile] = useState(null);
   const [dragOver, setDragOver] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const fileRef = useRef();
 
-  const handleChange = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name === 'subject' && value === 'other') {
+      setShowManualSubject(true);
+    } else if (name === 'subject') {
+      setShowManualSubject(false);
+    }
+    setForm(f => ({ ...f, [name]: value }));
+  };
+
 
   const handleFileSelect = (f) => {
     if (!f) return;
@@ -117,7 +133,10 @@ function MaterialModal({ mode, material, onClose, onSuccess }) {
       const fd = new FormData();
       fd.append('title', form.title.trim());
       fd.append('description', form.description.trim());
-      fd.append('subject', form.subject.trim().toLowerCase());
+      
+      const finalSubject = (form.subject === 'other' ? form.manualSubject : form.subject).trim().toLowerCase();
+      fd.append('subject', finalSubject);
+      
       fd.append('grade', form.grade.trim());
       fd.append('status', form.status);
 
@@ -143,15 +162,17 @@ function MaterialModal({ mode, material, onClose, onSuccess }) {
     }
   };
 
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800">
           <div className="flex items-center gap-3">
-            <div className="bg-emerald-100 dark:bg-emerald-900/40 p-2 rounded-xl">
-              {mode === 'create' ? <Upload className="w-5 h-5 text-emerald-600 dark:text-emerald-400" /> : <Edit3 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />}
+            <div className="bg-indigo-100 dark:bg-indigo-900/40 p-2 rounded-xl">
+              {mode === 'create' ? <Upload className="w-5 h-5 text-indigo-600 dark:text-indigo-400" /> : <Edit3 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
             </div>
+
             <div>
               <h2 className="text-lg font-bold text-gray-900 dark:text-white">
                 {mode === 'create' ? 'Upload Study Material' : 'Edit Study Material'}
@@ -174,10 +195,11 @@ function MaterialModal({ mode, material, onClose, onSuccess }) {
             onDragLeave={() => setDragOver(false)}
             onDrop={(e) => { e.preventDefault(); setDragOver(false); handleFileSelect(e.dataTransfer.files[0]); }}
             className={`relative border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${
-              dragOver ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' :
-              file ? 'border-emerald-400 bg-emerald-50 dark:bg-emerald-900/10' :
-              'border-gray-200 dark:border-gray-700 hover:border-emerald-400 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10'
+              dragOver ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' :
+              file ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-900/10' :
+              'border-slate-200 dark:border-gray-700 hover:border-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/10'
             }`}
+
           >
             <input ref={fileRef} type="file" className="hidden"
               accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif,.webp"
@@ -186,7 +208,8 @@ function MaterialModal({ mode, material, onClose, onSuccess }) {
               <div className="flex items-center justify-center gap-3">
                 {getFileIcon(file.name)}
                 <div className="text-left">
-                  <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">{file.name}</p>
+                  <p className="text-sm font-semibold text-indigo-700 dark:text-indigo-400">{file.name}</p>
+
                   <p className="text-xs text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
                 </div>
                 <button type="button" onClick={(e) => { e.stopPropagation(); setFile(null); }}
@@ -212,9 +235,10 @@ function MaterialModal({ mode, material, onClose, onSuccess }) {
             </label>
             <input
               name="title" value={form.title} onChange={handleChange} required
-              placeholder="e.g. Algebra Chapter 3 – Quadratic Equations"
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder-gray-400"
+              placeholder="Enter Title"
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400"
             />
+
           </div>
 
           {/* Description */}
@@ -225,8 +249,9 @@ function MaterialModal({ mode, material, onClose, onSuccess }) {
             <textarea
               name="description" value={form.description} onChange={handleChange} required rows={3}
               placeholder="Briefly describe what this material covers..."
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder-gray-400 resize-none"
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400 resize-none"
             />
+
           </div>
 
           {/* Subject + Grade */}
@@ -237,20 +262,35 @@ function MaterialModal({ mode, material, onClose, onSuccess }) {
               </label>
               <select
                 name="subject" value={form.subject} onChange={handleChange} required
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
+
                 <option value="">Select subject</option>
                 {SUBJECT_OPTIONS.map(s => <option key={s} value={s.toLowerCase()}>{s}</option>)}
               </select>
             </div>
+            {showManualSubject && (
+              <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Add Subject <span className="text-red-500">*</span>
+                </label>
+                <input
+                  name="manualSubject" value={form.manualSubject} onChange={handleChange} required
+                  placeholder="Enter Subject Name"
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400"
+                />
+              </div>
+            )}
             <div>
+
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                 Grade <span className="text-red-500">*</span>
               </label>
               <select
                 name="grade" value={form.grade} onChange={handleChange} required
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
+
                 <option value="">Select grade</option>
                 {GRADE_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
               </select>
@@ -265,8 +305,9 @@ function MaterialModal({ mode, material, onClose, onSuccess }) {
             <input
               name="tags" value={form.tags} onChange={handleChange}
               placeholder="e.g. algebra, equations, chapter3"
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder-gray-400"
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400"
             />
+
           </div>
 
           {/* Status */}
@@ -274,8 +315,9 @@ function MaterialModal({ mode, material, onClose, onSuccess }) {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Status</label>
             <select
               name="status" value={form.status} onChange={handleChange}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
+
               <option value="active">Active – visible to students</option>
               <option value="pending">Pending – under review</option>
               <option value="archived">Archived – hidden</option>
@@ -297,10 +339,11 @@ function MaterialModal({ mode, material, onClose, onSuccess }) {
               Cancel
             </button>
             <button type="submit" disabled={loading}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {mode === 'create' ? 'Upload Material' : 'Save Changes'}
             </button>
+
           </div>
         </form>
       </div>
@@ -346,17 +389,19 @@ function MaterialCard({ material, onEdit, onDelete, onDownload, onToggleStatus }
   const badge = getFileTypeBadge(material.fileUrl);
 
   const statusColors = {
-    active: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+    active: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
     pending: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
     archived: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
   };
+
 
   const isPublished = material.status === 'active';
 
   return (
     <div className="group bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
       {/* Top Accent */}
-      <div className={`h-1.5 ${isPublished ? 'bg-gradient-to-r from-emerald-400 to-teal-500' : 'bg-gray-300 dark:bg-gray-600'}`} />
+      <div className={`h-1.5 ${isPublished ? 'bg-gradient-to-r from-indigo-400 to-indigo-600' : 'bg-gray-300 dark:bg-gray-600'}`} />
+
 
       <div className="p-5">
         {/* Header */}
@@ -382,9 +427,10 @@ function MaterialCard({ material, onEdit, onDelete, onDownload, onToggleStatus }
               {isPublished ? <X className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
             </button>
             <button onClick={() => onEdit(material)} title="Edit"
-              className="p-1.5 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors text-gray-500 hover:text-emerald-600">
+              className="p-1.5 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors text-gray-500 hover:text-indigo-600">
               <Edit3 className="w-4 h-4" />
             </button>
+
             <button onClick={() => onDelete(material)} title="Delete"
               className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors text-gray-500 hover:text-red-600">
               <Trash2 className="w-4 h-4" />
@@ -434,11 +480,12 @@ function MaterialCard({ material, onEdit, onDelete, onDownload, onToggleStatus }
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => onDownload(material._id)}
-            className="flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
+            className="flex items-center gap-1 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
           >
             <Download className="w-3 h-3" />
             Open
           </a>
+
         </div>
       </div>
     </div>
@@ -475,10 +522,11 @@ export default function StudyMaterials({ user }) {
       const { data } = await customFetch.get(`/materials/my?${params}`);
       setMaterials(data.data || []);
       setPagination({
-        current: data.pagination?.currentPage || 1,
-        total: data.pagination?.totalPages || 1,
-        count: data.pagination?.totalCount || 0,
+        current: data.pagination?.current || 1,
+        total: data.pagination?.pages || 1,
+        count: data.pagination?.total || 0,
       });
+
     } catch (err) {
       showToast('Failed to load materials.', 'error');
     } finally {
@@ -550,24 +598,27 @@ export default function StudyMaterials({ user }) {
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <BookOpen className="w-6 h-6 text-emerald-600" />
+            <BookOpen className="w-6 h-6 text-indigo-600" />
             My Study Materials
           </h2>
+
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             {pagination.count} material{pagination.count !== 1 ? 's' : ''} uploaded
           </p>
         </div>
         <button
           onClick={() => setModal({ type: 'create' })}
-          className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium text-sm shadow-sm transition-colors"
+          className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium text-sm shadow-sm transition-colors"
         >
           <Plus className="w-4 h-4" />
           Upload Material
         </button>
+
       </div>
 
       {/* Search + Filter Bar */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4 shadow-sm">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-slate-200 dark:border-gray-700 p-4 shadow-md">
+
         <div className="flex gap-3 flex-wrap">
           <form onSubmit={handleSearch} className="flex flex-1 min-w-[200px] gap-2">
             <div className="relative flex-1">
@@ -576,41 +627,47 @@ export default function StudyMaterials({ user }) {
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Search by title, description, or tags..."
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder-gray-400"
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400"
               />
+
             </div>
             <button type="submit"
-              className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-medium transition-colors">
+              className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-medium transition-colors">
               Search
             </button>
+
           </form>
           <button
             onClick={() => setShowFilters(f => !f)}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors ${
-              showFilters ? 'bg-emerald-50 border-emerald-300 text-emerald-700 dark:bg-emerald-900/20 dark:border-emerald-700 dark:text-emerald-400'
-              : 'border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+              showFilters ? 'bg-indigo-50 border-indigo-300 text-indigo-700 dark:bg-indigo-900/20 dark:border-indigo-700 dark:text-indigo-400'
+              : 'border-slate-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
             }`}
           >
             <Filter className="w-4 h-4" />
-            Filters {hasFilters && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
+            Filters {hasFilters && <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />}
           </button>
+
         </div>
 
         {/* Filter Dropdowns */}
         {showFilters && (
           <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700 flex flex-wrap gap-3">
             <select value={filterSubject} onChange={e => setFilterSubject(e.target.value)}
-              className="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              className="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
               <option value="">All Subjects</option>
               {SUBJECT_OPTIONS.map(s => <option key={s} value={s.toLowerCase()}>{s}</option>)}
             </select>
             <select value={filterGrade} onChange={e => setFilterGrade(e.target.value)}
-              className="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              className="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
               <option value="">All Grades</option>
               {GRADE_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
             </select>
             <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
-              className="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              className="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
               <option value="">All Statuses</option>
               <option value="active">Active</option>
               <option value="pending">Pending</option>
@@ -630,15 +687,17 @@ export default function StudyMaterials({ user }) {
       {loading ? (
         <div className="flex items-center justify-center py-24">
           <div className="flex flex-col items-center gap-3">
-            <Loader2 className="w-10 h-10 text-emerald-600 animate-spin" />
+            <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
+
             <p className="text-sm text-gray-500 dark:text-gray-400">Loading materials...</p>
           </div>
         </div>
       ) : materials.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <div className="bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-2xl mb-4">
-            <BookOpen className="w-12 h-12 text-emerald-400 mx-auto" />
+          <div className="bg-indigo-50 dark:bg-indigo-900/20 p-6 rounded-2xl mb-4">
+            <BookOpen className="w-12 h-12 text-indigo-400 mx-auto" />
           </div>
+
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
             {hasFilters ? 'No materials found' : 'No materials yet'}
           </h3>
@@ -649,11 +708,12 @@ export default function StudyMaterials({ user }) {
           </p>
           {!hasFilters && (
             <button onClick={() => setModal({ type: 'create' })}
-              className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium text-sm transition-colors">
+              className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium text-sm transition-colors">
               <Plus className="w-4 h-4" />
               Upload Your First Material
             </button>
           )}
+
         </div>
       ) : (
         <>
