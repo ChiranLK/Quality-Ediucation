@@ -3,10 +3,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
 import {
   Send, BookOpen, Globe, Tag, FileText, AlertCircle,
-  CheckCircle2, Loader2, ChevronDown, X,
+  CheckCircle2, Loader2, ChevronDown, X, MessageSquare, Eye,
 } from "lucide-react";
 import customFetch from "../../utils/customfetch";
 import HelpRequestVideo from "../../components/HelpRequestVideo";
+import CardSlideshow from "../../components/CardSlideshow";
+import SubmittedMessagesModal from "./components/SubmittedMessagesModal";
 
 
 const CATEGORIES = [
@@ -142,6 +144,60 @@ export default function HelpRequest({ user }) {
   const [errors, setErrors]   = useState({});
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [showMessagesModal, setShowMessagesModal] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Slideshow cards
+  const slideshowCards = [
+    {
+      badge: "💡 Pro Tip",
+      title: "Be Specific & Clear",
+      description: "The more detailed your request, the faster tutors can help. Include what you've tried and where you're stuck.",
+      action: (
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="inline-block"
+        >
+          <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold transition-colors">
+            Learn More
+          </button>
+        </motion.div>
+      ),
+    },
+    {
+      badge: "🌍 Language Support",
+      title: "Request Help in Your Language",
+      description: "We support 9 different languages! Choose your preferred language to communicate comfortably with tutors.",
+      action: (
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="inline-block"
+        >
+          <button className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold transition-colors">
+            View Languages
+          </button>
+        </motion.div>
+      ),
+    },
+    {
+      badge: "⚡ Quick Response",
+      title: "Get Help Instantly",
+      description: "Once you submit, available tutors will see your request immediately. Average response time is under 5 minutes!",
+      action: (
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="inline-block"
+        >
+          <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-colors">
+            Ready to Go
+          </button>
+        </motion.div>
+      ),
+    },
+  ];
 
 
   const validate = () => {
@@ -183,6 +239,7 @@ export default function HelpRequest({ user }) {
       setForm(INITIAL);
       setErrors({});
       setSubmitted(true);
+      setRefreshTrigger(prev => prev + 1); // Trigger modal refresh
       setTimeout(() => setSubmitted(false), 4000);
     } catch (err) {
       const msg = err?.response?.data?.msg || "Failed to submit. Please try again.";
@@ -205,14 +262,27 @@ export default function HelpRequest({ user }) {
         transition={{ duration: 0.45 }}
         className="mb-8"
       >
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-200">
-            <BookOpen className="w-5 h-5 text-white" />
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-200">
+              <BookOpen className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Ask for Help</h1>
+              <p className="text-xs text-gray-400 dark:text-gray-500">Your request will be visible to all available tutors</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Ask for Help</h1>
-            <p className="text-xs text-gray-400 dark:text-gray-500">Your request will be visible to all available tutors</p>
-          </div>
+
+          {/* View Submitted Messages Button */}
+          <motion.button
+            onClick={() => setShowMessagesModal(true)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900 transition-colors font-medium text-sm"
+          >
+            <Eye className="w-4 h-4" />
+            <span>My Submissions</span>
+          </motion.button>
         </div>
 
         {/* Public notice */}
@@ -250,6 +320,29 @@ export default function HelpRequest({ user }) {
 
     
       <HelpRequestVideo />
+
+      {/* ── Slideshow Tips Section ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+        className="mb-8"
+      >
+        <div className="flex items-center gap-2 mb-4">
+          <MessageSquare className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+            Tips for Success
+          </h2>
+        </div>
+        <CardSlideshow
+          cards={slideshowCards}
+          autoPlay={true}
+          autoPlayInterval={5000}
+          showIndicators={true}
+          showNavigation={true}
+          height="h-52"
+        />
+      </motion.div>
 
       {/* ── Card form ── */}
       <motion.div
@@ -369,6 +462,13 @@ export default function HelpRequest({ user }) {
           </p>
         </form>
       </motion.div>
+
+      {/* ── Submitted Messages Modal ── */}
+      <SubmittedMessagesModal
+        isOpen={showMessagesModal}
+        onClose={() => setShowMessagesModal(false)}
+        triggerRefresh={refreshTrigger}
+      />
     </div>
   );
 }
