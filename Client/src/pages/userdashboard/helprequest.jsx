@@ -8,7 +8,7 @@ import {
 import customFetch from "../../utils/customfetch";
 import HelpRequestVideo from "../../components/HelpRequestVideo";
 
-// ─── Static data ────────────────────────────────────────────────
+
 const CATEGORIES = [
   { value: "Mathematics",       label: "Mathematics",       color: "bg-indigo-100 text-indigo-700" },
   { value: "Science",    label: "Science",            color: "bg-emerald-100 text-emerald-700" },
@@ -33,7 +33,7 @@ const LANGUAGES = [
   { value: "Japanese",   label: "Japanese",   flag: "🇯🇵" },
 ];
 
-// ─── Field wrapper ───────────────────────────────────────────────
+
 function Field({ label, icon: Icon, required, error, children }) {
   return (
     <motion.div
@@ -65,7 +65,7 @@ function Field({ label, icon: Icon, required, error, children }) {
   );
 }
 
-// ─── Custom select ────────────────────────────────────────────────
+
 function CustomSelect({ value, onChange, options, placeholder, error }) {
   const [open, setOpen] = useState(false);
   const selected = options.find((o) => o.value === value);
@@ -121,7 +121,7 @@ function CustomSelect({ value, onChange, options, placeholder, error }) {
   );
 }
 
-// ─── Character counter ────────────────────────────────────────────
+
 function CharCount({ value, max }) {
   const pct = (value.length / max) * 100;
   const color = pct > 90 ? "text-red-500" : pct > 70 ? "text-yellow-500" : "text-gray-400";
@@ -132,7 +132,7 @@ function CharCount({ value, max }) {
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────
+
 const INITIAL = { title: "", message: "", category: "", language: "English" };
 const TITLE_MAX = 50;
 const MSG_MAX   = 1000;
@@ -143,7 +143,7 @@ export default function HelpRequest({ user }) {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  // ── Validation ──────────────────────────────────────────────────
+
   const validate = () => {
     const e = {};
     if (!form.title.trim())            e.title    = "Title is required.";
@@ -160,7 +160,7 @@ export default function HelpRequest({ user }) {
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
-  // ── Submit ───────────────────────────────────────────────────────
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
@@ -248,7 +248,7 @@ export default function HelpRequest({ user }) {
         )}
       </AnimatePresence>
 
-      {/* ── Supporting Video ── */}
+    
       <HelpRequestVideo />
 
       {/* ── Card form ── */}
