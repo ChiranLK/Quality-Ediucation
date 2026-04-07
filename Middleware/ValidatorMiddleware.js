@@ -114,3 +114,26 @@ export const validateMessageInput = withValidationError([
       return true;
     }),
 ]);
+
+// Validation middleware for updating messages (all fields optional but validated if provided)
+export const validateMessageUpdate = withValidationError([
+  body("title")
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage("Title must be between 2 and 50 characters"),
+
+  body("message")
+    .optional()
+    .trim()
+    .isLength({ min: 10, max: 1000 })
+    .withMessage("Message must be between 10 and 1000 characters"),
+    
+  body("category")
+    .optional()
+    .trim(),
+
+  body("language")
+    .optional()
+    .trim(),
+]);

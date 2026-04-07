@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {createMessage, getAllMessages, updateMessage, deleteMessage} from "../Controllers/messageContoller.js";
 import { authenticateUser, authorizePermissions } from "../Middleware/authMiddleware.js";
-import { validateMessageInput } from "../Middleware/ValidatorMiddleware.js";
+import { validateMessageInput, validateMessageUpdate } from "../Middleware/ValidatorMiddleware.js";
 import { uploadMessageImage } from "../Middleware/uploadMiddleware.js";
 
 const router = Router();
@@ -25,7 +25,7 @@ router.patch(
      authenticateUser,
      authorizePermissions("user"),
      uploadMessageImage,
-     validateMessageInput,
+     validateMessageUpdate,
      updateMessage);
 
 router.delete(
