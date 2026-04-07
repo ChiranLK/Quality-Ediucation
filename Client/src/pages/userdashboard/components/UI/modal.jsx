@@ -2,11 +2,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
 
-/**
- * Professional Card Modal Component
- * Features: Multi-card support, smooth animations, keyboard navigation, accessibility
- */
-
 const backdropVariants = {
   initial: { opacity: 0 },
   animate: { opacity: 1 },
@@ -61,6 +56,8 @@ export default function CardModal({
   onCardChange = null,
   closeOnBackdropClick = true,
   closeOnEsc = true,
+  showCloseButton = true,
+  maxWidth = "max-w-xl",
 }) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [direction, setDirection] = useState(0);
@@ -144,18 +141,19 @@ export default function CardModal({
             initial="initial"
             animate="animate"
             exit="exit"
-            className="relative z-10 w-full max-w-2xl mx-4"
+            className={`relative z-10 w-full ${maxWidth} mx-2 sm:mx-4`}
           >
-            {/* Close Button */}
+            {showCloseButton && (
             <motion.button
               onClick={onClose}
               whileHover={{ scale: 1.1, rotate: 90 }}
               whileTap={{ scale: 0.95 }}
-              className="absolute -top-10 right-0 p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white/30"
+              className="absolute -top-8 sm:-top-10 right-0 sm:right-0 p-1.5 sm:p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white/30"
               aria-label="Close modal"
             >
-              <X className="w-6 h-6" />
+              <X className="w-5 h-5 sm:w-6 sm:h-6" />
             </motion.button>
+            )}
 
             {/* Cards Container */}
             {currentCard ? (
@@ -180,7 +178,7 @@ export default function CardModal({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.2 }}
-                        className="w-full h-64 overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-700"
+                        className="w-full h-32 sm:h-40 md:h-48 overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-700"
                       >
                         <img
                           src={currentCard.image}
@@ -191,16 +189,16 @@ export default function CardModal({
                     )}
 
                     {/* Card Content */}
-                    <div className="p-8">
+                    <div className="p-4 sm:p-6 md:p-8">
                       {/* Badge */}
                       {currentCard.badge && (
                         <motion.div
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.1 }}
-                          className="mb-4"
+                          className="mb-2 sm:mb-4"
                         >
-                          <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-full text-xs font-semibold uppercase tracking-wider">
+                          <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-full text-xs font-semibold uppercase tracking-wider">
                             {currentCard.badge}
                           </span>
                         </motion.div>
@@ -212,7 +210,7 @@ export default function CardModal({
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.15 }}
-                          className="text-3xl font-bold text-gray-900 dark:text-white mb-3"
+                          className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3"
                         >
                           {currentCard.title}
                         </motion.h2>
@@ -224,7 +222,7 @@ export default function CardModal({
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.2 }}
-                          className="text-lg text-gray-600 dark:text-gray-400 mb-4"
+                          className="text-base sm:text-lg text-gray-600 dark:text-gray-400 mb-2 sm:mb-4"
                         >
                           {currentCard.subtitle}
                         </motion.p>
@@ -236,7 +234,7 @@ export default function CardModal({
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.25 }}
-                          className="text-gray-700 dark:text-gray-300 leading-relaxed mb-6"
+                          className="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed mb-4 sm:mb-6"
                         >
                           {typeof currentCard.description === "string" ? (
                             <p>{currentCard.description}</p>
@@ -292,20 +290,20 @@ export default function CardModal({
                       onClick={handlePrevious}
                       whileHover={{ scale: 1.1, x: -4 }}
                       whileTap={{ scale: 0.95 }}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 -translate-x-12 p-3 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl text-gray-900 dark:text-white transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 -translate-x-10 sm:-translate-x-12 p-2 sm:p-3 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl text-gray-900 dark:text-white transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       aria-label="Previous card"
                     >
-                      <ChevronLeft className="w-6 h-6" />
+                      <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
                     </motion.button>
 
                     <motion.button
                       onClick={handleNext}
                       whileHover={{ scale: 1.1, x: 4 }}
                       whileTap={{ scale: 0.95 }}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 translate-x-12 p-3 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl text-gray-900 dark:text-white transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 translate-x-10 sm:translate-x-12 p-2 sm:p-3 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl text-gray-900 dark:text-white transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       aria-label="Next card"
                     >
-                      <ChevronRight className="w-6 h-6" />
+                      <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
                     </motion.button>
                   </>
                 )}
@@ -322,7 +320,7 @@ export default function CardModal({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="flex items-center justify-center gap-2 mt-6"
+                className="flex items-center justify-center gap-2 mt-4 sm:mt-6"
               >
                 {cards.map((_, index) => (
                   <motion.button
@@ -347,7 +345,7 @@ export default function CardModal({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
-                className="text-center mt-4 text-sm text-white/70"
+                className="text-center mt-2 sm:mt-4 text-xs sm:text-sm text-white/70"
               >
                 {currentIndex + 1} / {totalCards}
               </motion.div>
