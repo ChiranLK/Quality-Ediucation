@@ -23,6 +23,7 @@ export default function HelpRequest({ user }) {
   const [submitted, setSubmitted] = useState(false);
   const [showMessagesModal, setShowMessagesModal] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [formUILanguage, setFormUILanguage] = useState("English");
 
   const validate = () => {
     const e = {};
@@ -38,6 +39,10 @@ export default function HelpRequest({ user }) {
   const handleFormChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
+  };
+
+  const handleLanguageChange = (language) => {
+    setFormUILanguage(language);
   };
 
   const handleSubmit = async (e) => {
@@ -56,6 +61,7 @@ export default function HelpRequest({ user }) {
         message: form.message.trim(),
         category: form.category,
         language: form.language,
+        formUILanguage, // Send the form UI language for translation
       });
 
       toast.success("Your request has been published to all tutors! 🎉");
@@ -97,6 +103,7 @@ export default function HelpRequest({ user }) {
         errors={errors}
         loading={loading}
         onFormChange={handleFormChange}
+        onLanguageChange={handleLanguageChange}
         onSubmit={handleSubmit}
       />
 

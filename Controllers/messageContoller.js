@@ -13,19 +13,20 @@ export const createMessage = async (req, res) => {
 
   try {
     // Validate required fields
-      const { message } = req.body || {};
+    const { message, title, formUILanguage } = req.body || {};
 
-    if (!message) {
-      throw new BadRequestError("message is required");
+    if (!message || !title) {
+      throw new BadRequestError("title and message are required");
     }
 
     // Track uploaded file for cleanup on error
     uploadedFile = req.file;
 
-    // Process message with translation service
+    // Process message with translation service (translate to English based on formUILanguage)
     const messagePayload = await createMessageWithTranslation(
       req.body,
       { userId: req.user.userId },
+      formUILanguage || "English", // Default to English if not provided
       req.file
     );
 

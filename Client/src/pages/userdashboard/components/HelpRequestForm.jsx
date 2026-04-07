@@ -1,9 +1,12 @@
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, FileText, Tag, Globe, Loader2 } from "lucide-react";
 import Field from "./Field";
 import CustomSelect from "./CustomSelect";
 import CharCount from "./CharCount";
+import FormLanguageSelector from "./FormLanguageSelector";
 import { CATEGORIES, LANGUAGES, TITLE_MAX, MSG_MAX } from "./helpRequestConstants";
+import { translations } from "./translations";
 
 export default function HelpRequestForm({
   form,
@@ -11,8 +14,19 @@ export default function HelpRequestForm({
   loading,
   onFormChange,
   onSubmit,
+  onLanguageChange,
 }) {
+  const [formLanguage, setFormLanguage] = useState("English");
+  const t = translations[formLanguage];
   const selectedCategory = CATEGORIES.find((c) => c.value === form.category);
+
+  // Handle language change and notify parent
+  const handleLanguageChange = (newLanguage) => {
+    setFormLanguage(newLanguage);
+    if (onLanguageChange) {
+      onLanguageChange(newLanguage);
+    }
+  };
 
   return (
     <motion.div
@@ -21,16 +35,24 @@ export default function HelpRequestForm({
       transition={{ delay: 0.1, duration: 0.5 }}
       className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-7"
     >
+      {/* Language Selector - Top Right */}
+      <div className="flex justify-end mb-6">
+        <FormLanguageSelector 
+          selectedLanguage={formLanguage}
+          onChange={handleLanguageChange}
+        />
+      </div>
+
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-6">
         {/* Title */}
-        <Field label="Request Title" icon={FileText} required error={errors.title}>
+        <Field label={t.formLabels.title} icon={FileText} required error={errors.title}>
           <div className="relative">
             <input
               type="text"
               value={form.title}
               onChange={(e) => onFormChange("title", e.target.value)}
               maxLength={TITLE_MAX}
-              placeholder="e.g. I need help understanding integration by parts"
+              placeholder={t.placeholders.title}
               className={`w-full px-4 py-3 rounded-xl border text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-800
                 focus:outline-none focus:ring-2 focus:border-transparent transition-all
                 ${errors.title ? "border-red-300 focus:ring-red-200" : "border-gray-200 dark:border-gray-700 focus:ring-indigo-200 hover:border-indigo-300"}`}
@@ -43,22 +65,22 @@ export default function HelpRequestForm({
 
         {/* Category + Language (side by side) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <Field label="Category" icon={Tag} required error={errors.category}>
+          <Field label={t.formLabels.category} icon={Tag} required error={errors.category}>
             <CustomSelect
               value={form.category}
               onChange={(v) => onFormChange("category", v)}
               options={CATEGORIES}
-              placeholder="Select a subject"
+              placeholder={t.placeholders.category}
               error={errors.category}
             />
           </Field>
 
-          <Field label="Language" icon={Globe} required error={errors.language}>
+          <Field label={t.formLabels.language} icon={Globe} required error={errors.language}>
             <CustomSelect
               value={form.language}
               onChange={(v) => onFormChange("language", v)}
               options={LANGUAGES}
-              placeholder="Select language"
+              placeholder={t.placeholders.language}
               error={errors.language}
             />
           </Field>
@@ -74,7 +96,7 @@ export default function HelpRequestForm({
               exit={{ opacity: 0, scale: 0.9 }}
               className="flex items-center gap-2 -mt-2"
             >
-              <span className="text-xs text-gray-400">Selected topic:</span>
+              <span className="text-xs text-gray-400">{t.ui.selectedTopic}</span>
               <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${selectedCategory.color}`}>
                 {selectedCategory.label}
               </span>
@@ -83,14 +105,14 @@ export default function HelpRequestForm({
         </AnimatePresence>
 
         {/* Detailed message */}
-        <Field label="Detailed Message" icon={FileText} required error={errors.message}>
+        <Field label={t.formLabels.message} icon={FileText} required error={errors.message}>
           <div className="relative">
             <textarea
               value={form.message}
               onChange={(e) => onFormChange("message", e.target.value)}
               maxLength={MSG_MAX}
               rows={5}
-              placeholder="Describe your problem in detail so tutors can help you better…"
+              placeholder={t.placeholders.message}
               className={`w-full px-4 py-3 rounded-xl border text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-800 resize-none
                 focus:outline-none focus:ring-2 focus:border-transparent transition-all leading-relaxed
                 ${errors.message ? "border-red-300 focus:ring-red-200" : "border-gray-200 dark:border-gray-700 focus:ring-indigo-200 hover:border-indigo-300"}`}
@@ -116,18 +138,18 @@ export default function HelpRequestForm({
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              Publishing…
+              {t.buttons.submitting}
             </>
           ) : (
             <>
               <Send className="w-4 h-4" />
-              Publish Help Request
+              {t.buttons.submit}
             </>
           )}
         </motion.button>
 
         <p className="text-center text-xs text-gray-400 dark:text-gray-500 -mt-2">
-          By submitting, you agree that your request will be publicly visible to all verified tutors on TutorConnect.
+          {t.ui.disclaimer}
         </p>
       </form>
     </motion.div>
