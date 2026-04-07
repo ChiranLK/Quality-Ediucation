@@ -2,11 +2,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
 
-/**
- * Professional Card Slideshow Component
- * Features: Auto-play, smooth animations, manual navigation, responsive design
- */
-
 const slideVariants = {
   initial: (direction) => ({
     x: direction > 0 ? 500 : -500,
