@@ -42,7 +42,7 @@ export default function CardSlideshow({
   showIndicators = true,
   showNavigation = true,
   onCardChange = null,
-  height = "h-64",
+  height = "h-48",
 }) {
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(0);
@@ -94,7 +94,7 @@ export default function CardSlideshow({
             initial="initial"
             animate="animate"
             exit="exit"
-            className="absolute inset-0 p-6 md:p-8 flex flex-col justify-between"
+            className="absolute inset-0 p-4 md:p-6 flex flex-col justify-between"
           >
             {/* Content */}
             <div>
@@ -104,10 +104,10 @@ export default function CardSlideshow({
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="mb-3 inline-block"
+                  className="mb-2 inline-block"
                 >
-                  <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-full text-xs font-semibold uppercase tracking-wider flex items-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5" />
+                  <span className="px-2.5 py-0.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-full text-xs font-semibold uppercase tracking-wider flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" />
                     {currentCard.badge}
                   </span>
                 </motion.div>
@@ -119,7 +119,7 @@ export default function CardSlideshow({
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.15 }}
-                  className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2"
+                  className="text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-1"
                 >
                   {currentCard.title}
                 </motion.h3>
@@ -131,7 +131,7 @@ export default function CardSlideshow({
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.25 }}
-                  className="text-gray-600 dark:text-gray-400 text-sm md:text-base leading-relaxed max-w-md"
+                  className="text-gray-600 dark:text-gray-400 text-xs md:text-sm leading-relaxed max-w-md"
                 >
                   {currentCard.description}
                 </motion.p>
@@ -158,20 +158,20 @@ export default function CardSlideshow({
               onClick={() => paginate(-1)}
               whileHover={{ scale: 1.1, x: -4 }}
               whileTap={{ scale: 0.95 }}
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full bg-white/90 dark:bg-gray-800/90 shadow-lg hover:shadow-xl text-gray-900 dark:text-white transition-all backdrop-blur-sm"
+              className="absolute left-2 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-white/90 dark:bg-gray-800/90 shadow-lg hover:shadow-xl text-gray-900 dark:text-white transition-all backdrop-blur-sm"
               aria-label="Previous slide"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-4 h-4" />
             </motion.button>
 
             <motion.button
               onClick={() => paginate(1)}
               whileHover={{ scale: 1.1, x: 4 }}
               whileTap={{ scale: 0.95 }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full bg-white/90 dark:bg-gray-800/90 shadow-lg hover:shadow-xl text-gray-900 dark:text-white transition-all backdrop-blur-sm"
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-white/90 dark:bg-gray-800/90 shadow-lg hover:shadow-xl text-gray-900 dark:text-white transition-all backdrop-blur-sm"
               aria-label="Next slide"
             >
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="w-4 h-4" />
             </motion.button>
           </>
         )}
@@ -183,7 +183,7 @@ export default function CardSlideshow({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="flex items-center justify-center gap-2 mt-4"
+          className="flex items-center justify-center gap-2 mt-2.5"
         >
           {cards.map((_, index) => (
             <motion.button
