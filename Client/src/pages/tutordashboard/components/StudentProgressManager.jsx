@@ -214,11 +214,12 @@ export default function StudentProgressManager({ user }) {
           </div>
           <button
             onClick={() => setShowAddForm(!showAddForm)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold uppercase tracking-wider text-[10px] transition-all shadow-sm"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5" />
             Add Progress
           </button>
+
         </div>
       </div>
 
@@ -342,21 +343,22 @@ export default function StudentProgressManager({ user }) {
               />
             </div>
 
-            <div className="flex gap-2 justify-end">
+            <div className="flex gap-3 justify-end pt-4">
               <button
                 onClick={() => setShowAddForm(false)}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="px-5 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-[10px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleAddProgress}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all shadow-sm"
               >
-                <Save className="w-4 h-4" />
+                <Save className="w-3.5 h-3.5" />
                 Save Progress
               </button>
             </div>
+
           </div>
         </div>
       )}
@@ -414,22 +416,23 @@ export default function StudentProgressManager({ user }) {
                     />
                   </div>
 
-                  <div className="flex gap-2 justify-end">
+                  <div className="flex gap-3 justify-end pt-4">
                     <button
                       onClick={() => setEditingId(null)}
-                      className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      className="flex items-center gap-2 px-5 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-[10px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="w-3.5 h-3.5" />
                       Cancel
                     </button>
                     <button
                       onClick={() => handleSaveProgress(prog._id)}
-                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                      className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider"
                     >
-                      <Save className="w-4 h-4" />
+                      <Save className="w-3.5 h-3.5" />
                       Save
                     </button>
                   </div>
+
                 </div>
               ) : (
                 <>

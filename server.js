@@ -17,6 +17,7 @@ import feedbackEmailRoutes from "./Routes/feedbackEmailRoutes.js";
 import messageRouter from "./Routes/messageRouter.js";
 import tutoringSessionRouter from "./Routes/tutoringSessionRouter.js";
 import googleCalendarRouter from "./Routes/googleCalenderRouter.js";
+import googleOAuthRouter from "./Routes/googleOAuthRouter.js";
 import tutorRouter from "./Routes/tutorRouter.js";
 import materialRouter from "./Routes/materialRouter.js";
 
@@ -53,6 +54,7 @@ app.use("/api/messages", messageRouter);
 app.use("/api/tutoring-sessions", tutoringSessionRouter);
 app.use("/api/tutors", tutorRouter);
 app.use("/api/materials", materialRouter);
+app.use("/api/google-oauth", googleOAuthRouter);
 
 // Init Google Calendar
 initCalendar();

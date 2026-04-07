@@ -1,9 +1,16 @@
-import { useState, useEffect, useRef } from 'react';
 import { X, AlertCircle } from 'lucide-react';
+
+const SUBJECT_OPTIONS = [
+  'Mathematics', 'Physics', 'Chemistry', 'Biology', 'English',
+  'Sinhala', 'History', 'Geography', 'Science', 'ICT',
+  'Economics', 'Business Studies', 'Art', 'Music', 'Other'
+];
+
 
 const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
   const [formData, setFormData] = useState({
     subject: '',
+    manualSubject: '',
     description: '',
     schedule: {
       date: '',
@@ -16,6 +23,8 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
     level: '',
     tags: [],
   });
+  const [showManualSubject, setShowManualSubject] = useState(false);
+
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,8 +32,10 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
 
   useEffect(() => {
     if (session) {
-      setFormData({ // eslint-disable-line react-hooks/set-state-in-effect
-        subject: session.subject || '',
+      const isManual = session.subject && !SUBJECT_OPTIONS.map(s => s.toLowerCase()).includes(session.subject.toLowerCase());
+      setFormData({
+        subject: isManual ? 'other' : (session.subject || ''),
+        manualSubject: isManual ? session.subject : '',
         description: session.description || '',
         schedule: {
           date: session.schedule?.date ? new Date(session.schedule.date).toISOString().split('T')[0] : '',
@@ -37,9 +48,11 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
         level: session.level || '',
         tags: session.tags || [],
       });
+      setShowManualSubject(isManual);
     } else {
       setFormData({
         subject: '',
+        manualSubject: '',
         description: '',
         schedule: {
           date: '',
@@ -52,9 +65,11 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
         level: '',
         tags: [],
       });
+      setShowManualSubject(false);
     }
     setErrors({});
   }, [session, isOpen]);
+
 
   const validateForm = () => {
     const newErrors = {};
@@ -110,13 +125,18 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
 
     setIsSubmitting(true);
     try {
-      await onSave(formData);
+      const finalData = {
+        ...formData,
+        subject: formData.subject === 'other' ? formData.manualSubject : formData.subject
+      };
+      await onSave(finalData);
     } catch (error) {
       console.error('Error saving session:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -140,12 +160,16 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
         },
       }));
     } else {
+      if (name === 'subject') {
+        setShowManualSubject(value === 'other');
+      }
       setFormData(prev => ({
         ...prev,
         [name]: value,
       }));
     }
   };
+
 
   if (!isOpen) return null;
 
@@ -193,29 +217,47 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Subject *
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
+              Subject <span className="text-red-500">*</span>
             </label>
-            <input
-              type="text"
+            <select
               name="subject"
               value={formData.subject}
               onChange={handleChange}
-              required
               disabled={isSubmitting}
-              placeholder="e.g., Mathematics, Physics, English"
-              className={`w-full px-4 py-2 border rounded-lg transition-all focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed ${
-                errors.subject
-                  ? 'border-red-500 dark:border-red-500 focus:ring-red-500'
-                  : 'border-gray-300 dark:border-gray-600 focus:ring-green-500'
+              className={`w-full px-4 py-2.5 bg-white dark:bg-gray-800 border rounded-xl transition-all focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:text-white text-sm disabled:opacity-50 ${
+                errors.subject ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
               }`}
-            />
-            {errors.subject && <p className="text-sm text-red-600 dark:text-red-400 mt-2">{errors.subject}</p>}
+            >
+              <option value="">Select Subject</option>
+              {SUBJECT_OPTIONS.map(opt => (
+                <option key={opt} value={opt.toLowerCase()}>{opt}</option>
+              ))}
+            </select>
+            {errors.subject && <p className="text-[10px] font-bold text-red-500 uppercase mt-1.5">{errors.subject}</p>}
           </div>
 
+          {showManualSubject && (
+            <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
+                Manual Subject <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="manualSubject"
+                value={formData.manualSubject}
+                onChange={handleChange}
+                placeholder="e.g., Quantum Physics"
+                required
+                className="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:text-white text-sm outline-none"
+              />
+            </div>
+          )}
+
+
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Description * <span className="font-normal text-gray-500 text-xs">({formData.description.length}/500)</span>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
+              Description <span className="text-red-500">*</span> <span className="font-normal text-gray-400">({formData.description.length}/500)</span>
             </label>
             <textarea
               name="description"
@@ -223,20 +265,19 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
               onChange={handleChange}
               required
               disabled={isSubmitting}
-              placeholder="Describe the session topic and objectives (10-500 characters)"
+              placeholder="Describe the session topic and objectives"
               rows="3"
-              className={`w-full px-4 py-2 border rounded-lg transition-all focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed resize-none ${
-                errors.description
-                  ? 'border-red-500 dark:border-red-500 focus:ring-red-500'
-                  : 'border-gray-300 dark:border-gray-600 focus:ring-green-500'
+              className={`w-full px-4 py-2.5 bg-white dark:bg-gray-800 border rounded-xl transition-all focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:text-white text-sm disabled:opacity-50 resize-none ${
+                errors.description ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
               }`}
             />
-            {errors.description && <p className="text-sm text-red-600 dark:text-red-400 mt-2">{errors.description}</p>}
+            {errors.description && <p className="text-[10px] font-bold text-red-500 uppercase mt-1.5">{errors.description}</p>}
           </div>
 
+
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Date *
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
+              Date <span className="text-red-500">*</span>
             </label>
             <input
               type="date"
@@ -245,19 +286,18 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
               onChange={handleChange}
               required
               disabled={isSubmitting}
-              className={`w-full px-4 py-2 border rounded-lg transition-all focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed ${
-                errors.date
-                  ? 'border-red-500 dark:border-red-500 focus:ring-red-500'
-                  : 'border-gray-300 dark:border-gray-600 focus:ring-green-500'
+              className={`w-full px-4 py-2.5 bg-white dark:bg-gray-800 border rounded-xl transition-all focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:text-white text-sm disabled:opacity-50 ${
+                errors.date ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
               }`}
             />
-            {errors.date && <p className="text-sm text-red-600 dark:text-red-400 mt-2">{errors.date}</p>}
+            {errors.date && <p className="text-[10px] font-bold text-red-500 uppercase mt-1.5">{errors.date}</p>}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Start Time *
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
+                Start Time <span className="text-red-500">*</span>
               </label>
               <input
                 type="time"
@@ -266,17 +306,15 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
                 onChange={handleChange}
                 required
                 disabled={isSubmitting}
-                className={`w-full px-4 py-2 border rounded-lg transition-all focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed ${
-                  errors.startTime
-                    ? 'border-red-500 dark:border-red-500 focus:ring-red-500'
-                    : 'border-gray-300 dark:border-gray-600 focus:ring-green-500'
+                className={`w-full px-4 py-2.5 bg-white dark:bg-gray-800 border rounded-xl transition-all focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:text-white text-sm disabled:opacity-50 ${
+                  errors.startTime ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                 }`}
               />
-              {errors.startTime && <p className="text-sm text-red-600 dark:text-red-400 mt-2">{errors.startTime}</p>}
+              {errors.startTime && <p className="text-[10px] font-bold text-red-500 uppercase mt-1.5">{errors.startTime}</p>}
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                End Time *
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
+                End Time <span className="text-red-500">*</span>
               </label>
               <input
                 type="time"
@@ -285,19 +323,18 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
                 onChange={handleChange}
                 required
                 disabled={isSubmitting}
-                className={`w-full px-4 py-2 border rounded-lg transition-all focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed ${
-                  errors.endTime
-                    ? 'border-red-500 dark:border-red-500 focus:ring-red-500'
-                    : 'border-gray-300 dark:border-gray-600 focus:ring-green-500'
+                className={`w-full px-4 py-2.5 bg-white dark:bg-gray-800 border rounded-xl transition-all focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:text-white text-sm disabled:opacity-50 ${
+                  errors.endTime ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                 }`}
               />
-              {errors.endTime && <p className="text-sm text-red-600 dark:text-red-400 mt-2">{errors.endTime}</p>}
+              {errors.endTime && <p className="text-[10px] font-bold text-red-500 uppercase mt-1.5">{errors.endTime}</p>}
             </div>
           </div>
 
+
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Max Participants (1-100) *
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
+              Max Participants (1-100) <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
@@ -308,17 +345,16 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
               max="100"
               required
               disabled={isSubmitting}
-              className={`w-full px-4 py-2 border rounded-lg transition-all focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed ${
-                errors.maxParticipants
-                  ? 'border-red-500 dark:border-red-500 focus:ring-red-500'
-                  : 'border-gray-300 dark:border-gray-600 focus:ring-green-500'
+              className={`w-full px-4 py-2.5 bg-white dark:bg-gray-800 border rounded-xl transition-all focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:text-white text-sm disabled:opacity-50 ${
+                errors.maxParticipants ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
               }`}
             />
-            {errors.maxParticipants && <p className="text-sm text-red-600 dark:text-red-400 mt-2">{errors.maxParticipants}</p>}
+            {errors.maxParticipants && <p className="text-[10px] font-bold text-red-500 uppercase mt-1.5">{errors.maxParticipants}</p>}
           </div>
 
+
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
               Level
             </label>
             <select
@@ -326,7 +362,7 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
               value={formData.level}
               onChange={handleChange}
               disabled={isSubmitting}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg transition-all focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl transition-all focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:text-white text-sm disabled:opacity-50"
             >
               <option value="">Select Level</option>
               <option value="beginner">Beginner</option>
@@ -335,23 +371,25 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
             </select>
           </div>
 
-          <div className="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700 mt-6">
+
+          <div className="flex justify-end gap-3 pt-6 border-t border-gray-100 dark:border-gray-700 mt-6">
             <button
               type="button"
               onClick={onCancel}
               disabled={isSubmitting}
-              className="px-6 py-2 text-gray-700 dark:text-gray-300 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2 text-[10px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-xl transition-colors disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+              className="px-8 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all disabled:opacity-50 shadow-sm hover:shadow-md"
             >
-              {isSubmitting ? 'Saving...' : session ? 'Update' : 'Create'}
+              {isSubmitting ? 'Saving...' : session ? 'Update Session' : 'Create Session'}
             </button>
           </div>
+
         </form>
       </div>
     </div>

@@ -60,18 +60,18 @@ const SessionCard = ({ session, onEdit, onDelete, onViewDetails }) => {
       </div>
 
       <div className="flex items-center justify-between">
-        <span className={`px-2 py-1 text-xs rounded-full ${
+        <span className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full ${
           session.status === 'upcoming'
-            ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+            ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
             : session.status === 'ongoing'
-            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-            : 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300'
+            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'
+            : 'bg-gray-100 text-gray-700 dark:bg-gray-700/40 dark:text-gray-300'
         }`}>
           {session.status}
         </span>
         <button
           onClick={() => onViewDetails(session.id)}
-          className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+          className="text-xs font-bold uppercase tracking-wider text-indigo-600 hover:text-indigo-700 transition-colors"
         >
           View Details
         </button>
