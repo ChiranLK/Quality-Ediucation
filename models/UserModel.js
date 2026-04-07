@@ -23,16 +23,28 @@ const UserSchema = new mongoose.Schema(
     password: {
       type: String,
       minlength: 6,
+      // Optional for Google OAuth users
     },
     phoneNumber: {
       type: String,
-      required: [true, "Please provide phone number"],
       match: [/^[0-9]{10}$/, "Please provide a valid 10-digit phone number"],
+      // Optional for Google OAuth users
     },
     location: {
       type: String,
-      required: [true, "Please provide location"],
       trim: true,
+      // Optional for Google OAuth users
+    },
+    // Google OAuth fields
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    authProvider: {
+      type: String,
+      enum: ["local", "google"],
+      default: "local",
     },
     role: {
       type: String,

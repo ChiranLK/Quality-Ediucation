@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import "./App.css";
 import LoginPage from "./pages/login.jsx";
 import UserDashboard from "./pages/userdashboard/userDashboard.jsx";
@@ -11,6 +11,8 @@ import AboutUs from "./pages/info/AboutUs.jsx";
 import PrivacyPolicy from "./pages/info/PrivacyPolicy.jsx";
 import TermsOfService from "./pages/info/TermsOfService.jsx";
 import RegisterPage from "./pages/register.jsx";
+import AuthSuccessPage from "./pages/auth-success.jsx";
+import AuthErrorPage from "./pages/auth-error.jsx";
 
 const DASHBOARDS = {
   user: UserDashboard,
@@ -27,29 +29,61 @@ export default function App() {
 }
 
 function AppContent() {
-  const [currentView, setCurrentView] = useState("splash");
-  const [user, setUser] = useState(() => {
-    // Check sessionStorage first (tab-specific session), then localStorage (persistent remember-me)
+  // Handle auth-success URL callback from backend
+  const getInitialViewFromUrl = () => {
+    const path = window.location.pathname;
+    if (path.includes("auth-success")) return "auth-success";
+    if (path.includes("auth-error")) return "auth-error";
+    return null;
+  };
+
+  // Check if user is already logged in from storage FIRST
+  const getInitialUser = () => {
+    // First check for auth success with token in URL
+    const params = new URLSearchParams(window.location.search);
+    const urlToken = params.get("token");
+    const urlUser = params.get("user");
+    
+    if (urlToken && urlUser) {
+      try {
+        const user = JSON.parse(urlUser);
+        sessionStorage.setItem("token", urlToken);
+        sessionStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("token", urlToken);
+        localStorage.setItem("user", JSON.stringify(user));
+        return user;
+      } catch (e) {
+        console.error("Failed to parse user from URL:", e);
+      }
+    }
+
+    // Then check storage
     const sessionStored = sessionStorage.getItem("user");
     if (sessionStored) return JSON.parse(sessionStored);
     
     const persistedStored = localStorage.getItem("user");
     if (persistedStored) {
-      // If found in localStorage (from 'remember me'), restore to sessionStorage for current tab
       const user = JSON.parse(persistedStored);
       const token = localStorage.getItem("token");
       if (token) sessionStorage.setItem("token", token);
       return user;
     }
     return null;
-  });
+  };
 
-  // If user is already logged in securely from session, skip splash/home and go straight to dashboard
-  useEffect(() => {
-    if (user && !["dashboard", "about", "privacy", "terms"].includes(currentView)) {
-      setCurrentView("dashboard");
-    }
-  }, [user, currentView]);
+  const initialUser = getInitialUser();
+  const urlView = getInitialViewFromUrl();
+  
+  // If on auth-success page, show it. Otherwise if user is logged in, show dashboard. Otherwise show splash
+  const getInitialView = () => {
+    if (urlView === "auth-success") return "auth-success";
+    if (urlView === "auth-error") return "auth-error";
+    if (initialUser) return "dashboard";
+    return "splash";
+  };
+  
+  const [currentView, setCurrentView] = useState(getInitialView());
+  const [user, setUser] = useState(initialUser);
 
   const handleLogin = (data) => {
     setUser(data.user);
@@ -93,6 +127,10 @@ function AppContent() {
       return <PrivacyPolicy onBack={() => setCurrentView("home")} />;
     case "terms":
       return <TermsOfService onBack={() => setCurrentView("home")} />;
+    case "auth-success":
+      return <AuthSuccessPage onLogin={handleLogin} onBack={() => setCurrentView("home")} />;
+    case "auth-error":
+      return <AuthErrorPage onBack={() => setCurrentView("login")} />;
     default:
       return <HomePage 
         onNavigate={(view) => setCurrentView(view)} 
