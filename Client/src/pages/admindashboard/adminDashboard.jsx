@@ -8,6 +8,7 @@ import { AllFeedbacks, AdminProgress } from "../../components/feedback/index.js"
 import StudyMaterials from "../tutordashboard/components/StudyMaterials.jsx";
 import ManageUsers from "./components/ManageUsers.jsx";
 import ManageTutors from "./components/ManageTutors.jsx";
+import Reports from "./components/Reports.jsx";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -102,6 +103,10 @@ export default function AdminDashboard({ user, onLogout }) {
     setCurrentView('tutors');
   };
 
+  const handleViewReports = () => {
+    setCurrentView('reports');
+  };
+
   const handleBackToDashboard = () => {
     setCurrentView('dashboard');
   };
@@ -127,6 +132,10 @@ export default function AdminDashboard({ user, onLogout }) {
       case 'tutors':
         return (
           <ManageTutors />
+        );
+      case 'reports':
+        return (
+          <Reports />
         );
       default:
         return (
@@ -186,7 +195,10 @@ export default function AdminDashboard({ user, onLogout }) {
               <p className="text-gray-400 dark:text-gray-500 text-sm">Upload and manage resources.</p>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+            <div
+              className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer hover:shadow-md transition-shadow"
+              onClick={handleViewReports}
+            >
               <div className="bg-yellow-50 dark:bg-yellow-900/40 w-10 h-10 rounded-xl flex items-center justify-center mb-4">
                 <BarChart2 className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
               </div>
@@ -203,7 +215,7 @@ export default function AdminDashboard({ user, onLogout }) {
       className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-orange-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950"
     >
       {/* ── Navbar ── */}
-      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 px-6 py-4 flex items-center justify-between shadow-sm sticky top-0 z-20">
+      <header className="print:hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 px-6 py-4 flex items-center justify-between shadow-sm sticky top-0 z-20">
         <button
           onClick={handleBackToDashboard}
           className="flex items-center gap-2 cursor-pointer transition-opacity hover:opacity-75"
@@ -297,10 +309,10 @@ export default function AdminDashboard({ user, onLogout }) {
         {currentView !== 'dashboard' && (
           <button
             onClick={handleBackToDashboard}
-            className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 font-medium transition-colors mb-6"
+            title="Back to Dashboard"
+            className="print:hidden flex items-center gap-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors mb-6 bg-white dark:bg-gray-800 p-2 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 w-max"
           >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Dashboard
+            <ArrowLeft className="w-5 h-5" />
           </button>
         )}
         
@@ -311,7 +323,7 @@ export default function AdminDashboard({ user, onLogout }) {
           </>
         )}
 
-        <div className={currentView === 'feedbacks' || currentView === 'progress' || currentView === 'materials' || currentView === 'users' || currentView === 'tutors' ? "bg-white dark:bg-gray-800 rounded-lg p-6" : ""}>
+        <div className={currentView !== 'dashboard' ? "bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700/50 shadow-sm" : ""}>
           {renderContent()}
         </div>
       </main>
