@@ -8,12 +8,18 @@
     "dev": "nodemon server.js",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --forceExit",
     "test:unit": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js tests/unit --forceExit --verbose",
+    "test:unit:sessions": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js tests/unit/tutoringSession --forceExit --verbose",
     "test:integration": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js tests/integration --forceExit --verbose --runInBand",
+    "test:integration:sessions": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js tests/integration/tutoringSession --forceExit --verbose --runInBand",
     "test:coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage --forceExit --runInBand",
     "test:perf:token": "node tests/performance/generate-perf-token.js",
     "test:perf": "artillery run tests/performance/study-material-load-test.yml",
     "test:perf:run": "artillery run tests/performance/study-material-load-test.yml --output tests/performance/report.json",
-    "test:perf:report": "artillery report tests/performance/report.json --output tests/performance/report.html"
+    "test:perf:report": "artillery report tests/performance/report.json --output tests/performance/report.html",
+    "test:perf:sessions:token": "node tests/performance/generate-tutoring-perf-token.js",
+    "test:perf:sessions": "artillery run tests/performance/tutoring-session-load-test.yml",
+    "test:perf:sessions:run": "artillery run tests/performance/tutoring-session-load-test.yml --output tests/performance/sessions-report.json",
+    "test:perf:sessions:report": "artillery report tests/performance/sessions-report.json --output tests/performance/sessions-report.html"
   },
   "jest": {
     "testEnvironment": "node",
@@ -25,9 +31,11 @@
     "collectCoverageFrom": [
       "Controllers/**/*.js",
       "services/studyMaterialService.js",
+      "services/tutoringSessionService.js",
       "utils/**/*.js",
       "Middleware/authMiddleware.js",
-      "Middleware/studyMaterialValidation.js"
+      "Middleware/studyMaterialValidation.js",
+      "validations/tutoringSession.validation.js"
     ],
     "setupFilesAfterEnv": ["./tests/setup/jest.setup.js"],
     "coverageDirectory": "tests/coverage",

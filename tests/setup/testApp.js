@@ -11,6 +11,7 @@ import { errorHandler } from "../../Middleware/errorHandler.js";
 // Routes
 import materialRouter from "../../Routes/materialRouter.js";
 import authRouter from "../../Routes/authRouter.js";
+import tutoringSessionRouter from "../../Routes/tutoringSessionRouter.js";
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.get("/health", (req, res) => res.status(200).json({ message: "Server is work
 // Mount routers under test
 app.use("/api/auth", authRouter);
 app.use("/api/materials", materialRouter);
+app.use("/api/tutoring-sessions", tutoringSessionRouter);
 
 // Centralised error handler (must be last)
 app.use(errorHandler);

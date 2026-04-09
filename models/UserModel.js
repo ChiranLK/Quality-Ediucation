@@ -146,4 +146,4 @@ UserSchema.methods.toJSON = function () {
   return obj;
 };// automatically removes sensitive data whenever a user document is converted to JSON (e.g., when sending API responses).
 
-export default mongoose.model("User", UserSchema);
+export default mongoose.models.User || mongoose.model("User", UserSchema);
