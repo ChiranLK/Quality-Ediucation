@@ -26,10 +26,11 @@ export default function TutorHome({ user, onNavigate }) {
         setError(null);
 
         // Fetch data in parallel for better performance and resilience
-        const [sessionsRes, ratingsRes, feedbacksRes] = await Promise.allSettled([
+        const [sessionsRes, ratingsRes, feedbacksRes, allStudentsRes] = await Promise.allSettled([
           customFetch.get(`/tutoring-sessions/tutor/${user._id}`),
           customFetch.get(`/feedbacks/tutor/${user._id}/ratings`),
-          customFetch.get(`/feedbacks/tutor/${user._id}`)
+          customFetch.get(`/feedbacks/tutor/${user._id}`),
+          customFetch.get(`/tutors/students/all`)
         ]);
 
         // 1. Process Sessions
@@ -48,7 +49,7 @@ export default function TutorHome({ user, onNavigate }) {
         // 2. Process Ratings
         let avgRating = 0;
         if (ratingsRes.status === 'fulfilled') {
-          avgRating = ratingsRes.value.data.averageRating || 0;
+          avgRating = ratingsRes.value.data.avgRating || 0; // Fix: was averageRating incorrectly mapped
         } else if (ratingsRes.reason?.response?.status !== 404) {
           console.error('Ratings fetch failed:', ratingsRes.reason);
         }
@@ -60,10 +61,18 @@ export default function TutorHome({ user, onNavigate }) {
         } else if (feedbacksRes.reason?.response?.status !== 404) {
           console.error('Feedbacks fetch failed:', feedbacksRes.reason);
         }
+        
+        // Process total platform students
+        let platformStudents = 0;
+        if (allStudentsRes.status === 'fulfilled') {
+          platformStudents = allStudentsRes.value.data.count || 0;
+        } else if (allStudentsRes.reason?.response?.status !== 404) {
+          console.error('All Students fetch failed:', allStudentsRes.reason);
+        }
 
         setStats({
           upcomingSessions: upcomingSessionsList.length,
-          studentsCount: new Set(allSessions.map(s => s.studentId?._id).filter(Boolean)).size,
+          studentsCount: platformStudents, // Force global total as requested by user
           averageRating: parseFloat(avgRating),
           feedbacksCount,
           nextSessions: upcomingSessionsList.slice(0, 2),
