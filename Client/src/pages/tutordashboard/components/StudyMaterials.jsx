@@ -52,7 +52,9 @@ function Toast({ toast, onClose }) {
   return (
     <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-2xl text-sm font-medium transition-all animate-in slide-in-from-bottom-4 duration-300 ${
       toast.type === 'success'
-        ? 'bg-indigo-600 text-white'
+        ? 'bg-emerald-600 text-white'
+        : toast.type === 'delete'
+        ? 'bg-red-600 text-white'
         : 'bg-red-600 text-white'
     }`}>
 
@@ -60,6 +62,8 @@ function Toast({ toast, onClose }) {
 
       {toast.type === 'success'
         ? <CheckCircle className="w-4 h-4 flex-shrink-0" />
+        : toast.type === 'delete'
+        ? <Trash2 className="w-4 h-4 flex-shrink-0" />
         : <AlertCircle className="w-4 h-4 flex-shrink-0" />}
       {toast.message}
       <button onClick={onClose} className="ml-2 opacity-70 hover:opacity-100">
@@ -556,7 +560,7 @@ export default function StudyMaterials({ user }) {
     setDeleteLoading(true);
     try {
       await customFetch.delete(`/materials/${modal.material._id}`);
-      showToast('Material deleted successfully.');
+      showToast('Material deleted successfully.', 'delete');
       setModal(null);
       fetchMaterials(page);
     } catch (err) {

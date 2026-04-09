@@ -151,9 +151,9 @@ export default function StudentMaterials({ user }) {
       const { data } = await customFetch.get(`/materials?${params}`);
       setMaterials(data.data || []);
       setPagination({
-        current: data.pagination?.currentPage || 1,
-        total: data.pagination?.totalPages || 1,
-        count: data.pagination?.totalCount || 0,
+        current: data.pagination?.current || 1,
+        total: data.pagination?.pages || 1,
+        count: data.pagination?.total || 0,
       });
     } catch (err) {
       toast.error('Failed to load study materials.');
