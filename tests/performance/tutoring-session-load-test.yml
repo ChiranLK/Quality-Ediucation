@@ -1,0 +1,168 @@
+# Artillery Performance Test — Peer Learning / Tutoring Sessions API
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Purpose:
+#   Simulate 100 concurrent users accessing the Tutoring Sessions API
+#   to evaluate response times and throughput under realistic load.
+#
+# Prerequisites:
+#   1. Start the backend:   npm run dev
+#   2. Seed test data so sessions exist in the DB
+#   3. Generate tokens:     node tests/performance/generate-tutoring-perf-token.js
+#   4. Paste both tokens below (tutorToken, studentToken)
+#
+# Run commands:
+#   npm run test:perf:sessions               — run and show results in terminal
+#   npm run test:perf:sessions:report        — generate HTML report
+#
+# Load Phases:
+#   Phase 1 — Warm-up     :  5 users → 10 users over 20s
+#   Phase 2 — Normal Load : 50 users for 60s
+#   Phase 3 — Peak Spike  : 50 users → 100 users over 30s
+#
+# SLA Thresholds (test fails in CI if NOT met):
+#   p95 response time < 1000ms
+#   p99 response time < 2000ms
+#   ≥ 80% of responses must be 2xx
+# ═══════════════════════════════════════════════════════════════════════════════
+
+config:
+  target: "http://localhost:5000"
+
+  phases:
+    - name: "Phase 1 — Warm-up"
+      duration: 20
+      arrivalRate: 5
+      rampTo: 10
+
+    - name: "Phase 2 — Sustained Normal Load"
+      duration: 60
+      arrivalRate: 50
+
+    - name: "Phase 3 — Peak Spike (100 Users)"
+      duration: 30
+      arrivalRate: 50
+      rampTo: 100
+
+  http:
+    timeout: 15
+
+  variables:
+    # ─── STEP 1: Run generate-tutoring-perf-token.js and paste tokens below ───
+    tutorToken: "REPLACE_WITH_TUTOR_JWT_TOKEN"
+    studentToken: "REPLACE_WITH_STUDENT_JWT_TOKEN"
+
+    # ─── STEP 2: Set a real session ID from your database ────────────────────
+    # You can get one by calling GET /api/tutoring-sessions and copying an _id
+    knownSessionId: "REPLACE_WITH_REAL_SESSION_ID"
+
+  ensure:
+    thresholds:
+      - http.response_time.p95: 1000   # 95% requests under 1 second
+      - http.response_time.p99: 2000   # 99% requests under 2 seconds
+    conditions:
+      - expression: http.codes.2xx > 80   # at least 80% success rate
+
+  plugins:
+    ensure: {}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TEST SCENARIOS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+scenarios:
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  - name: "GET All Sessions — Public Listing (No Auth)"
+    weight: 35
+    # Simulates students browsing available sessions without logging in.
+    flow:
+      - get:
+          url: "/api/tutoring-sessions"
+          qs:
+            page: 1
+            limit: 10
+          expect:
+            - statusCode: 200
+            - hasProperty: "sessions"
+            - hasProperty: "pagination"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  - name: "GET Sessions with Filters (Subject + Level)"
+    weight: 20
+    # Simulates students filtering by subject and level.
+    flow:
+      - get:
+          url: "/api/tutoring-sessions"
+          qs:
+            subject: "mathematics"
+            level: "intermediate"
+            page: 1
+            limit: 10
+          expect:
+            - statusCode: 200
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  - name: "GET Single Session by ID"
+    weight: 20
+    # Simulates clicking into a session detail page.
+    flow:
+      - get:
+          url: "/api/tutoring-sessions/{{ knownSessionId }}"
+          expect:
+            - statusCode: 200
+            - hasProperty: "session"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  - name: "GET My Enrolled Sessions (Authenticated Student)"
+    weight: 10
+    # Simulates a logged-in student checking their dashboard.
+    flow:
+      - get:
+          url: "/api/tutoring-sessions/my-enrolled"
+          headers:
+            Authorization: "Bearer {{ studentToken }}"
+          expect:
+            - statusCode: 200
+            - hasProperty: "sessions"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  - name: "Full Lifecycle — Browse → Join → Leave (Student)"
+    weight: 10
+    # Simulates complete user flow: search, join, then leave a session.
+    flow:
+      # Step 1: Get list of available sessions
+      - get:
+          url: "/api/tutoring-sessions"
+          qs:
+            page: 1
+            limit: 5
+          capture:
+            - json: "$.sessions[0]._id"
+              as: "sessionId"
+
+      # Step 2: View that session's details
+      - get:
+          url: "/api/tutoring-sessions/{{ sessionId }}"
+
+      # Step 3: Join the session
+      - post:
+          url: "/api/tutoring-sessions/{{ sessionId }}/join"
+          headers:
+            Authorization: "Bearer {{ studentToken }}"
+
+      # Step 4: Leave the session (cleanup)
+      - post:
+          url: "/api/tutoring-sessions/{{ sessionId }}/leave"
+          headers:
+            Authorization: "Bearer {{ studentToken }}"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  - name: "API Health Check"
+    weight: 5
+    # 5% of traffic is simply health checking the server
+    flow:
+      - get:
+          url: "/health"
+          expect:
+            - statusCode: 200
