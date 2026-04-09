@@ -523,7 +523,8 @@ export default function StudyMaterials({ user }) {
       if (filterGrade) params.set('grade', filterGrade);
       if (filterStatus) params.set('status', filterStatus);
 
-      const { data } = await customFetch.get(`/materials/my?${params}`);
+      const endpoint = user?.role === 'admin' ? '/materials' : '/materials/my';
+      const { data } = await customFetch.get(`${endpoint}?${params}`);
       setMaterials(data.data || []);
       setPagination({
         current: data.pagination?.current || 1,
@@ -603,7 +604,7 @@ export default function StudyMaterials({ user }) {
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <BookOpen className="w-6 h-6 text-indigo-600" />
-            My Study Materials
+            {user?.role === 'admin' ? 'Manage Study Materials' : 'My Study Materials'}
           </h2>
 
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
@@ -708,6 +709,8 @@ export default function StudyMaterials({ user }) {
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-sm">
             {hasFilters
               ? 'Try adjusting your search or filters.'
+              : user?.role === 'admin'
+              ? 'No study materials have been uploaded by any tutor yet.'
               : 'Start sharing knowledge with your students by uploading your first study material.'}
           </p>
           {!hasFilters && (
