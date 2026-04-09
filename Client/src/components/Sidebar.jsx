@@ -1,17 +1,25 @@
 import { motion } from "framer-motion";
-import { BookOpen, LogOut, User } from "lucide-react";
+import { BookOpen, LogOut } from "lucide-react";
 
 /**
  * Sidebar
- * @param {{ links: Array<{icon: React.ElementType, label: string}>, activeLabel: string, onNavigate: (label:string)=>void, user: {name:string, email:string}, onLogout: ()=>void }} props
+ * @param {{ links, activeLabel, onNavigate, user, onLogout }} props
  */
 export default function Sidebar({ links, activeLabel, onNavigate, user, onLogout }) {
-  const handleLogoClick = () => {
-    // Navigate to the first link (typically "Home" or dashboard)
-    if (links && links.length > 0) {
-      onNavigate(links[0].label);
+
+  /** Resolve the avatar URL to display — real photo or initials fallback */
+  const avatarSrc = (() => {
+    if (user?.avatar && user.avatar !== "uploads/default-avatar.png") {
+      return `http://localhost:5000/${user.avatar}`;
     }
+    const name = user?.fullName || user?.name || "U";
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4F46E5&color=fff&size=64`;
+  })();
+
+  const handleLogoClick = () => {
+    if (links && links.length > 0) onNavigate(links[0].label);
   };
+
   return (
     <motion.aside
       initial={{ x: -80, opacity: 0 }}
@@ -66,11 +74,19 @@ export default function Sidebar({ links, activeLabel, onNavigate, user, onLogout
       {/* ── User & logout ── */}
       <div className="border-t border-gray-100 dark:border-gray-800 pt-4 mt-4">
         <div className="flex items-center gap-3 px-2 mb-3">
-          <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center shrink-0">
-            <User className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-          </div>
+          {/* Real avatar image */}
+          <img
+            src={avatarSrc}
+            alt="avatar"
+            className="w-8 h-8 rounded-full object-cover shrink-0 bg-indigo-100"
+            onError={(e) => {
+              e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.fullName || "U")}&background=4F46E5&color=fff&size=64`;
+            }}
+          />
           <div className="hidden lg:block overflow-hidden">
-            <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 truncate">{user?.name}</p>
+            <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 truncate">
+              {user?.fullName || user?.name}
+            </p>
             <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{user?.email}</p>
           </div>
         </div>

@@ -5,6 +5,7 @@ import HelpRequest from "./helprequest.jsx";
 import UserHome from "./userHome.jsx";
 import { MyProgress, MyFeedbacks, SubmitFeedback } from "../../components/feedback/index.js";
 import StudentMaterials from "./components/StudentMaterials.jsx";
+import UserProfile from "./components/UserProfile.jsx";
 
 // ── Static data ────────────────────────────────────────────────────────────────
 
@@ -21,7 +22,7 @@ const SIDEBAR_LINKS = [
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
-export default function UserDashboard({ user, onLogout }) {
+export default function UserDashboard({ user, onLogout, onUpdateUser }) {
   const [activePage, setActivePage] = useState(() => {
     return sessionStorage.getItem('userDashboardActivePage') || "Home";
   });
@@ -47,7 +48,7 @@ export default function UserDashboard({ user, onLogout }) {
       <div className="flex-1 flex flex-col min-w-0">
 
         {/* ── Top navbar ── */}
-        <DashboardNavbar searchPlaceholder="Search messages…" />
+        <DashboardNavbar searchPlaceholder="Search messages…" user={user} />
 
         {/* ── Page content ── */}
         <div className="flex flex-1 overflow-hidden">
@@ -154,8 +155,24 @@ export default function UserDashboard({ user, onLogout }) {
             </div>
           )}
 
+          {/* Settings View */}
+          {activePage === "Settings" && (
+            <div className="flex-1 overflow-y-auto">
+              <div className="p-6">
+                <button
+                  onClick={() => setActivePage("Home")}
+                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium mb-4"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to Home
+                </button>
+              </div>
+              <UserProfile user={user} onUpdateUser={onUpdateUser} />
+            </div>
+          )}
+
           {/* Placeholder for other pages */}
-          {activePage !== "Ask Help" && activePage !== "Progress" && activePage !== "Feedbacks" && activePage !== "Materials" && activePage !== "Home" && (
+          {activePage !== "Ask Help" && activePage !== "Progress" && activePage !== "Feedbacks" && activePage !== "Materials" && activePage !== "Settings" && activePage !== "Home" && (
             <div className="flex-1 overflow-y-auto p-6">
               <button
                 onClick={() => setActivePage("Home")}
