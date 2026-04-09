@@ -175,6 +175,17 @@ export const deleteMessage = async (req, res) => {
     //without wait code would continue immediately without waiting for the results
     res.status(StatusCodes.OK).json({ msg: "Message deleted successfully" });
   } catch (error) {
+    // Handle specific error types
+    if (error instanceof BadRequestError || error instanceof NotFoundError) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        msg: error.message
+      });
+    }
+
+    // Log error for monitoring
+    console.error("Delete message error:", error.message);
+
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       msg: "Failed to delete message",
       error: error.message,

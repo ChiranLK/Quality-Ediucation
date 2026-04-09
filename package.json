@@ -29,7 +29,7 @@
       "Middleware/authMiddleware.js",
       "Middleware/studyMaterialValidation.js"
     ],
-    "setupFilesAfterFramework": ["./tests/setup/jest.setup.js"],
+    "setupFilesAfterEnv": ["./tests/setup/jest.setup.js"],
     "coverageDirectory": "tests/coverage",
     "coverageReporters": [
       "text",
