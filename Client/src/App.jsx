@@ -101,9 +101,19 @@ function AppContent() {
     localStorage.removeItem("user");
   };
 
+  const handleUpdateUser = (updatedUser) => {
+    const merged = { ...user, ...updatedUser };
+    setUser(merged);
+    // Keep storage in sync so refreshes still work
+    const stored = sessionStorage.getItem("user");
+    if (stored) sessionStorage.setItem("user", JSON.stringify(merged));
+    const local = localStorage.getItem("user");
+    if (local) localStorage.setItem("user", JSON.stringify(merged));
+  };
+
   if (user && currentView === "dashboard") {
     const Dashboard = DASHBOARDS[user.role];
-    if (Dashboard) return <Dashboard user={user} onLogout={handleLogout} />;
+    if (Dashboard) return <Dashboard user={user} onLogout={handleLogout} onUpdateUser={handleUpdateUser} />;
   }
 
   // Not logged in routing

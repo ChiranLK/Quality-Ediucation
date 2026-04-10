@@ -21,4 +21,20 @@ customFetch.interceptors.request.use((config) => {
   return Promise.reject(error);
 });
 
+// Interceptor to handle 401 Unauthorized globally (e.g., when a user is deleted by admin)
+customFetch.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Force logout and redirect
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("user");
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default customFetch;

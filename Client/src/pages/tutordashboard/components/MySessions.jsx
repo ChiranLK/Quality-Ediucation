@@ -68,6 +68,7 @@ export default function MySessions({ user }) {
           maxParticipants: formData.capacity.maxParticipants,
         },
         level: formData.level,
+        grade: formData.grade,
         tags: formData.tags,
       };
 

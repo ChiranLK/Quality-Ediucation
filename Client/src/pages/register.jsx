@@ -19,11 +19,18 @@ export default function RegisterPage({ onLogin, onBack, onNavigateToLogin }) {
     phoneNumber: "",
     location: "",
     role: "user",
-    subjects: ""
+    subjects: "",
+    grade: "",
   });
 
+  const GRADE_OPTIONS = [
+    'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5',
+    'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10',
+    'Grade 11', 'Grade 12', 'Grade 13',
+  ];
+
   const validateForm = () => {
-    const { fullName, email, phoneNumber, location, password, confirmPassword, role, subjects } = formData;
+    const { fullName, email, phoneNumber, location, password, confirmPassword, role, subjects, grade } = formData;
 
     if (!fullName.trim() || !email.trim() || !phoneNumber.trim() || !location.trim() || !password || !confirmPassword) {
       return "All fields are required.";
@@ -35,6 +42,7 @@ export default function RegisterPage({ onLogin, onBack, onNavigateToLogin }) {
     if (phoneNumber.length !== 10) return "Phone number must be exactly 10 digits.";
     if (password.length < 6) return "Password must be at least 6 characters long.";
     if (password !== confirmPassword) return "Passwords do not match.";
+    if (role === "user" && !grade) return "Please select your grade.";
     if (role === "tutor" && !subjects.trim()) return "Subjects are required for tutor registration.";
     return null;
   };
@@ -75,8 +83,10 @@ export default function RegisterPage({ onLogin, onBack, onNavigateToLogin }) {
       const { confirmPassword, ...submitData } = formData;
       if (formData.role === "tutor") {
         submitData.subjects = formData.subjects.split(",").map(s => s.trim()).filter(s => s !== "");
+        delete submitData.grade;
       } else {
         delete submitData.subjects;
+        // grade is already in submitData for students
       }
 
       await customFetch.post("/auth/register", submitData);
@@ -356,6 +366,34 @@ export default function RegisterPage({ onLogin, onBack, onNavigateToLogin }) {
               </div>
             </div>
 
+
+            {/* Grade (If Student) */}
+            {formData.role === "user" && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                className="pt-2"
+              >
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  Your Grade / Level <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <GraduationCap className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
+                  <select
+                    name="grade"
+                    value={formData.grade}
+                    onChange={handleChange}
+                    required
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/50 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all appearance-none"
+                  >
+                    <option value="">Select your grade...</option>
+                    {GRADE_OPTIONS.map(g => (
+                      <option key={g} value={g}>{g}</option>
+                    ))}
+                  </select>
+                </div>
+              </motion.div>
+            )}
 
             {/* Subjects (If Tutor) */}
             {formData.role === "tutor" && (

@@ -1,4 +1,5 @@
 import User from "../models/UserModel.js";
+import StudyMaterial from "../models/StudyMaterialModel.js";
 import bcrypt from "bcryptjs";
 import { createJWT } from "../utils/generateToken.js";
 import { hashPassword } from "../utils/passwordUtils.js";
@@ -11,7 +12,7 @@ import {
 
 // Register a new user or tutor
 export const register = async (req, res) => {
-  const { email, password, role, subjects } = req.body || {};
+  const { email, password, role, subjects, grade } = req.body || {};
   if (!email || !password) {
     throw new BadRequestError("Email and password are required");
   }
@@ -44,6 +45,8 @@ export const register = async (req, res) => {
   } else {
     // Default: first account becomes admin, others become user
     req.body.role = isFirstAccount ? "admin" : "user";
+    // Save grade for students
+    if (grade) req.body.grade = grade;
   }
 
   const hashedPassword = await hashPassword(password);
@@ -100,7 +103,9 @@ export const login = async (req, res) => {
       email: user.email,
       phoneNumber: user.phoneNumber,
       location: user.location,
+      grade: user.grade || "",
       role: user.role,
+      avatar: user.avatar,
       tutorProfile: user.tutorProfile,
     },
   };
@@ -165,9 +170,9 @@ export const updateProfile = async (req, res) => {
       throw new BadRequestError("User ID not found in request");
     }
 
-    const { fullName, email, phoneNumber, location, tutorProfile } = req.body;
+    const { fullName, email, phoneNumber, location, grade, tutorProfile } = req.body;
 
-    if (!fullName && !email && !phoneNumber && !location && !tutorProfile) {
+    if (!fullName && !email && !phoneNumber && !location && !grade && !tutorProfile) {
       throw new BadRequestError("At least one field must be provided to update");
     }
 
@@ -176,6 +181,7 @@ export const updateProfile = async (req, res) => {
     if (email) updateData.email = email;
     if (phoneNumber) updateData.phoneNumber = phoneNumber;
     if (location) updateData.location = location;
+    if (grade !== undefined) updateData.grade = grade;
     if (tutorProfile) updateData.tutorProfile = tutorProfile;
 
     console.log('Update data:', updateData);
@@ -199,7 +205,9 @@ export const updateProfile = async (req, res) => {
         email: updatedUser.email,
         phoneNumber: updatedUser.phoneNumber,
         location: updatedUser.location,
+        grade: updatedUser.grade || "",
         role: updatedUser.role,
+        avatar: updatedUser.avatar,
         tutorProfile: updatedUser.tutorProfile,
       },
     });
@@ -387,7 +395,9 @@ export const getMe = async (req, res) => {
       email: user.email,
       phoneNumber: user.phoneNumber,
       location: user.location,
+      grade: user.grade || "",
       role: user.role,
+      avatar: user.avatar,
       tutorProfile: user.tutorProfile,
     });
   } catch (error) {
@@ -494,6 +504,9 @@ export const deleteUser = async (req, res) => {
       }
     }
 
+    // Cascade delete associated study materials
+    await StudyMaterial.deleteMany({ uploadedBy: userId });
+
     // Delete the user
     await User.findByIdAndDelete(userId);
 
@@ -510,3 +523,121 @@ export const deleteUser = async (req, res) => {
     });
   }
 };
+
+// Upload or update user avatar
+export const uploadAvatar = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    if (!req.file) {
+      throw new BadRequestError("Please upload an image file");
+    }
+    
+    // Path saved to DB, note we use relative forward-slash path
+    const avatarUrl = `uploads/${req.file.filename}`;
+    
+    const updatedUser = await User.findByIdAndUpdate(
+      userId, 
+      { avatar: avatarUrl }, 
+      { new: true, runValidators: true }
+    );
+    
+    if (!updatedUser) {
+      throw new NotFoundError("User not found");
+    }
+    
+    res.status(StatusCodes.OK).json({
+      success: true,
+      msg: "Profile picture updated successfully",
+      avatar: avatarUrl,
+      user: {
+        _id: updatedUser._id,
+        fullName: updatedUser.fullName,
+        email: updatedUser.email,
+        avatar: updatedUser.avatar,
+        role: updatedUser.role,
+      }
+    });
+  } catch (error) {
+    console.error("Upload avatar error:", error);
+    const statusCode = error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
+    res.status(statusCode).json({
+      success: false,
+      msg: error.message || "Failed to update profile picture",
+    });
+  }
+};
+
+// Delete own profile
+export const deleteMyProfile = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    
+    // Check if user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+
+    // Prevent deleting the only admin
+    if (user.role === 'admin') {
+      const adminCount = await User.countDocuments({ role: 'admin' });
+      if (adminCount <= 1) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          success: false,
+          msg: "Cannot delete the only admin user account",
+        });
+      }
+    }
+
+    // Delete the user
+    await User.findByIdAndDelete(userId);
+    
+    // Clear the auth cookie so user is logged out
+    res.cookie("token", "logout", {
+      httpOnly: true,
+      expires: new Date(Date.now()),
+    });
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      msg: "Your profile has been deleted successfully",
+    });
+  } catch (error) {
+    console.error('Delete my profile error:', error);
+    const statusCode = error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
+    res.status(statusCode).json({
+      success: false,
+      msg: error.message || 'Failed to delete profile',
+    });
+  }
+};
+
+// Remove user avatar (reset to default)
+export const removeAvatar = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const defaultAvatar = "uploads/default-avatar.png";
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { avatar: defaultAvatar },
+      { new: true }
+    );
+
+    if (!updatedUser) throw new NotFoundError("User not found");
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      msg: "Profile picture removed successfully",
+      avatar: defaultAvatar,
+    });
+  } catch (error) {
+    console.error("Remove avatar error:", error);
+    const statusCode = error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
+    res.status(statusCode).json({
+      success: false,
+      msg: error.message || "Failed to remove profile picture",
+    });
+  }
+};
+

@@ -178,4 +178,26 @@ export const uploadMessageImage = (req, res, next) => {
   });
 };
 
+export const uploadAvatarImage = (req, res, next) => {
+  const singleUpload = localUpload.single("avatar");
+  singleUpload(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      if (err.code === "LIMIT_FILE_SIZE") {
+        return res
+          .status(400)
+          .json({
+            success: false,
+            msg: "File size too large. Maximum size is 5MB",
+          });
+      }
+      return res
+        .status(400)
+        .json({ success: false, msg: `Upload error: ${err.message}` });
+    } else if (err) {
+      return res.status(400).json({ success: false, msg: err.message });
+    }
+    next();
+  });
+};
+
 export { cloudinary };

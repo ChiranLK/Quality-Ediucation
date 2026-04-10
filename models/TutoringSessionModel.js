@@ -185,6 +185,12 @@ const tutoringSessionSchema = new mongoose.Schema(
       default: "intermediate",
     },
 
+    grade: {
+      type: String,
+      trim: true,
+      maxlength: [30, "Grade cannot exceed 30 characters"],
+    },
+
     tags: [
       {
         type: String,

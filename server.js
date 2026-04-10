@@ -4,6 +4,8 @@ dotenv.config();
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import path from "path";
+import { fileURLToPath } from "url";
 import emailRoutes from "./Routes/emailRoutes.js";
 
 import connectDB from "./Config/db.js";
@@ -24,6 +26,9 @@ import materialRouter from "./Routes/materialRouter.js";
 // Google Calendar
 import { initCalendar } from "./services/googleCalendarService.js";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 
 // Middleware
@@ -34,6 +39,9 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Serve uploaded files (profile pictures etc.) as static files
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Routes
 app.get("/", (req, res) => {

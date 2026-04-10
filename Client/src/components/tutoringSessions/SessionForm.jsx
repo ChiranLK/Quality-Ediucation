@@ -23,6 +23,7 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
       maxParticipants: 10,
     },
     level: '',
+    grade: '',
     tags: [],
   });
   const [showManualSubject, setShowManualSubject] = useState(false);
@@ -49,6 +50,7 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
           maxParticipants: session.capacity?.maxParticipants || 10,
         },
         level: session.level || '',
+        grade: session.grade || '',
         tags: session.tags || [],
       });
       setShowManualSubject(isManual);
@@ -67,6 +69,7 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
           maxParticipants: 10,
         },
         level: '',
+        grade: '',
         tags: [],
       });
       setShowManualSubject(false);
@@ -145,6 +148,7 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
         schedule: formData.schedule,
         capacity: formData.capacity,
         level: formData.level,
+        grade: formData.grade,
         tags: formData.tags,
       };
       await onSave(finalData);
@@ -246,7 +250,7 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
               onChange={handleChange}
               maxLength={100}
               disabled={isSubmitting}
-              placeholder="e.g., Mathematics Tutoring — Algebra basics"
+              placeholder="Enter Session Title"
               className={`w-full px-4 py-2.5 bg-white dark:bg-gray-800 border rounded-xl transition-all focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:text-white text-sm disabled:opacity-50 outline-none ${
                 errors.title ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
               }`}
@@ -391,22 +395,43 @@ const SessionForm = ({ session, onSave, onCancel, isOpen }) => {
           </div>
 
 
-          <div>
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
-              Level
-            </label>
-            <select
-              name="level"
-              value={formData.level}
-              onChange={handleChange}
-              disabled={isSubmitting}
-              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl transition-all focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:text-white text-sm disabled:opacity-50"
-            >
-              <option value="">Select Level</option>
-              <option value="beginner">Beginner</option>
-              <option value="intermediate">Intermediate</option>
-              <option value="advanced">Advanced</option>
-            </select>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
+                Level
+              </label>
+              <select
+                name="level"
+                value={formData.level}
+                onChange={handleChange}
+                disabled={isSubmitting}
+                className="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl transition-all focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:text-white text-sm disabled:opacity-50"
+              >
+                <option value="">Select Level</option>
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
+                Grade
+              </label>
+              <select
+                name="grade"
+                value={formData.grade}
+                onChange={handleChange}
+                disabled={isSubmitting}
+                className="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl transition-all focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:text-white text-sm disabled:opacity-50"
+              >
+                <option value="">Select Grade</option>
+                {Array.from({ length: 13 }, (_, i) => `Grade ${i + 1}`).map(g => (
+                  <option key={g} value={g}>{g}</option>
+                ))}
+                <option value="Other">Other</option>
+              </select>
+            </div>
           </div>
 
 

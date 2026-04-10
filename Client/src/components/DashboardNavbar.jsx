@@ -1,12 +1,22 @@
 import { motion } from "framer-motion";
-import { Bell, Search, User } from "lucide-react";
+import { Bell, Search } from "lucide-react";
 import DarkModeToggle from "./DarkModeToggle";
 
 /**
- * DashboardNavbar — sticky top header with search, bell and avatar.
- * @param {{ searchPlaceholder?: string, onSearch?: (q:string)=>void }} props
+ * DashboardNavbar — sticky top header with search, bell and user avatar.
+ * @param {{ searchPlaceholder?: string, onSearch?: (q:string)=>void, user?: object }} props
  */
-export default function DashboardNavbar({ searchPlaceholder = "Search…", onSearch }) {
+export default function DashboardNavbar({ searchPlaceholder = "Search…", onSearch, user }) {
+
+  /** Resolve avatar URL — real photo or initials fallback */
+  const avatarSrc = (() => {
+    if (user?.avatar && user.avatar !== "uploads/default-avatar.png") {
+      return `http://localhost:5000/${user.avatar}`;
+    }
+    const name = user?.fullName || user?.name || "U";
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4F46E5&color=fff&size=64`;
+  })();
+
   return (
     <motion.header
       initial={{ y: -50, opacity: 0 }}
@@ -40,10 +50,15 @@ export default function DashboardNavbar({ searchPlaceholder = "Search…", onSea
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
         </motion.button>
 
-        {/* Avatar */}
-        <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
-          <User className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-        </div>
+        {/* Real user avatar */}
+        <img
+          src={avatarSrc}
+          alt="avatar"
+          className="w-8 h-8 rounded-full object-cover bg-indigo-100 ring-2 ring-indigo-100 dark:ring-indigo-900"
+          onError={(e) => {
+            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.fullName || "U")}&background=4F46E5&color=fff&size=64`;
+          }}
+        />
       </div>
     </motion.header>
   );

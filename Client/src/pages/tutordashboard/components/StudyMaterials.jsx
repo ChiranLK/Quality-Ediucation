@@ -52,7 +52,9 @@ function Toast({ toast, onClose }) {
   return (
     <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-2xl text-sm font-medium transition-all animate-in slide-in-from-bottom-4 duration-300 ${
       toast.type === 'success'
-        ? 'bg-indigo-600 text-white'
+        ? 'bg-emerald-600 text-white'
+        : toast.type === 'delete'
+        ? 'bg-red-600 text-white'
         : 'bg-red-600 text-white'
     }`}>
 
@@ -60,6 +62,8 @@ function Toast({ toast, onClose }) {
 
       {toast.type === 'success'
         ? <CheckCircle className="w-4 h-4 flex-shrink-0" />
+        : toast.type === 'delete'
+        ? <Trash2 className="w-4 h-4 flex-shrink-0" />
         : <AlertCircle className="w-4 h-4 flex-shrink-0" />}
       {toast.message}
       <button onClick={onClose} className="ml-2 opacity-70 hover:opacity-100">
@@ -519,7 +523,8 @@ export default function StudyMaterials({ user }) {
       if (filterGrade) params.set('grade', filterGrade);
       if (filterStatus) params.set('status', filterStatus);
 
-      const { data } = await customFetch.get(`/materials/my?${params}`);
+      const endpoint = user?.role === 'admin' ? '/materials' : '/materials/my';
+      const { data } = await customFetch.get(`${endpoint}?${params}`);
       setMaterials(data.data || []);
       setPagination({
         current: data.pagination?.current || 1,
@@ -556,7 +561,7 @@ export default function StudyMaterials({ user }) {
     setDeleteLoading(true);
     try {
       await customFetch.delete(`/materials/${modal.material._id}`);
-      showToast('Material deleted successfully.');
+      showToast('Material deleted successfully.', 'delete');
       setModal(null);
       fetchMaterials(page);
     } catch (err) {
@@ -599,7 +604,7 @@ export default function StudyMaterials({ user }) {
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <BookOpen className="w-6 h-6 text-indigo-600" />
-            My Study Materials
+            {user?.role === 'admin' ? 'Manage Study Materials' : 'My Study Materials'}
           </h2>
 
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
@@ -704,6 +709,8 @@ export default function StudyMaterials({ user }) {
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-sm">
             {hasFilters
               ? 'Try adjusting your search or filters.'
+              : user?.role === 'admin'
+              ? 'No study materials have been uploaded by any tutor yet.'
               : 'Start sharing knowledge with your students by uploading your first study material.'}
           </p>
           {!hasFilters && (

@@ -126,32 +126,34 @@ function StudentMaterialCard({ material, onDownload, onLike }) {
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-export default function StudentMaterials() {
+export default function StudentMaterials({ user }) {
+  const studentGrade = user?.grade || ""; // '' means no grade set yet
+
   const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({ current: 1, total: 1, count: 0 });
   const [search, setSearch] = useState('');
   const [filterSubject, setFilterSubject] = useState('');
-  const [filterGrade, setFilterGrade] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
   const page = pagination.current;
 
-  // Fetch materials (status=active guaranteed for students)
+  // Fetch materials — always locked to student's grade if set
   const fetchMaterials = async (pg = 1) => {
     setLoading(true);
     try {
       const params = new URLSearchParams({ page: pg, limit: 9, status: 'active' });
       if (search) params.set('keyword', search);
       if (filterSubject) params.set('subject', filterSubject);
-      if (filterGrade) params.set('grade', filterGrade);
+      // 🔒 Always filter by student's own grade if they have one set
+      if (studentGrade) params.set('grade', studentGrade);
 
       const { data } = await customFetch.get(`/materials?${params}`);
       setMaterials(data.data || []);
       setPagination({
-        current: data.pagination?.currentPage || 1,
-        total: data.pagination?.totalPages || 1,
-        count: data.pagination?.totalCount || 0,
+        current: data.pagination?.current || 1,
+        total: data.pagination?.pages || 1,
+        count: data.pagination?.total || 0,
       });
     } catch (err) {
       toast.error('Failed to load study materials.');
@@ -162,7 +164,8 @@ export default function StudentMaterials() {
 
   useEffect(() => {
     fetchMaterials(1);
-  }, [filterSubject, filterGrade]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterSubject, studentGrade]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -171,9 +174,7 @@ export default function StudentMaterials() {
 
   const handleDownloadRecord = async (id) => {
     try {
-      // Record download metric in background
       await customFetch.post(`/materials/${id}/download`);
-      // Re-fetch to update stats, delay purely for UX
       setTimeout(() => fetchMaterials(page), 1000);
     } catch (e) {
       console.error(e);
@@ -191,11 +192,10 @@ export default function StudentMaterials() {
 
   const clearFilters = () => {
     setFilterSubject('');
-    setFilterGrade('');
     setSearch('');
   };
 
-  const hasFilters = filterSubject || filterGrade || search;
+  const hasFilters = filterSubject || search;
 
   return (
     <div className="space-y-6">
@@ -206,10 +206,22 @@ export default function StudentMaterials() {
           <BookOpen className="w-6 h-6 text-blue-600" />
           Study Materials Library
         </h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 max-w-2xl">
-          Browse and download resources uploaded by your tutors. 
-          Found {pagination.count} available material{pagination.count !== 1 ? 's' : ''}.
-        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Found {pagination.count} material{pagination.count !== 1 ? 's' : ''} available.
+          </p>
+          {/* Grade lock badge */}
+          {studentGrade ? (
+            <span className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700">
+              <GraduationCap className="w-3.5 h-3.5" />
+              Showing: {studentGrade}
+            </span>
+          ) : (
+            <span className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-700">
+              ⚠ Set your grade in Settings to see materials for your level
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Search + Filter Bar */}
@@ -250,11 +262,7 @@ export default function StudentMaterials() {
               <option value="">All Subjects</option>
               {SUBJECT_OPTIONS.map(s => <option key={s} value={s.toLowerCase()}>{s}</option>)}
             </select>
-            <select value={filterGrade} onChange={e => setFilterGrade(e.target.value)}
-              className="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option value="">All Grades</option>
-              {GRADE_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
-            </select>
+            {/* Note: Grade filter is locked to student's profile grade — no dropdown shown */}
             {hasFilters && (
               <button onClick={clearFilters}
                 className="px-3 py-2 text-sm text-red-500 hover:text-red-600 font-medium flex items-center gap-1">
