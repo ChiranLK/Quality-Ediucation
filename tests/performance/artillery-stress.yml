@@ -1,0 +1,37 @@
+config:
+  target: "http://localhost:5000"
+  phases:
+    - duration: 60
+      arrivalRate: 10
+      rampTo: 50
+    - duration: 120
+      arrivalRate: 50
+      rampTo: 100
+    - duration: 120
+      arrivalRate: 100
+      rampTo: 250
+    - duration: 60
+      arrivalRate: 250
+  variables:
+    tutorId: "60d5ec49c1234567890abcd2"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - name: "Stress Test - Find Breaking Point"
+    flow:
+      # Primary endpoint - rating stats (read-heavy)
+      - get:
+          url: "/api/tutors/{{ tutorId }}/rating-stats"
+          expect:
+            - statusCode: [200, 400, 429, 500, 503]
+
+      # Secondary endpoint - feedbacks (read-heavy)
+      - get:
+          url: "/api/tutors/{{ tutorId }}/feedbacks"
+          expect:
+            - statusCode: [200, 400, 429, 500, 503]
+
+      # Think time decreases as load increases
+      - think: 0.5

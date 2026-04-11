@@ -138,10 +138,14 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  // Allow async operations to settle
+  await new Promise(resolve => setTimeout(resolve, 100));
   await closeDatabase();
 });
 
 afterEach(async () => {
+  // Allow async operations to settle before clearing
+  await new Promise(resolve => setTimeout(resolve, 50));
   // Clear sessions between tests (keep users for token validity)
   await TutoringSession.deleteMany({});
 });

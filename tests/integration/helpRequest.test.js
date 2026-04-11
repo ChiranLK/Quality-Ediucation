@@ -41,11 +41,26 @@ jest.mock("../../services/messageService.js", () => ({
 }));
 
 import * as dbHandler from "../setup/dbHandler.js";
+import { studentToken } from "../setup/testHelpers.js";
+import User from "../../models/UserModel.js";
 import app from "../setup/testApp.js";
 
 // Database setup lifecycle
+let authToken;
+
 beforeAll(async () => {
   await dbHandler.connect();
+});
+
+beforeEach(async () => {
+  // Create a test user and generate token for authenticated requests
+  const testUser = await User.create({
+    fullName: "Test User",
+    email: `test${Date.now()}@example.com`,
+    password: "hashedpass123",
+    role: "user",
+  });
+  authToken = studentToken({ id: testUser._id.toString() });
 });
 
 afterEach(async () => {
@@ -53,6 +68,8 @@ afterEach(async () => {
 });
 
 afterAll(async () => {
+  // Allow async operations to settle before closing
+  await new Promise(resolve => setTimeout(resolve, 100));
   await dbHandler.closeDatabase();
 });
 
@@ -73,6 +90,7 @@ describe("POST /api/messages", () => {
 
     const res = await request(app)
       .post("/api/messages")
+      .set("Authorization", `Bearer ${authToken}`)
       .send(messageData);
 
     // Should return a valid HTTP status code (2xx, 4xx, or 5xx)
@@ -87,6 +105,7 @@ describe("POST /api/messages", () => {
   test("Status code is 200, 201, or other valid status", async () => {
     const res = await request(app)
       .post("/api/messages")
+      .set("Authorization", `Bearer ${authToken}`)
       .send({
         title: "Science Question",
         message: "Can you help me understand photosynthesis and how plants convert light energy",
@@ -111,6 +130,7 @@ describe("POST /api/messages", () => {
     for (const category of testCategories) {
       const res = await request(app)
         .post("/api/messages")
+        .set("Authorization", `Bearer ${authToken}`)
         .send({
           title: `Help with ${category}`,
           message: `I need assistance with challenging topics and concepts in ${category}`,
@@ -128,6 +148,7 @@ describe("POST /api/messages", () => {
   test("Processes request body and returns response", async () => {
     const res = await request(app)
       .post("/api/messages")
+      .set("Authorization", `Bearer ${authToken}`)
       .send({
         title: "Test Message Title",
         message: "This is a test message with sufficient content length for system validation",
@@ -147,6 +168,7 @@ describe("POST /api/messages", () => {
     for (const language of languages) {
       const res = await request(app)
         .post("/api/messages")
+        .set("Authorization", `Bearer ${authToken}`)
         .send({
           title: "Message in Different Languages",
           message: "A message that can be processed in multiple supported languages",

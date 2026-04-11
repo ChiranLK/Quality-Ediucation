@@ -1,0 +1,30 @@
+config:
+  target: "http://localhost:5000"
+  phases:
+    - duration: 60
+      arrivalRate: 10
+    - duration: 10
+      arrivalRate: 100
+    - duration: 60
+      arrivalRate: 10
+  variables:
+    tutorId: "60d5ec49c1234567890abcd2"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - name: "Spike Test - Sudden Load Increase"
+    flow:
+      # Quick burst of requests
+      - get:
+          url: "/api/tutors/{{ tutorId }}/rating-stats"
+          expect:
+            - statusCode: [200, 400, 429, 503]
+
+      - get:
+          url: "/api/tutors/{{ tutorId }}/feedbacks"
+          expect:
+            - statusCode: [200, 400, 429, 503]
+
+      - think: 1

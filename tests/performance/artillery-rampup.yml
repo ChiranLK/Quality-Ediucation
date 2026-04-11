@@ -1,0 +1,34 @@
+config:
+  target: "http://localhost:5000"
+  phases:
+    - duration: 30
+      arrivalRate: 5
+    - duration: 120
+      arrivalRate: 20
+      rampTo: 50
+    - duration: 60
+      arrivalRate: 50
+    - duration: 30
+      arrivalRate: 20
+  variables:
+    tutorId: "60d5ec49c1234567890abcd2"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - name: "Ramp-up Load Test"
+    flow:
+      - get:
+          url: "/api/tutors/{{ tutorId }}/rating-stats"
+          expect:
+            - statusCode: [200, 400]
+
+      - think: 1
+
+      - get:
+          url: "/api/tutors/{{ tutorId }}/feedbacks"
+          expect:
+            - statusCode: [200, 400]
+
+      - think: 2

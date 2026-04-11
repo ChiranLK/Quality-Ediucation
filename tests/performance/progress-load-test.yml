@@ -1,0 +1,96 @@
+# Artillery Performance Test — Progress Tracking API
+# ═══════════════════════════════════════════════════════════════════════════
+# Test Scenario:
+#   Simulates tutors updating student progress and students viewing their progress.
+#   Load phases: Warm-up → Sustained Load → Peak Spike
+# ═══════════════════════════════════════════════════════════════════════════
+config:
+  target: "http://localhost:5000"
+  phases:
+    - name: "Warm-up Phase"
+      duration: 30
+      arrivalRate: 5
+      rampTo: 10
+    - name: "Sustained Load Phase"
+      duration: 60
+      arrivalRate: 25
+    - name: "Peak Spike Phase"
+      duration: 30
+      arrivalRate: 25
+      rampTo: 60
+
+  http:
+    timeout: 15
+
+  variables:
+    authToken: "REPLACE_WITH_VALID_JWT_TOKEN"
+
+  ensure:
+    thresholds:
+      - http.response_time.p95: 1000   # 95% of requests under 1 second
+      - http.response_time.p99: 2000   # 99% of requests under 2 seconds
+    conditions:
+      - expression: http.codes.2xx > 85  # At least 85% success rate
+
+  plugins:
+    ensure: {}
+
+scenarios:
+  # ─────────────────────────────────────────────────────────────────────────
+  - name: "POST Upsert Student Progress (Tutor Update)"
+    weight: 35  # 35% of traffic — tutors updating student progress
+    flow:
+      - post:
+          url: "/api/progress"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          json:
+            studentId: "{{ studentId }}"
+            tutorId: "{{ tutorId }}"
+            topic: "Algebra Basic Operations"
+            completionPercent: "{{ completionPercent }}"
+            notes: "Making good progress. Continue with word problems exercises."
+          expect:
+            - statusCode: 200
+            - hasProperty: "progress"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  - name: "GET Student Own Progress (Student View)"
+    weight: 25  # 25% of traffic — students viewing their progress
+    flow:
+      - get:
+          url: "/api/progress/me"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+            - hasProperty: "progress"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  - name: "GET Progress by Tutor (Dashboard View)"
+    weight: 25  # 25% of traffic — tutors viewing their students' progress
+    flow:
+      - get:
+          url: "/api/progress/tutor/{{ tutorId }}"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+            - hasProperty: "progress"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  - name: "GET Progress by Student (Detailed View)"
+    weight: 15  # 15% of traffic — viewing specific student progress
+    flow:
+      - get:
+          url: "/api/progress/student/{{ studentId }}"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+            - hasProperty: "progress"
+
+processors:
+  # Generate dynamic test data
+  before_request: "functions.js"
+  after_response: "functions.js"

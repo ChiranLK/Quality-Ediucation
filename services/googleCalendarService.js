@@ -21,9 +21,9 @@ export const initCalendar = () => {
     });
 
     calendar = google.calendar({ version: "v3", auth: oauth2Client });
-    console.log("✅ Google Calendar initialized");
+    console.log("Google Calendar initialized");
   } else {
-    console.warn("⚠️ Google Calendar disabled: missing credentials");
+    console.warn("Google Calendar disabled: missing credentials");
   }
 };
 
@@ -64,7 +64,7 @@ const buildEventObject = (session) => {
   };
 
   // Log for debugging
-  console.log("🗓️ Building calendar event:", {
+  console.log("Building calendar event:", {
     summary: eventObject.summary,
     startTime: eventObject.start.dateTime,
     endTime: eventObject.end.dateTime,
@@ -81,7 +81,7 @@ export const createCalendarEvent = async (session) => {
   
   try {
     const response = await cal.events.insert({ calendarId: "primary", resource: event });
-    console.log(`✅ Calendar event created successfully:`, {
+    console.log(`Calendar event created successfully:`, {
       eventId: response.data.id,
       title: response.data.summary,
       start: response.data.start.dateTime,
@@ -89,7 +89,7 @@ export const createCalendarEvent = async (session) => {
     });
     return response.data.id;
   } catch (error) {
-    console.error("❌ Failed to create calendar event:", {
+    console.error("Failed to create calendar event:", {
       error: error.message,
       title: event.summary,
       schedule: { start: event.start, end: event.end },
@@ -109,13 +109,13 @@ export const updateCalendarEvent = async (googleEventId, session) => {
       eventId: googleEventId, 
       resource: event 
     });
-    console.log(`✅ Calendar event updated successfully:`, {
+    console.log(`Calendar event updated successfully:`, {
       eventId: googleEventId,
       title: response.data.summary,
       start: response.data.start.dateTime,
     });
   } catch (error) {
-    console.error("❌ Failed to update calendar event:", {
+    console.error("Failed to update calendar event:", {
       eventId: googleEventId,
       error: error.message,
       title: event.summary,
@@ -129,9 +129,9 @@ export const deleteCalendarEvent = async (googleEventId) => {
   const cal = getCalendar();
   try {
     await cal.events.delete({ calendarId: "primary", eventId: googleEventId });
-    console.log(`✅ Calendar event deleted successfully:`, googleEventId);
+    console.log(`Calendar event deleted successfully:`, googleEventId);
   } catch (error) {
-    console.error("❌ Failed to delete calendar event:", {
+    console.error("Failed to delete calendar event:", {
       eventId: googleEventId,
       error: error.message,
     });

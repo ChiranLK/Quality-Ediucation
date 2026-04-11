@@ -1,0 +1,54 @@
+config:
+  target: "http://localhost:5000"
+  phases:
+    - duration: 60
+      arrivalRate: 10
+    - duration: 120
+      arrivalRate: 20
+    - duration: 60
+      arrivalRate: 10
+  variables:
+    tutorId: "60d5ec49c1234567890abcd2"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - name: "Feedback & Progress Component Load Test"
+    flow:
+      # Get Tutor Rating Stats (10% - reference endpoint)
+      - get:
+          url: "/api/tutors/{{ tutorId }}/rating-stats"
+          expect:
+            - statusCode: [200, 400]
+
+      # Get Tutor Feedbacks (20%)
+      - think: 1
+      - get:
+          url: "/api/tutors/{{ tutorId }}/feedbacks"
+          expect:
+            - statusCode: [200, 400]
+
+      # Get Tutor Feedbacks again (repeat for load distribution)
+      - think: 1
+      - get:
+          url: "/api/tutors/{{ tutorId }}/feedbacks"
+          expect:
+            - statusCode: [200, 400]
+
+      # Get Rating Stats again (repeat for load distribution)
+      - think: 1
+      - get:
+          url: "/api/tutors/{{ tutorId }}/rating-stats"
+          expect:
+            - statusCode: [200, 400]
+
+      # Get Feedbacks repeat 2
+      - think: 1
+      - get:
+          url: "/api/tutors/{{ tutorId }}/feedbacks"
+          expect:
+            - statusCode: [200, 400]
+
+      # Wait between iterations
+      - think: 2

@@ -23,7 +23,30 @@
     "test:perf:helprequest:token": "node tests/performance/generate-helprequest-perf-token.js",
     "test:perf:helprequest": "artillery run tests/performance/help-request-load-test.yml",
     "test:perf:helprequest:run": "artillery run tests/performance/help-request-load-test.yml --output tests/performance/helprequest-report.json",
-    "test:perf:helprequest:report": "artillery report tests/performance/helprequest-report.json --output tests/performance/helprequest-report.html"
+    "test:perf:helprequest:report": "artillery report tests/performance/helprequest-report.json --output tests/performance/helprequest-report.html",
+    "test:unit:feedback": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js tests/unit/feedbackController.test.js --forceExit --verbose",
+    "test:unit:progress": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js tests/unit/progressController.test.js --forceExit --verbose",
+    "test:integration:feedback": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js tests/integration/feedback.test.js --forceExit --verbose --runInBand",
+    "test:integration:progress": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js tests/integration/progress.test.js --forceExit --verbose --runInBand",
+    "test:perf:feedback:token": "node tests/performance/generate-feedback-perf-token.js",
+    "test:perf:feedback": "artillery run tests/performance/feedback-load-test.yml",
+    "test:perf:feedback:run": "artillery run tests/performance/feedback-load-test.yml --output tests/performance/feedback-report.json",
+    "test:perf:feedback:report": "artillery report tests/performance/feedback-report.json --output tests/performance/feedback-report.html",
+    "test:perf:progress:token": "node tests/performance/generate-progress-perf-token.js",
+    "test:perf:progress": "artillery run tests/performance/progress-load-test.yml",
+    "test:perf:progress:run": "artillery run tests/performance/progress-load-test.yml --output tests/performance/progress-report.json",
+    "test:perf:progress:report": "artillery report tests/performance/progress-report.json --output tests/performance/progress-report.html",
+    "perf:load": "artillery run tests/performance/artillery-config.yml",
+    "perf:load:report": "artillery run tests/performance/artillery-config.yml --output tests/performance/load-test-report.json && artillery report tests/performance/load-test-report.json",
+    "perf:rampup": "artillery run tests/performance/artillery-rampup.yml",
+    "perf:rampup:report": "artillery run tests/performance/artillery-rampup.yml --output tests/performance/rampup-report.json && artillery report tests/performance/rampup-report.json",
+    "perf:spike": "artillery run tests/performance/artillery-spike.yml",
+    "perf:spike:report": "artillery run tests/performance/artillery-spike.yml --output tests/performance/spike-report.json && artillery report tests/performance/spike-report.json",
+    "perf:stress": "artillery run tests/performance/artillery-stress.yml",
+    "perf:stress:report": "artillery run tests/performance/artillery-stress.yml --output tests/performance/stress-report.json && artillery report tests/performance/stress-report.json",
+    "perf:all": "npm run perf:load:report && npm run perf:rampup:report && npm run perf:spike:report && npm run perf:stress:report",
+    "component4:test": "npm run test:unit:feedback && npm run test:unit:progress && npm run test:integration:feedback && npm run test:integration:progress && npm run perf:load",
+    "component4:perf": "npm run perf:load && npm run perf:rampup && npm run perf:spike && npm run perf:stress"
   },
   "jest": {
     "testEnvironment": "node",
@@ -41,7 +64,9 @@
       "Middleware/studyMaterialValidation.js",
       "validations/tutoringSession.validation.js"
     ],
-    "setupFilesAfterEnv": ["./tests/setup/jest.setup.js"],
+    "setupFilesAfterEnv": [
+      "./tests/setup/jest.setup.js"
+    ],
     "coverageDirectory": "tests/coverage",
     "coverageReporters": [
       "text",
@@ -73,6 +98,7 @@
   },
   "devDependencies": {
     "@jest/globals": "^30.3.0",
+    "artillery": "^2.0.21",
     "jest": "^30.3.0",
     "mongodb-memory-server": "^11.0.1",
     "nodemon": "^3.1.11",

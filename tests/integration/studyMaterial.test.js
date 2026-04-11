@@ -66,6 +66,8 @@ beforeAll(async () => {
 });
 
 afterEach(async () => {
+  // Allow async operations to settle before clearing
+  await new Promise(resolve => setTimeout(resolve, 50));
   await dbHandler.clearDatabase();
 });
 

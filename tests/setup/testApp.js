@@ -13,6 +13,8 @@ import materialRouter from "../../Routes/materialRouter.js";
 import authRouter from "../../Routes/authRouter.js";
 import tutoringSessionRouter from "../../Routes/tutoringSessionRouter.js";
 import messageRouter from "../../Routes/messageRouter.js";
+import feedbackRouter from "../../Routes/feedbackRouter.js";
+import progressRouter from "../../Routes/progressRouter.js";
 
 const app = express();
 
@@ -44,6 +46,8 @@ app.use("/api/auth", authRouter);
 app.use("/api/materials", materialRouter);
 app.use("/api/tutoring-sessions", tutoringSessionRouter);
 app.use("/api/messages", messageRouter);
+app.use("/api/feedbacks", feedbackRouter);
+app.use("/api/progress", progressRouter);
 
 // Centralised error handler (must be last)
 app.use(errorHandler);

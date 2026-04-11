@@ -1,0 +1,95 @@
+# Artillery Performance Test — Feedback & Ratings API
+# ═══════════════════════════════════════════════════════════════════════════
+# Test Scenario:
+#   Simulates students submitting feedback and tutors viewing their ratings.
+#   Load phases: Warm-up → Sustained Load → Peak Spike
+# ═══════════════════════════════════════════════════════════════════════════
+config:
+  target: "http://localhost:5000"
+  phases:
+    - name: "Warm-up Phase"
+      duration: 30
+      arrivalRate: 5
+      rampTo: 10
+    - name: "Sustained Load Phase"
+      duration: 60
+      arrivalRate: 20
+    - name: "Peak Spike Phase"
+      duration: 30
+      arrivalRate: 20
+      rampTo: 50
+
+  http:
+    timeout: 15
+
+  variables:
+    authToken: "REPLACE_WITH_VALID_JWT_TOKEN"
+
+  ensure:
+    thresholds:
+      - http.response_time.p95: 800   # 95% of requests under 800ms
+      - http.response_time.p99: 1500  # 99% of requests under 1.5 seconds
+    conditions:
+      - expression: http.codes.2xx > 85  # At least 85% success rate
+
+  plugins:
+    ensure: {}
+
+scenarios:
+  # ─────────────────────────────────────────────────────────────────────────
+  - name: "GET Tutor Rating Stats (Public)"
+    weight: 30  # 30% of traffic — students viewing ratings
+    flow:
+      - get:
+          url: "/api/feedbacks/tutor/{{ tutorId }}/ratings"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+            - hasProperty: "avgRating"
+            - hasProperty: "totalRatings"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  - name: "POST Submit Feedback (Write-Heavy)"
+    weight: 40  # 40% of traffic — students submitting feedback
+    flow:
+      - post:
+          url: "/api/feedbacks"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          json:
+            tutorId: "{{ tutorId }}"
+            rating: "{{ rating }}"
+            message: "Great teaching experience! Very knowledgeable."
+          expect:
+            - statusCode: 201
+            - hasProperty: "feedback"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  - name: "GET My Feedbacks (Student View)"
+    weight: 20  # 20% of traffic — students viewing own feedback history
+    flow:
+      - get:
+          url: "/api/feedbacks/me"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+            - hasProperty: "feedbacks"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  - name: "GET Tutor Feedback List (Tutor Dashboard)"
+    weight: 10  # 10% of traffic — tutors viewing feedback about them
+    flow:
+      - get:
+          url: "/api/feedbacks/tutor/{{ tutorId }}"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+            - hasProperty: "feedbacks"
+
+processors:
+  # Generate dynamic test data: tutor IDs and ratings
+  before_request: "functions.js"
+  after_response: "functions.js"

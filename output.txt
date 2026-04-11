@@ -1,0 +1,148 @@
+
+> af_backend@1.0.0 test:unit:feedback
+> node --experimental-vm-modules ./node_modules/jest/bin/jest.js tests/unit/feedbackController.test.js --forceExit --verbose --testTimeout=10000
+
+  console.log
+    [dotenv@17.3.1] injecting env (3) from .env.test -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+
+      at _log (node_modules/dotenv/lib/main.js:139:11)
+
+  console.log
+    [dotenv@17.3.1] injecting env (24) from .env -- tip: ⚙️  override existing env vars with { override: true }
+
+      at _log (node_modules/dotenv/lib/main.js:139:11)
+
+  console.log
+    SMTP CONFIG: sandbox.smtp.mailtrap.io 2525
+
+      at services/mailService.js:6:29
+
+(node:9488) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL tests/unit/feedbackController.test.js
+  📝 submitFeedback
+    × should submit feedback with valid rating (1-5) and message (3 ms)
+    √ should reject feedback from non-student (tutor) (2 ms)
+    √ should reject feedback with invalid tutorId (1 ms)
+    √ should reject feedback with rating < 1 (1 ms)
+    √ should reject feedback with rating > 5 (1 ms)
+    × should return 404 when tutor does not exist (3 ms)
+    × should allow admin to submit feedback (2 ms)
+    × should allow feedback submission with sessionId (1 ms)
+  📖 getMyFeedbacks
+    √ should return student's feedbacks (1 ms)
+    √ should return empty array when student has no feedbacks (1 ms)
+  📊 getTutorFeedbacks
+    √ tutor should view own feedback list (1 ms)
+    √ admin should view any tutor's feedback (1 ms)
+    √ other tutor should NOT view another tutor's feedback
+    √ should return 400 for invalid tutorId
+  ⭐ getTutorRatingStats
+    √ should return aggregated rating stats for tutor (1 ms)
+    √ should return zero stats when tutor has no feedbacks
+    √ should return 400 for invalid tutorId
+  📋 getAllFeedbacks
+    √ admin should view all feedbacks (1 ms)
+    √ non-admin should NOT view all feedbacks
+  🗑️ deleteFeedback
+    √ student should delete own feedback (4 ms)
+    √ tutor should delete feedback about themselves (1 ms)
+    √ admin should delete any feedback
+    √ unrelated student should NOT delete other's feedback (1 ms)
+    √ should return 404 for non-existent feedback (1 ms)
+    √ should return 400 for invalid feedback id (1 ms)
+  ✏️ updateFeedbackAdmin
+    √ admin should update feedback rating and message (1 ms)
+    √ non-admin should NOT update feedback
+    √ should reject invalid rating (1 ms)
+  ➕ createFeedbackAdmin
+    × admin should create feedback on behalf of student (2 ms)
+    √ non-admin should NOT create feedback (5 ms)
+    √ should validate studentId and tutorId (1 ms)
+
+  ● 📝 submitFeedback › should submit feedback with valid rating (1-5) and message
+
+    TypeError: sendFeedbackNotificationEmail.mockResolvedValue is not a function
+
+    [0m [90m 91 |[39m     [33mFeedback[39m[33m.[39mfind [33m=[39m jest[33m.[39mfn()[33m.[39mmockResolvedValue([feedback])[33m;[39m
+     [90m 92 |[39m     [33mUser[39m[33m.[39mfindByIdAndUpdate [33m=[39m jest[33m.[39mfn()[33m.[39mmockResolvedValue(tutor)[33m;[39m
+    [31m[1m>[22m[39m[90m 93 |[39m     sendFeedbackNotificationEmail[33m.[39mmockResolvedValue()[33m;[39m
+     [90m    |[39m                                   [31m[1m^[22m[39m
+     [90m 94 |[39m
+     [90m 95 |[39m     [36mawait[39m submitFeedback(req[33m,[39m res)[33m;[39m
+     [90m 96 |[39m[0m
+
+      at Object.<anonymous> (tests/unit/feedbackController.test.js:93:35)
+
+  ● 📝 submitFeedback › should return 404 when tutor does not exist
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: 404
+    Received: 500
+
+    Number of calls: 1
+
+    [0m [90m 196 |[39m     [36mawait[39m submitFeedback(req[33m,[39m res)[33m;[39m
+     [90m 197 |[39m
+    [31m[1m>[22m[39m[90m 198 |[39m     expect(res[33m.[39mstatus)[33m.[39mtoHaveBeenCalledWith([33mStatusCodes[39m[33m.[39m[33mNOT_FOUND[39m)[33m;[39m
+     [90m     |[39m                        [31m[1m^[22m[39m
+     [90m 199 |[39m     expect(res[33m.[39mjson)[33m.[39mtoHaveBeenCalledWith(
+     [90m 200 |[39m       expect[33m.[39mobjectContaining({ message[33m:[39m [32m"Tutor not found"[39m })
+     [90m 201 |[39m     )[33m;[39m[0m
+
+      at Object.<anonymous> (tests/unit/feedbackController.test.js:198:24)
+
+  ● 📝 submitFeedback › should allow admin to submit feedback
+
+    TypeError: sendFeedbackNotificationEmail.mockResolvedValue is not a function
+
+    [0m [90m 222 |[39m     [33mFeedback[39m[33m.[39mfind [33m=[39m jest[33m.[39mfn()[33m.[39mmockResolvedValue([feedback])[33m;[39m
+     [90m 223 |[39m     [33mUser[39m[33m.[39mfindByIdAndUpdate [33m=[39m jest[33m.[39mfn()[33m.[39mmockResolvedValue(tutor)[33m;[39m
+    [31m[1m>[22m[39m[90m 224 |[39m     sendFeedbackNotificationEmail[33m.[39mmockResolvedValue()[33m;[39m
+     [90m     |[39m                                   [31m[1m^[22m[39m
+     [90m 225 |[39m
+     [90m 226 |[39m     [36mawait[39m submitFeedback(req[33m,[39m res)[33m;[39m
+     [90m 227 |[39m[0m
+
+      at Object.<anonymous> (tests/unit/feedbackController.test.js:224:35)
+
+  ● 📝 submitFeedback › should allow feedback submission with sessionId
+
+    TypeError: sendFeedbackNotificationEmail.mockResolvedValue is not a function
+
+    [0m [90m 251 |[39m     [33mFeedback[39m[33m.[39mfind [33m=[39m jest[33m.[39mfn()[33m.[39mmockResolvedValue([feedback])[33m;[39m
+     [90m 252 |[39m     [33mUser[39m[33m.[39mfindByIdAndUpdate [33m=[39m jest[33m.[39mfn()[33m.[39mmockResolvedValue(tutor)[33m;[39m
+    [31m[1m>[22m[39m[90m 253 |[39m     sendFeedbackNotificationEmail[33m.[39mmockResolvedValue()[33m;[39m
+     [90m     |[39m                                   [31m[1m^[22m[39m
+     [90m 254 |[39m
+     [90m 255 |[39m     [36mawait[39m submitFeedback(req[33m,[39m res)[33m;[39m
+     [90m 256 |[39m[0m
+
+      at Object.<anonymous> (tests/unit/feedbackController.test.js:253:35)
+
+  ● ➕ createFeedbackAdmin › admin should create feedback on behalf of student
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: 201
+    Received: 500
+
+    Number of calls: 1
+
+    [0m [90m 714 |[39m     [36mawait[39m createFeedbackAdmin(req[33m,[39m res)[33m;[39m
+     [90m 715 |[39m
+    [31m[1m>[22m[39m[90m 716 |[39m     expect(res[33m.[39mstatus)[33m.[39mtoHaveBeenCalledWith([33mStatusCodes[39m[33m.[39m[33mCREATED[39m)[33m;[39m
+     [90m     |[39m                        [31m[1m^[22m[39m
+     [90m 717 |[39m   })[33m;[39m
+     [90m 718 |[39m
+     [90m 719 |[39m   test([32m"non-admin should NOT create feedback"[39m[33m,[39m [36masync[39m () [33m=>[39m {[0m
+
+      at Object.<anonymous> (tests/unit/feedbackController.test.js:716:24)
+
+Test Suites: 1 failed, 1 total
+Tests:       5 failed, 26 passed, 31 total
+Snapshots:   0 total
+Time:        0.708 s, estimated 1 s
+Ran all test suites matching tests/unit/feedbackController.test.js.
+Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?
