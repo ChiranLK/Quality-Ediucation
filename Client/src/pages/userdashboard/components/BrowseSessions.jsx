@@ -58,27 +58,6 @@ function Toast({ message, type = 'success', onClose }) {
   );
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-// ADD THIS — check if current time is within the session window
-function isSessionActive(session) {
-  if (!session.schedule?.date || !session.schedule?.startTime || !session.schedule?.endTime) {
-    return false;
-  }
-  const dateStr = new Date(session.schedule.date).toISOString().split('T')[0]; // YYYY-MM-DD
-  const start = new Date(`${dateStr}T${session.schedule.startTime}:00`);
-  const end   = new Date(`${dateStr}T${session.schedule.endTime}:00`);
-  const now   = new Date();
-  return now >= start && now <= end;
-}
-
-// ADD THIS — check if session has already ended
-function isSessionEnded(session) {
-  if (!session.schedule?.date || !session.schedule?.endTime) return false;
-  const dateStr = new Date(session.schedule.date).toISOString().split('T')[0];
-  const end = new Date(`${dateStr}T${session.schedule.endTime}:00`);
-  return new Date() > end;
-}
-
 // ── Session Card ──────────────────────────────────────────────────────────────
 // UPDATE THIS — added enrolledSessions prop so isEnrolled is always accurate
 function SessionCard({ session, userId, enrolledSessions, onJoin, onLeave, onOpenMeet, actionLoading }) {
@@ -181,7 +160,6 @@ function SessionCard({ session, userId, enrolledSessions, onJoin, onLeave, onOpe
         <div className="pt-3 border-t border-gray-100 dark:border-gray-700 space-y-2">
           {isEnrolled ? (
             <>
-              {/* ADD THIS — open Meet link with time-gate check */}
               {meetLink && (
                 <button
                   onClick={() => onOpenMeet(session)}
@@ -207,7 +185,7 @@ function SessionCard({ session, userId, enrolledSessions, onJoin, onLeave, onOpe
               className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
             >
               {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LogIn className="w-3.5 h-3.5" />}
-              {isFull ? 'Session Full' : 'Join Session'}
+              {isFull ? 'Session Full' : 'Enroll to Session'}
             </button>
           )}
         </div>
@@ -258,54 +236,27 @@ export default function BrowseSessions({ user }) {
     fetchSessions({ page: 1, keyword: search, subject: filterSubject, grade: filterGrade, level: filterLevel });
   };
 
-  // UPDATE THIS — enrollment and meeting-open are now separated
   const handleJoin = async (id) => {
-    // ADD THIS — look up session and check enrollment BEFORE any API call
-    const session = sessions.find((s) => s._id === id);
     const alreadyEnrolled = enrolledSessions?.some((s) => s._id === id);
-    const meetLink = session?.meetingLink || session?.location?.meetingLink;
 
     setActionLoading(id);
     try {
       if (!alreadyEnrolled) {
-        // ADD THIS — only enroll if not yet enrolled (prevents 'already enrolled' error)
         await joinSession(id);
         await fetchEnrolledSessions();
-        setToast({ message: 'Joined session successfully!', type: 'success' });
-        // Refresh list to update capacity
+        setToast({ message: 'Enrolled in session successfully!', type: 'success' });
         fetchSessions({ page, keyword: search, subject: filterSubject, grade: filterGrade, level: filterLevel });
       }
-
-      // ADD THIS — always open meet link regardless of enrollment state
-      if (!meetLink) {
-        alert('Meeting link not available.');
-      } else {
-        window.open(meetLink, '_blank', 'noopener,noreferrer');
-      }
     } catch (err) {
-      setToast({ message: err.response?.data?.message || 'Failed to join session.', type: 'error' });
+      setToast({ message: err.response?.data?.message || 'Failed to enroll in session.', type: 'error' });
     } finally {
       setActionLoading(null);
     }
   };
 
-  // ADD THIS — time-gated Meet link handler
   const handleOpenMeet = (session) => {
     const meetLink = session.location?.meetingLink;
     if (!meetLink) return;
-
-    if (isSessionEnded(session)) {
-      alert('This session has already ended.');
-      return;
-    }
-    if (!isSessionActive(session)) {
-      alert(
-        `Session hasn't started yet. It begins at ${session.schedule?.startTime} on ` +
-        new Date(session.schedule?.date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }) +
-        '.'
-      );
-      return;
-    }
     window.open(meetLink, '_blank', 'noopener,noreferrer');
   };
 
