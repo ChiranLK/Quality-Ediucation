@@ -1,0 +1,203 @@
+
+config:
+  target: "http://localhost:5000"
+
+  phases:
+    - name: "Phase 1 — Warm-up"
+      duration: 20
+      arrivalRate: 5
+      rampTo: 15
+
+    - name: "Phase 2 — Sustained Normal Load"
+      duration: 60
+      arrivalRate: 40
+
+    - name: "Phase 3 — Peak Spike (80 Concurrent Users)"
+      duration: 30
+      arrivalRate: 40
+      rampTo: 80
+
+    - name: "Phase 4 — Cool-down"
+      duration: 20
+      arrivalRate: 80
+      rampTo: 10
+
+  http:
+    timeout: 15
+
+  variables:
+    # ─── STEP 1: Run generate-helprequest-perf-token.js and paste tokens below ───
+    userToken: "64f1a2b3c4d5e6f7a8b9c0d1"
+    tutorToken: "64f1a2b3c4d5e6f7a8b9c0d2"
+    adminToken: "64f1a2b3c4d5e6f7a8b9c0d3"
+
+    # ─── Random test data ─────────────────────────────────────────────────────
+    categories:
+      - "Mathematics"
+      - "Science"
+      - "IT & Programming"
+      - "English"
+      - "History"
+      - "Geography"
+      - "Physics"
+      - "Chemistry"
+
+    languages:
+      - "English"
+      - "Sinhala"
+      - "Tamil"
+
+  ensure:
+    thresholds:
+      - http.response_time.p95: 1000   # 95% requests under 1 second
+      - http.response_time.p99: 2000   # 99% requests under 2 seconds
+    conditions:
+      - expression: http.codes.2xx > 85        # at least 85% success rate
+      - expression: http.codes.2xx < 95        # sanity check
+      - expression: http.codes.4xx < 10        # less than 10% client errors
+      - expression: http.codes.5xx < 5         # less than 5% server errors
+
+  plugins:
+    ensure: {}
+
+# TEST SCENARIOS
+
+scenarios:
+
+  - name: "Create Help Request — Standard Flow"
+    weight: 30
+    
+    flow:
+      - post:
+          url: "/api/messages"
+          headers:
+            Authorization: "Bearer {{ userToken }}"
+          json:
+            title: "Need help with {{ $randomNumber(1, 10000) }}"
+            message: "I need assistance understanding this complex topic number {{ $randomNumber(1, 100000) }}. Please provide detailed explanation."
+            category: "{{ categories | sample }}"
+            language: "{{ languages | sample }}"
+            formUILanguage: "English"
+          expect:
+            - statusCode: 201
+            - hasProperty: "message"
+            - hasProperty: "success"
+          capture:
+            - json: "$.message._id"
+              as: "createdMessageId"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  - name: "Retrieve All Help Requests — Default Listing"
+    weight: 35
+    # Simulates fetching all help requests for the current user
+    flow:
+      - get:
+          url: "/api/messages"
+          headers:
+            Authorization: "Bearer {{ userToken }}"
+          expect:
+            - statusCode: 200
+            - hasProperty: "messages"
+            - contentType: json
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  - name: "View All Requests as Tutor — Elevated Permissions"
+    weight: 10
+    # Simulates a tutor viewing all help requests (not just their own)
+    flow:
+      - get:
+          url: "/api/messages"
+          headers:
+            Authorization: "Bearer {{ tutorToken }}"
+          expect:
+            - statusCode: 200
+            - hasProperty: "messages"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  - name: "View All Requests as Admin — Full Access"
+    weight: 5
+    # Simulates admin viewing all help requests in the system
+    flow:
+      - get:
+          url: "/api/messages"
+          headers:
+            Authorization: "Bearer {{ adminToken }}"
+          expect:
+            - statusCode: 200
+            - hasProperty: "messages"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  - name: "Full Lifecycle — Create → Update → Delete (User)"
+    weight: 15
+    # Simulates complete workflow: create request, update it, then delete it
+    flow:
+      # Step 1: Create a help request
+      - post:
+          url: "/api/messages"
+          headers:
+            Authorization: "Bearer {{ userToken }}"
+          json:
+            title: "Lifecycle Test Request {{ $randomNumber(1, 100000) }}"
+            message: "This is a test message for the full lifecycle test. {{ $randomNumber(1, 50000) }}"
+            category: "{{ categories | sample }}"
+            language: "{{ languages | sample }}"
+            formUILanguage: "English"
+          expect:
+            - statusCode: 201
+          capture:
+            - json: "$.message._id"
+              as: "lifecycleMessageId"
+
+      # Step 2: Update the created request
+      - patch:
+          url: "/api/messages/{{ lifecycleMessageId }}"
+          headers:
+            Authorization: "Bearer {{ userToken }}"
+          json:
+            title: "Updated Title - Lifecycle {{ $randomNumber(1, 100000) }}"
+            message: "Updated message content. This request has been modified {{ $randomNumber(1, 50000) }}"
+            category: "{{ categories | sample }}"
+            language: "{{ languages | sample }}"
+          expect:
+            - statusCode: 200
+
+      # Step 3: Delete the request (cleanup)
+      - delete:
+          url: "/api/messages/{{ lifecycleMessageId }}"
+          headers:
+            Authorization: "Bearer {{ userToken }}"
+          expect:
+            - statusCode: 200
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  - name: "Stress Test — Rapid Sequential Creates"
+    weight: 5
+    # Simulates batch creation of multiple requests in quick succession
+    flow:
+      - loop:
+          - post:
+              url: "/api/messages"
+              headers:
+                Authorization: "Bearer {{ userToken }}"
+              json:
+                title: "Batch Create {{ $loopCount }} - {{ $randomNumber(1, 1000) }}"
+                message: "Batch message number {{ $loopCount }}. Content: {{ $randomNumber(1, 100000) }}"
+                category: "{{ categories | sample }}"
+                language: "{{ languages | sample }}"
+                formUILanguage: "English"
+              expect:
+                - statusCode: 201
+        count: 3
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  - name: "API Health Check — Lightweight GET"
+    weight: 5
+    # 5% of traffic validates API is still responsive
+    flow:
+      - get:
+          url: "/api/messages"
+          headers:
+            Authorization: "Bearer {{ userToken }}"
+          expect:
+            - statusCode: 200
+
