@@ -12,6 +12,7 @@ import { errorHandler } from "../../Middleware/errorHandler.js";
 import materialRouter from "../../Routes/materialRouter.js";
 import authRouter from "../../Routes/authRouter.js";
 import tutoringSessionRouter from "../../Routes/tutoringSessionRouter.js";
+import messageRouter from "../../Routes/messageRouter.js";
 
 const app = express();
 
@@ -42,6 +43,7 @@ app.get("/health", (req, res) => res.status(200).json({ message: "Server is work
 app.use("/api/auth", authRouter);
 app.use("/api/materials", materialRouter);
 app.use("/api/tutoring-sessions", tutoringSessionRouter);
+app.use("/api/messages", messageRouter);
 
 // Centralised error handler (must be last)
 app.use(errorHandler);
