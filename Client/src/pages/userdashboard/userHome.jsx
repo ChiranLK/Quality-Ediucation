@@ -2,6 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, TrendingUp, MessageSquare, BookOpen, Loader, AlertCircle, ArrowRight } from 'lucide-react';
 import customFetch from '../../utils/customfetch';
 
+/** Same rule as BrowseSessions "My Sessions" — session is past only after schedule end. */
+function isSessionEnded(session) {
+  if (!session.schedule?.date || !session.schedule?.endTime) return false;
+  const dateStr = new Date(session.schedule.date).toISOString().split('T')[0];
+  const end = new Date(`${dateStr}T${session.schedule.endTime}:00`);
+  return new Date() > end;
+}
+
 export default function UserHome({ user, onNavigate }) {
   const [stats, setStats] = useState({
     upcomingSessions: 0,
@@ -17,13 +25,11 @@ export default function UserHome({ user, onNavigate }) {
       try {
         setLoading(true);
         
-        // Fetch sessions
-        const { data: sessionsData } = await customFetch.get('/tutoring-sessions');
-        const allSessions = sessionsData.sessions || [];
-        
-        // Count upcoming sessions (future date)
-        const now = new Date();
-        const upcomingSessions = allSessions.filter(s => new Date(s.scheduledDate) > now).length;
+        // Same source as Sessions → My Sessions (enrolled only)
+        const { data: enrolledData } = await customFetch.get('/tutoring-sessions/my-enrolled');
+        const enrolledList = enrolledData.sessions || enrolledData.data || [];
+
+        const upcomingSessions = enrolledList.filter((s) => !isSessionEnded(s)).length;
         
         // Fetch progress
         const { data: progressData } = await customFetch.get('/progress/me');
@@ -39,18 +45,27 @@ export default function UserHome({ user, onNavigate }) {
           feedbacksReceived: feedbacksCount,
         });
 
-        // Set recent sessions (last 3)
-        setRecentSessions(allSessions.slice(0, 3).map(s => ({
-          _id: s._id,
-          tutorName: s.tutorId?.fullName || 'Unknown Tutor',
-          date: new Date(s.scheduledDate).toLocaleDateString('en-US', { 
-            month: 'short', 
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          }),
-          status: new Date(s.scheduledDate) > now ? 'Upcoming' : 'Completed',
-        })));
+        const enrolledSorted = [...enrolledList].sort(
+          (a, b) => new Date(b.schedule?.date || 0) - new Date(a.schedule?.date || 0)
+        );
+        setRecentSessions(enrolledSorted.slice(0, 3).map((s) => {
+          const d = s.schedule?.date ? new Date(s.schedule.date) : null;
+          const dateLabel = d
+            ? d.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                ...(s.schedule?.startTime
+                  ? { hour: '2-digit', minute: '2-digit' }
+                  : {}),
+              })
+            : 'TBD';
+          return {
+            _id: s._id,
+            tutorName: s.tutorId?.fullName || 'Unknown Tutor',
+            date: dateLabel,
+            status: isSessionEnded(s) ? 'Completed' : 'Upcoming',
+          };
+        }));
       } catch (err) {
         console.error('Failed to fetch dashboard data:', err);
         setError('Failed to load dashboard data');
@@ -101,7 +116,7 @@ export default function UserHome({ user, onNavigate }) {
             <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           </div>
           <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.upcomingSessions}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Sessions scheduled</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Your enrolled sessions not yet ended</p>
         </div>
 
         {/* Learning Progress */}
@@ -128,7 +143,7 @@ export default function UserHome({ user, onNavigate }) {
       {/* Recent Sessions */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white">Recent Sessions</h2>
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">Recent enrolled sessions</h2>
           <BookOpen className="w-5 h-5 text-gray-400 dark:text-gray-600" />
         </div>
 
