@@ -334,6 +334,198 @@ AF_Backend/
 
 ---
 
+## � Quick Start Testing (Beginner-Friendly)
+
+### For Developers: First Time Running Tests?
+
+**Time to Complete: ~10 minutes**
+
+#### Step 1: Install Dev Dependencies ✅
+
+```bash
+# Skip this if already installed
+npm install
+```
+
+#### Step 2: Run Unit Tests (Fastest - ~2 minutes)
+
+```bash
+# Test all components
+npm run test:unit
+
+# Or test specific component
+npm run test:unit:sessions
+```
+
+**What you'll see:**
+- ✅ Green checkmarks = tests passed
+- ❌ Red X = test failed (check console for error details)
+
+---
+
+#### Step 3: Run Integration Tests (Medium - ~5 minutes)
+
+```bash
+# Test API endpoints
+npm run test:integration
+
+# Or test specific endpoints
+npm run test:integration:sessions
+```
+
+**What's being tested:**
+- API endpoint responses (200, 400, 403, 404)
+- Database operations
+- Authentication and authorization
+- Error handling
+
+---
+
+#### Step 4: Run Performance Tests (Optional - ~5 minutes)
+
+```bash
+# Terminal 1: Start backend
+npm run dev
+
+# Terminal 2: Generate token and run performance test
+npm run test:perf:helprequest:token
+# Copy token from output into tests/performance/help-request-load-test.yml
+
+npm run test:perf:helprequest
+
+# Open generated report
+tests/performance/helprequest-report.html
+```
+
+---
+
+### 📊 All Testing Commands at a Glance
+
+```bash
+# Unit Tests
+npm run test:unit                          # All unit tests
+npm run test:unit:sessions                 # Tutoring sessions only
+
+# Integration Tests  
+npm run test:integration                   # All integration tests
+npm run test:integration:sessions          # Tutoring sessions only
+
+# Code Coverage
+npm run test:coverage                      # Generate coverage report
+
+# Performance Tests
+npm run test:perf:token                    # Study materials tokens
+npm run test:perf                          # Study materials load test
+npm run test:perf:run                      # With JSON output
+npm run test:perf:report                   # Generate HTML report
+
+npm run test:perf:sessions:token           # Tutoring sessions tokens
+npm run test:perf:sessions                 # Load test
+npm run test:perf:sessions:run             # With JSON output
+npm run test:perf:sessions:report          # Generate HTML report
+
+npm run test:perf:helprequest:token        # Help request tokens
+npm run test:perf:helprequest              # Load test
+npm run test:perf:helprequest:run          # With JSON output
+npm run test:perf:helprequest:report       # Generate HTML report
+```
+
+---
+
+## 🏗️ Component Testing Strategy
+
+This table shows which testing layers cover each component:
+
+| Component | Developer | Unit Tests | Integration Tests | Performance Tests |
+|-----------|-----------|:----------:|:----------------:|:----------------:|
+| **Authentication** | IT23472020 | ✅ | ✅ | ✅ |
+| **Help Requests (Messages)** | IT23472020 | ✅ | ✅ | ✅ Artillery |
+| **Study Materials** | IT23405240 | ✅ | ✅ | ✅ Artillery |
+| **Tutoring Sessions** | IT23401976 | ✅ | ✅ | ✅ Artillery |
+| **Google Calendar** | IT23401976 | ✅ | ✅ | ✅ (Mocked) |
+| **Feedback & Ratings** | IT23242272 | ✅ | ✅ | ✅ (in integration) |
+| **Student Progress** | IT23242272 | ✅ | ✅ | ✅ (in integration) |
+| **Email Notifications** | IT23242272 | ✅ | ✅ | ✅ (Mocked) |
+
+**Legend:**
+- ✅ = Fully tested
+- ✅ (Mocked) = External APIs are mocked to avoid real calls
+- ✅ Artillery = Load tested with Artillery.io
+
+---
+
+## 📌 Test Coverage by Scenario
+
+### Scenario 1: Student Creates & Updates Help Request
+
+**Flow:**
+1. Student registers
+2. Student creates help request with Sinhala text
+3. Message auto-translates to English (Google Gemini API called)
+4. Student updates message with another Sinhala text
+5. Student deletes message
+
+**Tested in:**
+- ✅ Unit: `messageService.test.js` (translation logic)
+- ✅ Integration: Manual workflow + automated tests
+- ✅ Performance: Artillery with 80+ concurrent users
+
+---
+
+### Scenario 2: Tutor Creates Session & Manages Students
+
+**Flow:**
+1. Tutor creates tutoring session
+2. Google Calendar event auto-created
+3. Multiple students join session
+4. Students leave session
+5. Tutor updates session details
+6. Tutor records student progress
+7. Student views their progress
+
+**Tested in:**
+- ✅ Unit: `tutoringSessionService.test.js`, `tutoringSessionController.test.js`
+- ✅ Integration: `tutoringSession.test.js` (43 test cases)
+- ✅ Performance: `tutoring-session-load-test.yml`
+
+---
+
+### Scenario 3: Tutor Uploads Study Materials
+
+**Flow:**
+1. Tutor uploads PDF file
+2. File stored in Cloudinary
+3. Student searches materials by subject
+4. Student downloads material (counter increments)
+5. Student likes material (toggles)
+6. Tutor updates material metadata
+7. Admin deletes material
+
+**Tested in:**
+- ✅ Unit: `studyMaterialService.test.js`
+- ✅ Integration: `studyMaterial.test.js` (30+ API tests)
+- ✅ Performance: `study-material-load-test.yml`
+- 📋 Postman: `StudyMaterials_Complete.postman_collection.json` (30 API tests)
+
+---
+
+### Scenario 4: Student Provides Feedback to Tutor
+
+**Flow:**
+1. Student submits rating (1-5 stars) for tutor
+2. Email notification sent to tutor and admin
+3. Tutor views all feedback received
+4. Student views feedback they submitted
+5. Admin can delete any feedback
+6. Rating aggregation updated (avg, breakdown by stars)
+
+**Tested in:**
+- ✅ Unit: `feedbackController.test.js`
+- ✅ Integration: Feedback endpoints in `tutoringSession.test.js`
+- ✅ Email: Mocked Nodemailer in tests
+
+---
+
 ## 📡 API Endpoints
 
 ### 🔐 Authentication Routes
@@ -1343,6 +1535,324 @@ graph LR
 
 ---
 
+## 🧪 Comprehensive Testing Guide
+
+This project implements a **3-layer testing strategy** for quality assurance:
+
+| Layer | Tool | Purpose | Scope |
+|---|---|---|---|
+| **Unit Tests** | Jest + `@jest/globals` | Test individual functions and services in isolation | No DB, no HTTP calls |
+| **Integration Tests** | Jest + Supertest + MongoMemoryServer | Test API endpoints with real HTTP and in-memory DB | Full API flow testing |
+| **Performance Tests** | Artillery.io | Load testing under 100 concurrent users | Response time & throughput analysis |
+
+---
+
+### 📋 Test Folder Structure
+
+```
+tests/
+├── setup/                          # Shared testing utilities
+│   ├── testApp.js                 # Express app for integration tests
+│   ├── dbHandler.js               # MongoMemoryServer configuration
+│   ├── testHelpers.js             # JWT & data factories
+│   └── jest.setup.js              # Jest configuration
+│
+├── unit/                          # Unit tests (pure functions)
+│   ├── validationUtils.test.js
+│   ├── responseHandler.test.js
+│   ├── tutoringSessionValidation.test.js
+│   ├── tutoringSessionUtils.test.js
+│   ├── tutoringSessionService.test.js
+│   └── tutoringSessionController.test.js
+│
+├── integration/                   # Integration tests (API endpoints)
+│   ├── studyMaterial.test.js      # All 8 Study Material endpoints
+│   └── tutoringSession.test.js    # All 9 Tutoring Session endpoints
+│
+└── performance/                   # Performance & load tests
+    ├── study-material-load-test.yml
+    ├── tutoring-session-load-test.yml
+    ├── help-request-load-test.yml
+    ├── generate-perf-token.js
+    ├── HELP_REQUEST_PERFORMANCE_TESTING.md
+    └── ...
+```
+
+---
+
+### 🔧 Installation & Setup
+
+All test dependencies are pre-installed. To verify:
+
+```bash
+# Install test dependencies (if needed)
+npm install --save-dev jest supertest mongodb-memory-server @jest/globals
+
+# Install Artillery globally (for performance tests)
+npm install -g artillery@latest
+```
+
+---
+
+## ✅ Layer 1: Unit Tests
+
+Unit tests validate **pure functions and service logic in isolation** without database or HTTP.
+
+### What's Tested:
+
+- ✅ **Validation Functions** — Input sanitization, ObjectId checks, email validation
+- ✅ **Response Handlers** — Success/error/paginated response formatting
+- ✅ **Service Methods** — Business logic (CRUD, filtering, calculations)
+- ✅ **Controller Handlers** — HTTP status codes and response shapes
+- ✅ **Middleware** — Authentication, authorization, input validation
+
+### Run Unit Tests:
+
+```bash
+# All unit tests
+npm run test:unit
+
+# Tutoring sessions unit tests only
+npm run test:unit:sessions
+
+# Watch mode (auto-run on file changes)
+npm run test:unit -- --watch
+
+# With coverage report
+npm run test:coverage
+```
+
+### Expected Output:
+
+```
+PASS  tests/unit/validationUtils.test.js
+PASS  tests/unit/responseHandler.test.js
+PASS  tests/unit/tutoringSessionValidation.test.js
+PASS  tests/unit/tutoringSessionService.test.js
+PASS  tests/unit/tutoringSessionController.test.js
+
+Tests: 94 passed | Time: ~1.5s
+Coverage: 85%+
+```
+
+---
+
+## 🔗 Layer 2: Integration Tests
+
+Integration tests verify **API endpoints with real HTTP requests** against an in-memory MongoDB.
+
+### What's Tested:
+
+| Component | Endpoint | Scenarios |
+|-----------|----------|-----------|
+| **Study Materials** | 8 endpoints | Upload, Get All, Filter, Search, Download, Like, Metrics |
+| **Tutoring Sessions** | 9 endpoints | Create, Get All, Join, Leave, Calendar Sync |
+| **Success Cases** | ✅ | Valid requests return 200/201/204 |
+| **Error Cases** | ❌ | Invalid input returns 400, unauthorized returns 403, not found returns 404 |
+| **Edge Cases** | 🔲 | Boundary values, empty results, duplicates |
+
+### Run Integration Tests:
+
+```bash
+# All integration tests
+npm run test:integration
+
+# Tutoring sessions integration tests only
+npm run test:integration:sessions
+
+# Single test file
+npm run test:integration -- studyMaterial.test.js
+
+# Watch mode (auto-run on file changes)
+npm run test:integration -- --watch
+```
+
+### Expected Output:
+
+```
+PASS  tests/integration/studyMaterial.test.js
+
+  POST /api/materials — Upload Material
+    ✓ ✅ SUCCESS — tutor uploads a file (201)
+    ✓ ❌ ERROR — student role blocked (403)
+    ✓ ❌ ERROR — missing file returns 400
+
+  GET /api/materials — Get All Materials
+    ✓ ✅ SUCCESS — returns paginated list (200)
+    ✓ ✅ SUCCESS — filters by subject
+    ✓ 🔲 EDGE — empty result returns []
+
+Tests: 43 passed | Time: ~8s
+```
+
+---
+
+## 🚀 Layer 3: Performance Tests (Artillery.io)
+
+Performance tests simulate **realistic load** with 80+ concurrent users to validate response times and throughput.
+
+### What's Tested:
+
+✅ **Response Time**
+- `p95` (95th percentile) < 1000ms
+- `p99` (99th percentile) < 2000ms
+
+✅ **Throughput**
+- Requests per second under sustained load
+- Error rate < 5%
+
+✅ **Scalability**
+- System behavior under peak load (80+ concurrent users)
+- Graceful degradation
+
+### Available Performance Tests:
+
+#### 1️⃣ Study Materials Performance Test
+
+**File:** `tests/performance/study-material-load-test.yml`
+
+**Test Phases:**
+- Warm-up: 5→15 users (20s)
+- Sustained: 50 users (60s)
+- Peak: 50→100 users (30s)
+
+**Run Test:**
+```bash
+# Step 1: Generate JWT token
+npm run test:perf:token
+
+# Step 2: Update token in test file (when prompted)
+
+# Step 3: Start backend server (in another terminal)
+npm run dev
+
+# Step 4: Run test and generate report
+npm run test:perf:run
+npm run test:perf:report
+
+# Report generated at: tests/performance/report.html
+```
+
+---
+
+#### 2️⃣ Tutoring Sessions Performance Test
+
+**File:** `tests/performance/tutoring-session-load-test.yml`
+
+**Test Phases:**
+- Warm-up: 5→20 users (30s)
+- Sustained: 60 users (60s)
+- Peak: 60→100 users (30s)
+
+**Run Test:**
+```bash
+# Step 1: Generate JWT token
+npm run test:perf:sessions:token
+
+# Step 2: Start backend server (in another terminal)
+npm run dev
+
+# Step 3: Run test and generate report
+npm run test:perf:sessions:run
+npm run test:perf:sessions:report
+
+# Report generated at: tests/performance/sessions-report.html
+```
+
+---
+
+#### 3️⃣ Help Request Performance Test
+
+**File:** `tests/performance/help-request-load-test.yml`
+
+**Test Scenarios:**
+- Create help requests (30%)
+- Retrieve all requests (35%)
+- Tutor view all (10%)
+- Admin view all (5%)
+- Full lifecycle: Create→Update→Delete (15%)
+- Stress test: Rapid creation (5%)
+
+**Test Phases:**
+- Warm-up: 5→15 users (20s)
+- Sustained: 40 users (60s)
+- Peak: 40→80 users (30s)
+- Cool-down: 80→10 users (20s)
+
+**Run Test:**
+```bash
+# Quick Start Guide for Help Request Testing
+
+# Step 1: Generate performance testing tokens
+npm run test:perf:helprequest:token
+
+# Step 2: Update configuration file
+# Copy tokens from output and paste into:
+# tests/performance/help-request-load-test.yml
+# Variables section: userToken, tutorToken, adminToken
+
+# Step 3: Start backend server (in another terminal)
+npm run dev
+
+# Step 4: Run performance test (quick mode)
+npm run test:perf:helprequest
+
+# Step 5: Run with report generation (comprehensive)
+npm run test:perf:helprequest:run
+npm run test:perf:helprequest:report
+
+# Report generated at: tests/performance/helprequest-report.html
+```
+
+---
+
+### Performance Test Results Interpretation
+
+After running a performance test, check the HTML report for:
+
+```
+✅ Response Time Percentiles:
+   - p50: 320ms (median response time)
+   - p95: 850ms (95% requests completed in this time)
+   - p99: 1,200ms (99% requests completed in this time)
+
+✅ Request Throughput:
+   - Total requests: 2,500
+   - Successful: 2,475 (99%)
+   - Failed: 25 (1%)
+
+✅ Error Rate:
+   - 2xx (success): 99%
+   - 4xx (client errors): 0.8%
+   - 5xx (server errors): 0.2%
+```
+
+**Pass Criteria:**
+- ✅ p95 < 1000ms
+- ✅ p99 < 2000ms
+- ✅ Success rate > 85%
+- ✅ Error rate < 5%
+
+---
+
+## 📊 Test Coverage Report
+
+Generate a coverage report to see which files are tested:
+
+```bash
+npm run test:coverage
+```
+
+Coverage report will be generated at: `tests/coverage/index.html`
+
+**Coverage Targets:**
+- Controllers: > 80%
+- Services: > 85%
+- Utilities: > 90%
+- Middleware: > 75%
+
+---
+
 ## 🧪 Testing with Postman
 
 ### Import Collection
@@ -1350,6 +1860,7 @@ graph LR
 2. Import the workspace globals: `workspace.postman_globals.json`
 3. Set the base URL: `http://localhost:5000`
 
+---
 
 ### 📚 Study Materials Testing (IT23405240)
 
@@ -1361,16 +1872,181 @@ graph LR
 6. Test metrics: Download counter, Like/Unlike toggle
 7. Test error cases: no file, duplicate title, invalid ID, oversized file
 
+---
+
+### 📅 Tutoring Sessions Testing (IT23401976)
+
+1. Import Postman collection or use manual requests
+2. **Create Session** (as Tutor):
+   ```bash
+   POST /api/tutoring-sessions
+   Authorization: Bearer <tutor-token>
+   {
+     "title": "Advanced Math",
+     "subject": "Mathematics",
+     "grade": "Grade 12",
+     "date": "2026-03-15",
+     "startTime": "14:00",
+     "endTime": "16:00",
+     "maxCapacity": 25
+   }
+   ```
+
+3. **Join Session** (as Student):
+   ```bash
+   POST /api/tutoring-sessions/:sessionId/join
+   Authorization: Bearer <student-token>
+   ```
+
+4. **Verify Google Calendar Event** — Check tutor's Google Calendar for auto-created event
+
+---
+
 ### ⭐ Feedback, Ratings & Progress Testing (IT23242272)
 
 1. Login as **student** — use token for feedback submission
-2. `POST /api/feedbacks` — submit a rating (1–5) + message for a tutor; check Mailtrap inbox for notification email
-3. `GET /api/feedbacks/tutor/:tutorId/ratings` — verify aggregated avg rating and star breakdown
-4. Login as **tutor** — `GET /api/feedbacks/tutor/:tutorId` to view student messages
-5. `POST /api/progress` — (as tutor) log a student's progress with topic + completion %
-6. Login as **student** — `GET /api/progress/me` to verify progress records
-7. Test role guardrails: tutors submitting feedback should receive `403 Forbidden`
-8. Test duplicate feedback: re-submit same student+tutor+session — should update, not duplicate
+2. **Submit Feedback:**
+   ```bash
+   POST /api/feedbacks
+   Authorization: Bearer <student-token>
+   {
+     "tutorId": "64f1a2b3...",
+     "rating": 5,
+     "message": "Excellent teaching!"
+   }
+   ```
+
+3. **Check Email Notification** — Verify in Mailtrap inbox (if configured)
+
+4. **View Ratings:**
+   ```bash
+   GET /api/feedbacks/tutor/:tutorId/ratings
+   Authorization: Bearer <token>
+   ```
+
+5. **Login as Tutor** — View feedback messages:
+   ```bash
+   GET /api/feedbacks/tutor/:tutorId
+   Authorization: Bearer <tutor-token>
+   ```
+
+6. **Create Progress Record** (as Tutor):
+   ```bash
+   POST /api/progress
+   Authorization: Bearer <tutor-token>
+   {
+     "studentId": "64f1a2b3...",
+     "topic": "Quadratic Equations",
+     "completionPercent": 75,
+     "notes": "Good progress!"
+   }
+   ```
+
+7. **View Progress** (as Student):
+   ```bash
+   GET /api/progress/me
+   Authorization: Bearer <student-token>
+   ```
+
+---
+
+### 💬 Help Request Testing (IT23472020)
+
+1. **Create Help Request** (as Student):
+   ```bash
+   POST /api/messages
+   Authorization: Bearer <student-token>
+   {
+     "message": "මට ගණිතයේ උදව්වක් අවශ්‍යයි"  # Sinhala text
+   }
+   ```
+   ✅ Translation should be automatic (English: "I need help with mathematics")
+
+2. **View Your Messages:**
+   ```bash
+   GET /api/messages
+   Authorization: Bearer <student-token>
+   ```
+   ✅ Students see only their own messages
+
+3. **View All Messages** (as Tutor/Admin):
+   ```bash
+   GET /api/messages
+   Authorization: Bearer <tutor-token>
+   ```
+   ✅ Tutors/Admins see all messages
+
+4. **Update Message** (as Student):
+   ```bash
+   PUT /api/messages/:messageId
+   Authorization: Bearer <student-token>
+   {
+     "message": "අර්ජුනයි, අරුඹ/විද්‍යාව ගිණුම් සඳහා උදව්ව අවශ්‍යයි"
+   }
+   ```
+   ✅ Translation should be automatic
+
+5. **Delete Message** (as Student):
+   ```bash
+   DELETE /api/messages/:messageId
+   Authorization: Bearer <student-token>
+   ```
+
+---
+
+## 🛠️ Troubleshooting Common Test Issues
+
+### Issue: Tests fail with "MongoDB connection error"
+**Solution:** Ensure MongoMemoryServer is installed:
+```bash
+npm install --save-dev mongodb-memory-server
+```
+
+### Issue: Performance test shows "Cannot find token variable"
+**Solution:** Generate token before running test:
+```bash
+npm run test:perf:token
+# Copy the token and paste into the .yml file
+```
+
+### Issue: Artillery command not found
+**Solution:** Install Artillery globally:
+```bash
+npm install -g artillery@latest
+```
+
+### Issue: Port 5000 already in use
+**Solution:** Kill the process or use a different port:
+```bash
+# Kill process on port 5000 (Linux/Mac)
+lsof -ti:5000 | xargs kill -9
+
+# Kill process on port 5000 (Windows)
+netstat -ano | findstr :5000
+taskkill /PID <PID> /F
+```
+
+### Issue: JSON Web Token errors
+**Solution:** Ensure token is valid and not expired:
+```bash
+# Generate a fresh token
+npm run test:perf:token
+# or 
+npm run test:perf:sessions:token
+# or 
+npm run test:perf:helprequest:token
+```
+
+---
+
+## 📚 Additional Testing Resources
+
+- 📖 **Jest Documentation:** https://jestjs.io/
+- 📖 **Supertest Documentation:** https://github.com/visionmedia/supertest
+- 📖 **Artillery.io Documentation:** https://artillery.io/
+- 📖 **MongoDB Memory Server:** https://github.com/nodkz/mongodb-memory-server
+- 📄 **Full Testing Guide:** See `tests/TESTING_README.md`
+- 📄 **Help Request Testing Guide:** See `tests/performance/HELP_REQUEST_PERFORMANCE_TESTING.md`
 
 ---
 
