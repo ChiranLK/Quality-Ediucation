@@ -80,10 +80,11 @@ function isSessionEnded(session) {
 }
 
 // ── Session Card ──────────────────────────────────────────────────────────────
-function SessionCard({ session, userId, onJoin, onLeave, onOpenMeet, actionLoading }) {
-  const isEnrolled = session.students?.some(
-    (s) => (s._id || s) === userId
-  );
+// UPDATE THIS — added enrolledSessions prop so isEnrolled is always accurate
+function SessionCard({ session, userId, enrolledSessions, onJoin, onLeave, onOpenMeet, actionLoading }) {
+  // UPDATE THIS — was: session.students?.some(...) which is always undefined
+  //               now: checks the enrolledSessions list from context (source of truth)
+  const isEnrolled = enrolledSessions?.some((s) => s._id === session._id);
   const isFull = session.capacity?.enrolled >= session.capacity?.maxParticipants;
   const isLoading = actionLoading === session._id;
   // ADD THIS — derive meet link from nested location object
@@ -257,27 +258,29 @@ export default function BrowseSessions({ user }) {
     fetchSessions({ page: 1, keyword: search, subject: filterSubject, grade: filterGrade, level: filterLevel });
   };
 
-  // UPDATE THIS — opens meetingLink directly, no time-window check on student side
+  // UPDATE THIS — enrollment and meeting-open are now separated
   const handleJoin = async (id) => {
+    // ADD THIS — look up session and check enrollment BEFORE any API call
+    const session = sessions.find((s) => s._id === id);
+    const alreadyEnrolled = enrolledSessions?.some((s) => s._id === id);
+    const meetLink = session?.meetingLink || session?.location?.meetingLink;
+
     setActionLoading(id);
     try {
-      await joinSession(id);
-      await fetchEnrolledSessions();
-      setToast({ message: 'Joined session successfully!', type: 'success' });
-      // Refresh list to update capacity
-      fetchSessions({ page, keyword: search, subject: filterSubject, grade: filterGrade, level: filterLevel });
+      if (!alreadyEnrolled) {
+        // ADD THIS — only enroll if not yet enrolled (prevents 'already enrolled' error)
+        await joinSession(id);
+        await fetchEnrolledSessions();
+        setToast({ message: 'Joined session successfully!', type: 'success' });
+        // Refresh list to update capacity
+        fetchSessions({ page, keyword: search, subject: filterSubject, grade: filterGrade, level: filterLevel });
+      }
 
-      // UPDATE THIS — removed time validation; open link directly
-      const session = sessions.find((s) => s._id === id);
-      if (session) {
-        const meetLink = session.meetingLink || session.location?.meetingLink;
-        if (!meetLink) {
-          // ADD THIS — guard: no link stored
-          alert('Meeting link not available.');
-        } else {
-          // REMOVE THIS (was: time-gate checks) — open immediately
-          window.open(meetLink, '_blank', 'noopener,noreferrer');
-        }
+      // ADD THIS — always open meet link regardless of enrollment state
+      if (!meetLink) {
+        alert('Meeting link not available.');
+      } else {
+        window.open(meetLink, '_blank', 'noopener,noreferrer');
       }
     } catch (err) {
       setToast({ message: err.response?.data?.message || 'Failed to join session.', type: 'error' });
@@ -464,6 +467,7 @@ export default function BrowseSessions({ user }) {
                     key={s._id}
                     session={s}
                     userId={userId}
+                    enrolledSessions={enrolledSessions}
                     onJoin={handleJoin}
                     onLeave={handleLeave}
                     onOpenMeet={handleOpenMeet}
@@ -526,6 +530,7 @@ export default function BrowseSessions({ user }) {
                   key={s._id}
                   session={s}
                   userId={userId}
+                  enrolledSessions={enrolledSessions}
                   onJoin={handleJoin}
                   onLeave={handleLeave}
                   onOpenMeet={handleOpenMeet}

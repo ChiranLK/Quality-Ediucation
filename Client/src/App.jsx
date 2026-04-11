@@ -13,6 +13,8 @@ import { SessionProvider }     from "./context/SessionContext.jsx";
 import { HelpRequestProvider } from "./context/HelpRequestContext.jsx";
 import { ProgressProvider }    from "./context/ProgressContext.jsx";
 import { FeedbackProvider }    from "./context/FeedbackContext.jsx";
+// USE EXISTING — project-wide toast library (react-hot-toast)
+import { Toaster }             from "react-hot-toast";
 
 import LoginPage        from "./pages/login.jsx";
 import UserDashboard    from "./pages/userdashboard/userDashboard.jsx";
@@ -128,6 +130,14 @@ export default function App() {
             <HelpRequestProvider>
               <ProgressProvider>
                 <FeedbackProvider>
+                  {/* ADD THIS — single global Toaster; all react-hot-toast calls render here */}
+                  <Toaster
+                    position="top-right"
+                    toastOptions={{
+                      duration: 4000,
+                      className: 'text-base px-5 py-4 rounded-xl shadow-lg',
+                    }}
+                  />
                   <AppRouter />
                 </FeedbackProvider>
               </ProgressProvider>
