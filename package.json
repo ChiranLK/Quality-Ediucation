@@ -19,7 +19,11 @@
     "test:perf:sessions:token": "node tests/performance/generate-tutoring-perf-token.js",
     "test:perf:sessions": "artillery run tests/performance/tutoring-session-load-test.yml",
     "test:perf:sessions:run": "artillery run tests/performance/tutoring-session-load-test.yml --output tests/performance/sessions-report.json",
-    "test:perf:sessions:report": "artillery report tests/performance/sessions-report.json --output tests/performance/sessions-report.html"
+    "test:perf:sessions:report": "artillery report tests/performance/sessions-report.json --output tests/performance/sessions-report.html",
+    "test:perf:helprequest:token": "node tests/performance/generate-helprequest-perf-token.js",
+    "test:perf:helprequest": "artillery run tests/performance/help-request-load-test.yml",
+    "test:perf:helprequest:run": "artillery run tests/performance/help-request-load-test.yml --output tests/performance/helprequest-report.json",
+    "test:perf:helprequest:report": "artillery report tests/performance/helprequest-report.json --output tests/performance/helprequest-report.html"
   },
   "jest": {
     "testEnvironment": "node",
