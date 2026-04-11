@@ -134,9 +134,19 @@ export function SessionProvider({ children }) {
    */
   const joinSession = useCallback(async (id) => {
     const { data } = await customFetch.post(`/tutoring-sessions/${id}/join`);
-    // Update local session to reflect new participant count
+    const currentEnrolled = data.currentEnrolled ?? data?.session?.capacity?.currentEnrolled;
     setSessions((prev) =>
-      prev.map((s) => (s._id === id ? { ...s, ...(data.session || {}) } : s))
+      prev.map((s) =>
+        s._id === id
+          ? {
+              ...s,
+              capacity: {
+                ...s.capacity,
+                currentEnrolled: currentEnrolled ?? s.capacity?.currentEnrolled,
+              },
+            }
+          : s
+      )
     );
     return data;
   }, []);
@@ -147,8 +157,19 @@ export function SessionProvider({ children }) {
    */
   const leaveSession = useCallback(async (id) => {
     const { data } = await customFetch.post(`/tutoring-sessions/${id}/leave`);
+    const currentEnrolled = data.currentEnrolled ?? data?.session?.capacity?.currentEnrolled;
     setSessions((prev) =>
-      prev.map((s) => (s._id === id ? { ...s, ...(data.session || {}) } : s))
+      prev.map((s) =>
+        s._id === id
+          ? {
+              ...s,
+              capacity: {
+                ...s.capacity,
+                currentEnrolled: currentEnrolled ?? s.capacity?.currentEnrolled,
+              },
+            }
+          : s
+      )
     );
     setEnrolledSessions((prev) => prev.filter((s) => s._id !== id));
     return data;

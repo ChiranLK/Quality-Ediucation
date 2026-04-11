@@ -14,7 +14,9 @@ import React, { useState, useEffect } from 'react';
 import {
   Calendar, Clock, Users, BookOpen, Search, Filter,
   GraduationCap, LogIn, LogOut as LeaveIcon, RefreshCw,
-  ChevronLeft, ChevronRight, Tag, User, Loader2, X
+  ChevronLeft, ChevronRight, Tag, User, Loader2, X,
+  // ADD THIS
+  Link as LinkIcon, Video
 } from 'lucide-react';
 import { useSession } from '../../../context/SessionContext';
 
@@ -56,13 +58,36 @@ function Toast({ message, type = 'success', onClose }) {
   );
 }
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+// ADD THIS — check if current time is within the session window
+function isSessionActive(session) {
+  if (!session.schedule?.date || !session.schedule?.startTime || !session.schedule?.endTime) {
+    return false;
+  }
+  const dateStr = new Date(session.schedule.date).toISOString().split('T')[0]; // YYYY-MM-DD
+  const start = new Date(`${dateStr}T${session.schedule.startTime}:00`);
+  const end   = new Date(`${dateStr}T${session.schedule.endTime}:00`);
+  const now   = new Date();
+  return now >= start && now <= end;
+}
+
+// ADD THIS — check if session has already ended
+function isSessionEnded(session) {
+  if (!session.schedule?.date || !session.schedule?.endTime) return false;
+  const dateStr = new Date(session.schedule.date).toISOString().split('T')[0];
+  const end = new Date(`${dateStr}T${session.schedule.endTime}:00`);
+  return new Date() > end;
+}
+
 // ── Session Card ──────────────────────────────────────────────────────────────
-function SessionCard({ session, userId, onJoin, onLeave, actionLoading }) {
+function SessionCard({ session, userId, onJoin, onLeave, onOpenMeet, actionLoading }) {
   const isEnrolled = session.students?.some(
     (s) => (s._id || s) === userId
   );
   const isFull = session.capacity?.enrolled >= session.capacity?.maxParticipants;
   const isLoading = actionLoading === session._id;
+  // ADD THIS — derive meet link from nested location object
+  const meetLink = session.location?.meetingLink;
 
   const formattedDate = session.schedule?.date
     ? new Date(session.schedule.date).toLocaleDateString('en-US', {
@@ -131,6 +156,13 @@ function SessionCard({ session, userId, onJoin, onLeave, actionLoading }) {
               {session.tutorId.fullName}
             </span>
           )}
+          {/* ADD THIS — show Meet link indicator if present */}
+          {meetLink && (
+            <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+              <Video className="w-3 h-3" />
+              Online
+            </span>
+          )}
         </div>
 
         {/* Tags */}
@@ -145,16 +177,28 @@ function SessionCard({ session, userId, onJoin, onLeave, actionLoading }) {
         )}
 
         {/* Action */}
-        <div className="pt-3 border-t border-gray-100 dark:border-gray-700">
+        <div className="pt-3 border-t border-gray-100 dark:border-gray-700 space-y-2">
           {isEnrolled ? (
-            <button
-              onClick={() => onLeave(session._id)}
-              disabled={isLoading}
-              className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-xs font-bold hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors disabled:opacity-60"
-            >
-              {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LeaveIcon className="w-3.5 h-3.5" />}
-              Leave Session
-            </button>
+            <>
+              {/* ADD THIS — open Meet link with time-gate check */}
+              {meetLink && (
+                <button
+                  onClick={() => onOpenMeet(session)}
+                  className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-green-600 hover:bg-green-700 text-white text-xs font-bold transition-colors shadow-sm"
+                >
+                  <LinkIcon className="w-3.5 h-3.5" />
+                  Join Google Meet
+                </button>
+              )}
+              <button
+                onClick={() => onLeave(session._id)}
+                disabled={isLoading}
+                className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-xs font-bold hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors disabled:opacity-60"
+              >
+                {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LeaveIcon className="w-3.5 h-3.5" />}
+                Leave Session
+              </button>
+            </>
           ) : (
             <button
               onClick={() => onJoin(session._id)}
@@ -213,6 +257,7 @@ export default function BrowseSessions({ user }) {
     fetchSessions({ page: 1, keyword: search, subject: filterSubject, grade: filterGrade, level: filterLevel });
   };
 
+  // UPDATE THIS — opens meetingLink directly, no time-window check on student side
   const handleJoin = async (id) => {
     setActionLoading(id);
     try {
@@ -221,11 +266,44 @@ export default function BrowseSessions({ user }) {
       setToast({ message: 'Joined session successfully!', type: 'success' });
       // Refresh list to update capacity
       fetchSessions({ page, keyword: search, subject: filterSubject, grade: filterGrade, level: filterLevel });
+
+      // UPDATE THIS — removed time validation; open link directly
+      const session = sessions.find((s) => s._id === id);
+      if (session) {
+        const meetLink = session.meetingLink || session.location?.meetingLink;
+        if (!meetLink) {
+          // ADD THIS — guard: no link stored
+          alert('Meeting link not available.');
+        } else {
+          // REMOVE THIS (was: time-gate checks) — open immediately
+          window.open(meetLink, '_blank', 'noopener,noreferrer');
+        }
+      }
     } catch (err) {
       setToast({ message: err.response?.data?.message || 'Failed to join session.', type: 'error' });
     } finally {
       setActionLoading(null);
     }
+  };
+
+  // ADD THIS — time-gated Meet link handler
+  const handleOpenMeet = (session) => {
+    const meetLink = session.location?.meetingLink;
+    if (!meetLink) return;
+
+    if (isSessionEnded(session)) {
+      alert('This session has already ended.');
+      return;
+    }
+    if (!isSessionActive(session)) {
+      alert(
+        `Session hasn't started yet. It begins at ${session.schedule?.startTime} on ` +
+        new Date(session.schedule?.date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }) +
+        '.'
+      );
+      return;
+    }
+    window.open(meetLink, '_blank', 'noopener,noreferrer');
   };
 
   const handleLeave = async (id) => {
@@ -388,6 +466,7 @@ export default function BrowseSessions({ user }) {
                     userId={userId}
                     onJoin={handleJoin}
                     onLeave={handleLeave}
+                    onOpenMeet={handleOpenMeet}
                     actionLoading={actionLoading}
                   />
                 ))}
@@ -449,6 +528,7 @@ export default function BrowseSessions({ user }) {
                   userId={userId}
                   onJoin={handleJoin}
                   onLeave={handleLeave}
+                  onOpenMeet={handleOpenMeet}
                   actionLoading={actionLoading}
                 />
               ))}

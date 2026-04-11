@@ -77,6 +77,8 @@ export default function MySessions({ user }) {
         level: formData.level,
         grade: formData.grade,
         tags:  formData.tags,
+        // ADD THIS — forward the meetingLink from the form
+        location: formData.location,
       };
 
       if (editingSession) {
