@@ -16,6 +16,16 @@
 
 ---
 
+## 🚀 Live URLs & Demo
+
+- **🟢 Frontend Platform**: [https://quality-education-six.vercel.app](https://quality-education-six.vercel.app)
+- **⚙️ Backend API**: [https://quality-education-8hz3.onrender.com](https://quality-education-8hz3.onrender.com)
+
+### Live Demo Preview
+![Quality Education Homepage](./assets/deployment-success.png)
+
+---
+
 ## 1. Project Overview
 
 **Quality Education** is a comprehensive full-stack web application that connects school students with qualified tutors, providing peer-learning and structured tutoring sessions. The platform enables:
