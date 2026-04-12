@@ -72,7 +72,7 @@ export default function HelpRequestTips() {
         autoPlay={true}
         autoPlayInterval={5000}
         showIndicators={true}
-        showNavigation={true}
+        showNavigation={false}
         height="h-52"
       />
     </motion.div>
