@@ -3165,49 +3165,6 @@ Coverage report will be generated at: `tests/coverage/index.html`
 
 ---
 
-### 💬 Help Request Testing (IT23472020)
-
-1. **Create Help Request** (as Student):
-   ```bash
-   POST /api/messages
-   Authorization: Bearer <student-token>
-   {
-     "message": "මට ගණිතයේ උදව්වක් අවශ්‍යයි"  # Sinhala text
-   }
-   ```
-   ✅ Translation should be automatic (English: "I need help with mathematics")
-
-2. **View Your Messages:**
-   ```bash
-   GET /api/messages
-   Authorization: Bearer <student-token>
-   ```
-   ✅ Students see only their own messages
-
-3. **View All Messages** (as Tutor/Admin):
-   ```bash
-   GET /api/messages
-   Authorization: Bearer <tutor-token>
-   ```
-   ✅ Tutors/Admins see all messages
-
-4. **Update Message** (as Student):
-   ```bash
-   PUT /api/messages/:messageId
-   Authorization: Bearer <student-token>
-   {
-     "message": "අර්ජුනයි, අරුඹ/විද්‍යාව ගිණුම් සඳහා උදව්ව අවශ්‍යයි"
-   }
-   ```
-   ✅ Translation should be automatic
-
-5. **Delete Message** (as Student):
-   ```bash
-   DELETE /api/messages/:messageId
-   Authorization: Bearer <student-token>
-   ```
-
----
 
 ## 🛠️ Troubleshooting Common Test Issues
 
