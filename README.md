@@ -1,340 +1,1547 @@
 <div align="center">
 
-# 🎓 Quality Education Backend
+# 🎓 Quality Education Platform
 
 ### A Web-Based Peer Learning and Tutoring Platform for School Students
 
 ![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
 ![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge)
 ![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)
+![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![Tailwind](https://img.shields.io/badge/Tailwind-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white)
 ![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)
-![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white)
-![Google Gemini](https://img.shields.io/badge/Google%20Gemini-8E75B2?style=for-the-badge&logo=google&logoColor=white)
 
 </div>
 
 ---
 
-## 📌 Overview
+## 1. Project Overview
 
-**Quality Education** is a web-based peer-learning and tutoring platform designed to connect school students with qualified tutors in an efficient and scalable manner.
+**Quality Education** is a comprehensive full-stack web application that connects school students with qualified tutors, providing peer-learning and structured tutoring sessions. The platform enables:
 
-The platform enables students to request academic help, **automatically translates Sinhala messages into English** using the **Google Gemini API**, and allows tutors to respond effectively.
+- **Students** to request academic help with automatic Sinhala-to-English translation
+- **Tutors** to create and manage tutoring sessions with Google Calendar integration
+- **Administrators** to monitor platform activities and manage content
+- **Collaborative Learning** through study material sharing, progress tracking, and feedback systems
 
-This system promotes **accessible, structured, and collaborative digital education**.
+### Key Capabilities:
+- 🔐 Role-based access control (Student, Tutor, Admin)
+- 💬 Real-time messaging with AI-powered translation
+- 📚 Study material management with cloud storage
+- 📅 Tutoring session scheduling with calendar integration
+- ⭐ Feedback and rating system with email notifications
+- 📊 Student progress tracking and analytics
+- 🌍 Multi-language support (Sinhala ↔ English)
 
----
-
-## 🚀 Key Features
-
-### 🔐 Authentication & Authorization
-👨‍💻 Developed by **H A S Maduwantha** — Student ID: `IT23472020`
-- ✅ **Role-based access control (RBAC)**
-- ✅ Secure login & registration
-- ✅ JWT-based authentication
-- ✅ Three user roles:
-  - 👨‍🎓 **Student (User)**
-  - 👨‍🏫 **Tutor**
-  - 🛡️ **Admin**
-
-### 💬 Help Request Management (Full CRUD)
-👨‍💻 Developed by **H A S Maduwantha** — Student ID: `IT23472020`
-#### Students can:
-- ✍️ Create help requests
-- 👀 View submitted requests
-- ✏️ Update messages (with translation support)
-- 🗑️ Delete requests
-
-#### Tutors & Admin can:
-- 📋 View all help requests
-- 💡 Respond to student queries
-
-### 🌍 Sinhala to English Translation
-
-- 🔍 **Detects Sinhala Unicode range** (0D80–0DFF)
-- 🤖 **Automatically translates** to English using Google Gemini API
-- 💾 Stores translated message in database
-- ⚡ Avoids API call if message is already English (optimization)
-- 🔄 **Translation on both create and update** operations
-
-## 🏗️ System Architecture
-
-```
-┌─────────────────────────────────────────────────┐
-│           Client (Student/Tutor/Admin)          │
-└────────────────────┬────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────┐
-│              Express.js API Layer               │
-│  ┌───────────────────────────────────────────┐  │
-│  │   Authentication & Authorization (JWT)    │  │
-│  └───────────────────────────────────────────┘  │
-│  ┌───────────────────────────────────────────┐  │
-│  │   Controllers (Business Logic Layer)      │  │
-│  └───────────────────────────────────────────┘  │
-│  ┌───────────────────────────────────────────┐  │
-│  │   Services (Translation, Validation)      │  │
-│  └───────────────────┬───────────────────────┘  │
-└────────────────────┬─┴──────────────────────────┘
-                     │     │
-        ┌────────────┘     └──────────────┐
-        ▼                                  ▼
-┌──────────────────┐            ┌──────────────────┐
-│  MongoDB Atlas   │            │  Google Gemini   │
-│   (Database)     │            │   API (AI/ML)    │
-└──────────────────┘            └──────────────────┘
-```
-
-**Key Architecture Components:**
-- 🎯 Role-Based Access Control (RBAC)
-- 🔄 RESTful API architecture
-- 🔌 Third-party API integration (Google Gemini)
-- 📦 Modular controller-service structure
-- 🔒 Secure environment variable configuration
 
 ---
 
-## 🛠️ Tech Stack
+## 2. Tech Stack
+
+### Frontend Technologies
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| **Framework** | React 19 | UI library with latest features |
+| **Build Tool** | Vite 5.4 | Fast development and optimized builds |
+| **Styling** | Tailwind CSS 4.2 | Utility-first CSS framework |
+| **Routing** | React Router DOM 7 | Client-side routing |
+| **HTTP Client** | Axios 1.13 | API communication |
+| **State Management** | Zustand 5.0 | Lightweight global state |
+| **Animations** | Framer Motion 12.38 | Smooth UI animations |
+| **Charts** | Recharts 3.8 | Data visualization |
+| **Icons** | Lucide React 1.6 | Icon library |
+| **Notifications** | React Hot Toast 2.6 | Toast notifications |
+| **PDF Export** | jsPDF + html2canvas | Document generation |
+| **Date Handling** | date-fns 4.1 | Date utilities |
 
 ### Backend Technologies
-| Technology | Purpose |
-|-----------|---------|
-| ![Node.js](https://img.shields.io/badge/Node.js-v22.14.0-green?logo=node.js) | Runtime Environment |
-| ![Express.js](https://img.shields.io/badge/Express.js-4.x-lightgrey?logo=express) | Web Framework |
-| ![MongoDB](https://img.shields.io/badge/MongoDB-Database-green?logo=mongodb) | NoSQL Database |
-| ![Mongoose](https://img.shields.io/badge/Mongoose-ODM-red) | Object Data Modeling |
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| **Runtime** | Node.js 22.14 | JavaScript runtime |
+| **Framework** | Express.js 5.2 | Web server framework |
+| **Database** | MongoDB 7.1 | NoSQL database |
+| **ODM** | Mongoose 9.2 | MongoDB object modeling |
+| **Authentication** | JWT | Stateless authentication |
+| **Password Hashing** | bcryptjs 3.0 | Secure password storage |
+| **Validation** | express-validator 7.3 | Input validation |
+| **File Upload** | Multer 2.0 | File handling |
+| **Cloud Storage** | Cloudinary 1.41 | Image/document storage |
+| **Email Service** | Nodemailer 8.0 | SMTP email delivery |
+| **AI Translation** | Google Gemini API 0.21 | Sinhala-to-English translation |
+| **Calendar** | Google Calendar API | Event scheduling |
+| **CORS** | cors 2.8 | Cross-origin requests |
+| **Cookies** | cookie-parser 1.4 | Cookie handling |
 
-### Authentication & Security
-- 🔐 **JWT (JSON Web Tokens)**
-- 🔒 **bcrypt.js** for password hashing
-- 🛡️ **express-validator** for input validation
-- 🍪 **cookie-parser** for secure cookie handling
-
-### Third-Party Integration
-- 🤖 **Google Gemini API** - Sinhala to English translation
-- 📦 **Multer** - File upload handling
-- ☁️ **Cloudinary** - Cloud storage for study material files (PDF, DOC, images)
-- 📅 **Google Calendar API** - Automatic event creation for tutoring sessions
-- 📧 **Nodemailer + Mailtrap (SMTP)** - Feedback notification emails to tutors and admins
+### Testing & Development
+| Tool | Purpose |
+|------|---------|
+| **Jest 30.3** | Unit and integration testing |
+| **Supertest** | HTTP assertion library |
+| **MongoMemoryServer** | In-memory MongoDB for tests |
+| **Artillery.io** | Performance and load testing |
+| **ESLint 9.39** | Code linting (Frontend) |
+| **Nodemon** | Auto-restart development server |
 
 ---
-## 🌍 Translation Workflow
 
-```mermaid
-graph LR
-    A[User Submits Message] --> B{Contains Sinhala?}
-    B -->|Yes| C[Call Google Gemini API]
-    B -->|No| D[Store Original Message]
-    C --> E{Translation Success?}
-    E -->|Yes| F[Store Translated Message]
-    E -->|No| G[Store Original + Log Error]
-    F --> H[Save to Database]
-    D --> H
-    G --> H
-    H --> I[Return Response to User]
+## 3. System Architecture
+
+### High-Level Architecture Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Client Layer (React)                         │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  Pages: Auth, Dashboard, Sessions, Materials, Feedback   │  │
+│  │  Components: Shared UI, Forms, Cards, Modals            │  │
+│  │  State: Zustand Stores, Local Component State           │  │
+│  │  Services: Axios API Client, Auth Service              │  │
+│  └──────────────────────────────────────────────────────────┘  │
+└─────────────────────────────┬──────────────────────────────────┘
+                              │ HTTP/REST
+                              │ JWT Token
+                              │ (via Vite Dev Server)
+┌─────────────────────────────▼──────────────────────────────────┐
+│                  Express.js API Server                         │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  API Routes: /api/auth, /api/messages, /api/sessions   │  │
+│  │  Middleware: CORS, Auth, Validation, Error Handler     │  │
+│  │  Controllers: Business Logic Layer                      │  │
+│  │  Services: Data Processing, Integrations               │  │
+│  └──────────────────────────────────────────────────────────┘  │
+└─────────────────────────────┬──────────────────────────────────┘
+                    │          │          │
+        ┌───────────┴──────┬───┴────┬────┬─────────┐
+        ▼                  ▼        ▼    ▼         ▼
+    ┌────────┐      ┌──────────┐ ┌──────────┐ ┌──────────┐
+    │MongoDB │      │Cloudinary│ │ Gemini   │ │ Google   │
+    │ Atlas  │      │ (Files)  │ │ (AI)     │ │Calendar  │
+    └────────┘      └──────────┘ └──────────┘ └──────────┘
+        │                                           │
+        └───────────────────────┬───────────────────┘
+                                │
+    ┌───────────────────────────┴────────────────────┐
+    │         Mailtrap SMTP (Email Service)          │
+    └─────────────────────────────────────────────────┘
 ```
 
-**Translation Features:**
-- 🔍 Automatically detects Sinhala characters (Unicode range: 0D80-0DFF)
-- 🤖 Uses Google Gemini 2.5 Flash model for translation
-- ⚡ 10-second timeout for translation requests
-- 💾 Stores only the final (translated or original) message
-- 🔄 Works on both create and update operations
-- 📊 Returns `translationPerformed` flag in response
+### Frontend Architecture (React + Vite)
 
----
+**Folder Structure:**
+```
+Client/src/
+├── components/          # Reusable UI components
+├── pages/              # Route-based page components
+├── services/           # Axios API client & HTTP utilities
+├── stores/             # Zustand global state management
+├── context/            # React context for shared data
+├── hooks/              # Custom React hooks
+├── utils/              # Helper functions and utilities
+├── assets/             # Images, fonts, static files
+└── __tests__/          # Unit tests, Integration tests, performance tests
+```
 
-### Testing Flow
-1. ✅ Register a student account
-2. ✅ Register a tutor account
-3. ✅ Login with student credentials
-4. ✅ Create a help request (try Sinhala text)
-5. ✅ View all messages
-6. ✅ Update message (try Sinhala text)
-7. ✅ Delete message
-8. ✅ Login with tutor credentials
-9. ✅ View all student requests
+**Data Flow:**
+```
+User Interaction → Component State → Zustand Store → API Service 
+→ Backend API → Database → Response → Store Update → Re-render
+```
 
+### Backend Architecture (Express + MongoDB)
 
-
-### 📚 Study Materials & Resources
-👨‍💻 Developed by **ALAHAKOON PB** — Student ID: `IT23405240`
-
-- 📤 **Upload study materials** — PDF, DOC, DOCX, PPT, PPTX, TXT, images (max 5 MB) via Cloudinary
-- 📋 **View & search** — full-text keyword search across title, description, and tags
-- 🔍 **Filter** by subject, grade, and status (active / archived / pending)
-- 📄 **Pagination & sorting** — latest, oldest, by subject or title
-- ✏️ **Update** — edit metadata or replace file (old Cloudinary file auto-deleted)
-- 🗑️ **Delete** — removes from DB and Cloudinary storage atomically
-- 👤 **My Uploads** — tutors can view only their own materials
-- 📊 **Engagement metrics** — view count (auto), download counter, like/unlike toggle
-- 🔒 **Role-based access** — only tutors/admins can upload, update, or delete
-- 🛡️ **Security** — NoSQL injection protection, likedBy array hidden, Cloudinary rollback on failure
-
-### 📅 Peer Learning & Tutoring Sessions
-👨‍💻 Developed by **SERASINGHE CS** — Student ID: `IT23401976`
-
-- 🎯 **Create & Manage Sessions** — Tutors can create, update, and delete tutoring sessions
-- 📆 **Google Calendar Integration** — Automatic event creation when tutors create sessions
-- 👥 **Join & Leave Sessions** — Students can enroll/unenroll in available sessions
-- 🔢 **Capacity Management** — Automatic tracking of enrolled students vs. max capacity
-- 🔍 **Advanced Filtering** — Filter by subject, grade, tutor, date, and availability
-- 📋 **My Sessions** — View enrolled sessions and sessions created by tutor
-- 🎓 **Tutor-specific Sessions** — Get all sessions by a particular tutor
-- ⏰ **Schedule Management** — Date, time, and duration tracking for all sessions
-- 🔒 **Role-based access** — Only tutors can create/modify sessions, students can join
-- ✅ **Real-time availability** — Auto-calculate available spots and prevent overbooking
-
-### ⭐ Feedback, Ratings & Progress Tracking
-👨‍💻 Developed by **NIMADITH LMH** — Student ID: `IT23242272`
-
-- ✍️ **Submit Tutor Feedback** — Students submit ratings (1–5 stars) and written feedback for tutors, optionally linked to a specific session
-- 🔄 **Upsert Feedback** — One feedback per student+tutor+session enforced via a unique compound index; re-submitting updates the existing record
-- ⭐ **View Tutor Ratings** — Anyone can query aggregated rating stats: average score, total count, and a full 1★–5★ breakdown (MongoDB aggregation pipeline)
-- 📋 **View Feedback Details** — Tutors/admins see the full message list; students can view all feedback they have personally submitted
-- 🗑️ **Delete Feedback** — Students delete their own feedback; admins can delete any entry
-- 📊 **Track Student Progress** — Tutors/admins create and update student progress records with topic, completion percentage (0–100%), and freeform notes
-- 👤 **Role-Based Progress Access** — Students view only their own progress; tutors see only their assigned students; admins have full unrestricted access
-- 📧 **SMTP Email Notifications** — Automatic HTML + plain-text email sent to the tutor and/or admin upon every feedback submission via Nodemailer + Mailtrap (SMTP)
-- 🔒 **Role-based access control** — Only students can submit feedback; only tutors/admins can update student progress
-
----
-
-
-## 📂 Project Structure
-
+**Folder Structure:**
 ```
 AF_Backend/
-├── 📁 Config/
-│   └── db.js                    # Database configuration
-├── 📁 Controllers/
-│   ├── authController.js              # Authentication logic
-│   ├── messageContoller.js            # Message CRUD + Translation
-│   ├── studyMaterialController.js     # Study Materials CRUD & metrics  [IT23405240]
-│   ├── tutoringSessionController.js   # Tutoring Sessions CRUD           [IT23401976]
-│   ├── tutorController.js             # Tutor management
-│   ├── feedbackController.js          # Feedback & Ratings CRUD         [IT23242272]
-│   ├── progressController.js          # Student Progress Tracking       [IT23242272]
-│   ├── feedbackEmailController.js     # Feedback email notification     [IT23242272]
-│   └── ...
-├── 📁 Middleware/
-│   ├── authMiddleware.js              # JWT verification & RBAC
-│   ├── errorHandler.js                # Global error handling
-│   ├── uploadMiddleware.js            # Multer + Cloudinary upload      [IT23405240]
-│   ├── studyMaterialValidation.js     # Study material input validators [IT23405240]
-│   ├── tutoringSessionValidator.js    # Session input validation        [IT23401976]
-│   └── ValidatorMiddleware.js         # Auth input validation
-├── 📁 models/
-│   ├── UserModel.js                   # User/Tutor schema
-│   ├── MessageModel.js                # Message schema
-│   ├── StudyMaterialModel.js          # Study material schema            [IT23405240]
-│   ├── TutoringSessionModel.js        # Tutoring session schema          [IT23401976]
-│   ├── FeedbackModel.js               # Feedback & Ratings schema        [IT23242272]
-│   ├── ProgressModel.js               # Student Progress schema          [IT23242272]
-│   └── ...
-├── 📁 Routes/
-│   ├── authRouter.js                  # Authentication routes
-│   ├── materialRouter.js              # Study material routes            [IT23405240]
-│   ├── messageRouter.js               # Message routes
-│   ├── tutoringSessionRouter.js       # Tutoring session routes          [IT23401976]
-│   ├── tutorRouter.js                 # Tutor routes
-│   ├── googleCalenderRouter.js        # Google Calendar integration      [IT23401976]
-│   ├── feedbackRouter.js              # Feedback & Ratings routes        [IT23242272]
-│   ├── progressRouter.js              # Student Progress routes          [IT23242272]
-│   ├── feedbackEmailRoutes.js         # Feedback email notify route      [IT23242272]
-│   └── index.js                       # Route aggregator
-├── 📁 services/
-│   ├── messageService.js              # Translation service
-│   ├── studyMaterialService.js        # Study material business logic    [IT23405240]
-│   ├── tutoringSessionService.js      # Tutoring session logic           [IT23401976]
-│   ├── googleCalendarService.js       # Google Calendar integration      [IT23401976]
-│   ├── feedbackMailService.js         # Feedback SMTP email service      [IT23242272]
-│   └── ...
-├── 📁 utils/
-│   ├── generateToken.js               # JWT generation
-│   ├── responseHandler.js             # Standardised API responses       [IT23405240]
-│   ├── validationUtils.js             # ObjectId validation helper       [IT23405240]
-│   ├── tutoringSessionUtils.js        # Session utilities                [IT23401976]
-│   ├── googleCalender.js              # Google Calendar helper           [IT23401976]
-│   └── passwordUtils.js               # Password hashing
-├── 📁 postman/
-│   └── StudyMaterials_Complete.postman_collection.json  # 30 API tests [IT23405240]
-├── 📁 uploads/                     # Local file uploads (messages)
-├── .env                            # Environment variables
-├── server.js                       # Application entry point
-└── package.json                    # Dependencies
+├── Controllers/        # Request handlers (logic)
+├── services/          # Business logic & integrations
+├── models/            # Mongoose schemas
+├── Routes/            # API route definitions
+├── Middleware/        # Auth, validation, error handling
+├── validations/       # Input validation rules
+├── utils/             # Helper functions
+├── Config/            # Database configuration
+├── tests/             # Unit , integration & performance tests
+└── uploads/           # Local file storage
+```
+
+**Request-Response Flow:**
+```
+HTTP Request → Route → Middleware (Auth/Validation) → Controller 
+→ Service/Model → Database → Response JSON → HTTP Response
+```
+
+### Key System Flows
+
+#### 1. Multi-Language Translation Flow
+```
+Student sends message in any language
+→ Detect language automatically (Sinhala, Tamil etc.)
+→ Check if language ≠ English
+→ Call Google Gemini API for translation to English
+→ Store original message + translated version in MongoDB
+→ Handle translation errors gracefully (use original if translation fails)
+→ Return with translationPerformed flag & detected language
+→ Tutors see translated message in English for response
+```
+
+**Supported Languages:**
+- Sinhala (Unicode 0D80-0DFF)
+- Tamil (Unicode 0B80-0BFF)
+- Hindi (Unicode 0900-097F)
+- English (detected, no translation needed)
+- Any other language (auto-detected via API)
+
+#### 2. Tutoring Session Flow
+```
+Tutor creates session 
+→ Validate & save to MongoDB 
+→ Create Google Calendar event (auto-invites) 
+→ Return session with event ID 
+→ Students can join (capacity management) 
+→ Feedback after session
+```
+
+#### 3. Feedback & Notification Flow
+```
+Student submits feedback & rating 
+→ Validate & save to MongoDB 
+→ Compose email (HTML + plain text) 
+→ Send via Nodemailer + Mailtrap SMTP 
+→ Tutor receives notification
+```
+
+#### 4. Study Materials Management Flow
+```
+Tutor uploads study material with file
+→ Validate file (size ≤ 5 MB, supported type)
+→ Upload file to Cloudinary
+→ Save material metadata to MongoDB
+→ Store Cloudinary URL & public ID
+→ Return response with material details & URL
+→ Students can search, filter, view (views counter incremented)
+→ Download & like functionality tracked with metrics
+```
+
+### Communication Protocols
+
+- **Frontend ↔ Backend**: REST API over HTTPS, request/response in JSON
+- **Client ↔ Database**: Mongoose ODM abstracts MongoDB communication
+- **Application ↔ External APIs**: 
+  - Google Gemini: REST API (async)
+  - Google Calendar: OAuth 2.0
+  - Cloudinary: REST API (file upload)
+  - Mailtrap: SMTP protocol
+
+---
+
+## 4. Prerequisites
+
+Before setting up the project, ensure you have the following installed:
+
+### System Requirements
+- **Operating System**: Windows, macOS, or Linux
+- **RAM**: Minimum 4 GB (8 GB recommended)
+- **Disk Space**: At least 2 GB available
+
+### Required Software
+- **Node.js** v22.14.0 or higher ([Download](https://nodejs.org/))
+- **npm** v10.0+ (comes with Node.js) or **yarn**
+- **MongoDB** ([Atlas Cloud](https://www.mongodb.com/cloud/atlas) recommended for easy setup)
+- **Git** for version control
+
+### Required Accounts & API Keys
+1. **MongoDB Atlas** - Free cloud database ([Sign up](https://www.mongodb.com/cloud/atlas))
+2. **Google Cloud Project** - For Gemini API, Calendar API, and OAuth
+   - Enable: Generative Language API, Google Calendar API
+   - Create service account and download JSON key
+3. **Cloudinary** - For file storage ([Sign up](https://cloudinary.com/))
+4. **Mailtrap** - For email testing ([Sign up](https://mailtrap.io/))
+5. **Google OAuth Credentials** - For third-party authentication
+
+### Recommended Tools
+- **VS Code** - Code editor
+- **Postman** - API testing
+- **MongoDB Compass** - Database GUI (optional)
+- **Thunder Client** - VS Code API testing extension
+
+---
+
+## 5. Setup Instructions
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/sankamaduwantha/Application_Framework_Backend.git
+cd Application_Framework_Backend
+```
+
+### Backend Setup
+
+#### Step 1: Install Dependencies
+
+```bash
+# Navigate to backend directory (if not already there)
+cd AF_Backend
+
+# Install backend dependencies
+npm install
+```
+
+#### Step 2: Configure Environment Variables
+
+Create a `.env` file in the root directory with all required variables (see Section 6 below).
+
+#### Step 3: Start MongoDB
+
+**Option A: Using MongoDB Atlas (Recommended)**
+- Create a free cluster at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+- Get connection string from cluster settings
+
+**Option B: Using Local MongoDB**
+```bash
+# macOS with Homebrew
+brew services start mongodb-community
+
+# Windows (if installed)
+mongod
+```
+
+#### Step 4: Start Backend Server
+
+```bash
+# Development mode (with hot reload)
+npm run dev
+
+# Production mode
+npm start
+```
+
+Expected output:
+```
+MongoDB Connected: cluster0.xxxxx.mongodb.net
+Server running on port 5000
+```
+
+### Frontend Setup
+
+#### Step 1: Install Dependencies
+
+```bash
+# Navigate to frontend directory
+cd Client
+
+# Install frontend dependencies
+npm install
+```
+
+#### Step 2: Configure Environment Variables
+
+Create a `.env.local` file in the `Client` directory:
+
+```
+VITE_API_URL=http://localhost:5000
+```
+
+#### Step 3: Start Development Server
+
+```bash
+# Start Vite dev server
+npm run dev
+
+# The app will automatically open at http://localhost:5173
+```
+
+#### Step 4: Build for Production
+
+```bash
+# Create optimized production build
+npm run build
+
+# Preview production build locally
+npm run preview
+```
+
+### Verify Both Servers are Running
+
+- **Frontend**: http://localhost:5173
+- **Backend**: http://localhost:5000
+- **Health Check**: GET http://localhost:5000/ should return welcome message
+
+---
+
+## 6. Environment Variables
+
+### Backend Environment Variables (.env)
+
+
+```
+
+### Frontend Environment Variables (.env.local)
+
+Create `.env.local` file in the `Client` directory:
+
+```bash
+# ============ API Configuration ============
+VITE_API_URL=http://localhost:5000
+
+# ============ Optional: Third-party Keys ============
+# VITE_GOOGLE_CLIENT_ID=your_google_client_id_for_oauth
+```
+
+### How to Obtain Environment Variables
+
+#### MongoDB URI
+1. Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+2. Create a cluster → Connect → Copy connection string
+3. Replace `<password>` with your database user password
+
+#### Google Gemini API Key
+1. Visit [Google AI Studio](https://aistudio.google.com/app/apikey)
+2. Create new API key
+3. Copy and paste in `.env`
+
+#### Cloudinary Credentials
+1. Sign up at [Cloudinary](https://cloudinary.com/)
+2. Get credentials from Dashboard → Settings → API Keys
+
+#### Mailtrap Credentials
+1. Sign up at [Mailtrap](https://mailtrap.io/)
+2. Create inbox
+3. Get SMTP credentials from inbox settings
+
+---
+
+## 7. API Endpoint Documentation
+
+All API endpoints require `Authorization: Bearer <token>` header except for auth endpoints.
+
+### Authentication Endpoints
+
+#### Register User
+
+```http
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "fullName": "John Doe",
+  "email": "john@example.com",
+  "password": "password123",
+  "phoneNumber": "0771234567",
+  "location": "Colombo",
+  "role": "user"
+}
+```
+
+**Response (201)**
+```json
+{
+  "msg": "User Created Successfully"
+}
+```
+
+#### Register Tutor
+
+```http
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "fullName": "Dr. Jane Smith",
+  "email": "jane@example.com",
+  "password": "password123",
+  "phoneNumber": "0771234567",
+  "location": "Colombo",
+  "role": "tutor",
+  "subjects": ["Mathematics", "Physics"],
+  "tutorProfile": {
+    "bio": "5 years experience",
+    "experience": 5,
+    "hourlyRate": 2000
+  }
+}
+```
+
+#### Login
+
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+```
+
+**Response (200)**
+```json
+{
+  "msg": "User logged in",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "role": "user",
+    "name": "John Doe",
+    "email": "john@example.com"
+  }
+}
+```
+
+#### Logout
+
+```http
+POST /api/auth/logout
+```
+
+### Message Endpoints (Help Requests with Translation)[IT23472020]
+
+#### Create Message
+
+```http
+POST /api/messages
+Content-Type: application/json
+Authorization: Bearer <token>
+
+{
+  "title": "රසායන විද්‍යා සංකල්ප ප්‍රශ්නය",
+  "message": "පහත දැක්වෙන අසමතුලිත රසායනික සමීකරණය සලකා බලන්න. මෙය නිවැරදිව තුලිත කර (Balance කර), ලැබෙන පූර්ණ සංඛ්‍යා සංගුණක (Coefficients) සඳහන් කරන්න.",
+  "category": "Chemistry",
+  "language": "Sinhala"
+}
+```
+
+**Response (201)**
+```json
+{
+  "success": true,
+  "message": "Message created successfully",
+  "data": {
+    "_id": "507f1f77bcf86cd799439011",
+    "title": "Chemistry Concepts Question",
+    "message": "Consider the following unbalanced chemical equation. Correctly balance it, and state the resulting integer coefficients.",
+    "category": "chemistry",
+    "createdBy": {
+      "_id": "507f1f77bcf86cd799439012",
+      "fullName": "sanka"
+    },
+    "createdAt": "2026-04-12T10:30:00.000Z"
+  },
+  "translationPerformed": true
+}
+```
+
+#### Get All Messages
+
+```http
+GET /api/messages
+Authorization: Bearer <token>
+```
+
+#### Update Message
+
+```http
+PUT /api/messages/:id
+Content-Type: application/json
+Authorization: Bearer <token>
+
+{
+  "title": "රසායන විද්‍යා සංකල්ප ප්‍රශ්නය",
+  "message": "පහත දැක්වෙන අසමතුලිත රසායනික සමීකරණය සලකා බලන්න. මෙය නිවැරදිව තුලිත කර (Balance කර), ලැබෙන පූර්ණ සංඛ්‍යා සංගුණක (Coefficients) සඳහන් කරන්න.",
+  "category": "Science",
+  "language": "Sinhala"
+}
+```
+
+#### Delete Message
+
+```http
+DELETE /api/messages/:id
+Authorization: Bearer <token>
+```
+
+### Study Materials Endpoints
+
+#### Upload Material
+
+```http
+POST /api/materials
+Content-Type: multipart/form-data
+Authorization: Bearer <token>
+
+Form Data:
+- title: "Linear Algebra Basics"
+- description: "Comprehensive guide to linear algebra"
+- subject: "Mathematics"
+- grade: "Grade 11"
+- file: [PDF file]
+- tags: ["algebra", "matrices"]
+```
+
+#### Get All Materials
+
+```http
+GET /api/materials?subject=Mathematics&grade=Grade%2011&sort=latest&page=1&limit=10
+Authorization: Bearer <token>
+```
+
+#### Get My Uploads
+
+```http
+GET /api/materials/my
+Authorization: Bearer <token>
+```
+
+#### Get Single Material
+
+```http
+GET /api/materials/:id
+Authorization: Bearer <token>
+```
+
+#### Update Material
+
+```http
+PATCH /api/materials/:id
+Content-Type: multipart/form-data
+Authorization: Bearer <token>
+
+Form Data:
+- title: "Updated Title" (optional)
+- file: [new PDF file] (optional)
+```
+
+#### Delete Material
+
+```http
+DELETE /api/materials/:id
+Authorization: Bearer <token>
+```
+
+#### Record Download
+
+```http
+POST /api/materials/:id/download
+Authorization: Bearer <token>
+```
+
+#### Like/Unlike Material
+
+```http
+POST /api/materials/:id/like
+Authorization: Bearer <token>
+```
+
+### Tutoring Sessions Endpoints
+
+#### Create Session
+
+```http
+POST /api/tutoring-sessions
+Content-Type: application/json
+Authorization: Bearer <token>
+
+{
+  "title": "Calculus for Beginners",
+  "description": "Learn calculus from scratch",
+  "subject": "Mathematics",
+  "grade": "Grade 12",
+  "date": "2026-05-15",
+  "startTime": "14:00",
+  "endTime": "16:00",
+  "maxCapacity": 20,
+  "isOnline": true,
+  "meetingLink": "https://zoom.us/j/123456789"
+}
+```
+
+**Response (201)**
+```json
+{
+  "success": true,
+  "message": "Tutoring session created successfully",
+  "data": {
+    "_id": "507f1f77bcf86cd799439011",
+    "title": "Calculus for Beginners",
+    "subject": "Mathematics",
+    "tutor": {
+      "_id": "507f1f77bcf86cd799439012",
+      "fullName": "Dr. Jane Smith"
+    },
+    "date": "2026-05-15T00:00:00.000Z",
+    "startTime": "14:00",
+    "endTime": "16:00",
+    "maxCapacity": 20,
+    "enrolledStudents": [],
+    "availableSpots": 20,
+    "googleCalendarEventId": "abc123xyz"
+  },
+  "googleCalendarEvent": "Event created successfully"
+}
+```
+
+#### Get All Sessions
+
+```http
+GET /api/tutoring-sessions?subject=Mathematics&grade=Grade%2012&available=true&sort=latest
+Authorization: Bearer <token>
+```
+
+#### Get My Sessions
+
+```http
+GET /api/tutoring-sessions/my-enrolled
+Authorization: Bearer <token>
+```
+
+#### Get Sessions by Tutor
+
+```http
+GET /api/tutoring-sessions/tutor/:tutorId
+Authorization: Bearer <token>
+```
+
+#### Update Session
+
+```http
+PATCH /api/tutoring-sessions/:id
+Content-Type: application/json
+Authorization: Bearer <token>
+
+{
+  "title": "Advanced Calculus",
+  "maxCapacity": 25
+}
+```
+
+#### Delete Session
+
+```http
+DELETE /api/tutoring-sessions/:id
+Authorization: Bearer <token>
+```
+
+#### Join Session
+
+```http
+POST /api/tutoring-sessions/:id/join
+Authorization: Bearer <token>
+```
+
+#### Leave Session
+
+```http
+POST /api/tutoring-sessions/:id/leave
+Authorization: Bearer <token>
+```
+
+### Feedback & Ratings Endpoints
+
+#### Submit Feedback
+
+```http
+POST /api/feedbacks
+Content-Type: application/json
+Authorization: Bearer <token>
+
+{
+  "tutorId": "507f1f77bcf86cd799439012",
+  "rating": 5,
+  "message": "Excellent teaching method!",
+  "sessionId": "507f1f77bcf86cd799439011"
+}
+```
+
+#### Get My Feedbacks
+
+```http
+GET /api/feedbacks/me
+Authorization: Bearer <token>
+```
+
+#### Get Tutor Ratings
+
+```http
+GET /api/feedbacks/tutor/:tutorId/ratings
+Authorization: Bearer <token>
+```
+
+**Response**
+```json
+{
+  "tutorId": "507f1f77bcf86cd799439012",
+  "averageRating": 4.7,
+  "totalRatings": 15,
+  "ratingBreakdown": {
+    "5": 12,
+    "4": 2,
+    "3": 1,
+    "2": 0,
+    "1": 0
+  }
+}
+```
+
+#### Delete Feedback
+
+```http
+DELETE /api/feedbacks/:id
+Authorization: Bearer <token>
+```
+
+### Progress Tracking Endpoints
+
+#### Create/Update Progress
+
+```http
+POST /api/progress
+Content-Type: application/json
+Authorization: Bearer <token>
+
+{
+  "studentId": "507f1f77bcf86cd799439013",
+  "topic": "Algebra",
+  "completionPercentage": 75,
+  "notes": "Student grasps concepts well, needs more practice"
+}
+```
+
+#### Get My Progress
+
+```http
+GET /api/progress/me
+Authorization: Bearer <token>
+```
+
+#### Get Student Progress
+
+```http
+GET /api/progress/student/:studentId
+Authorization: Bearer <token>
+```
+
+#### Get Tutor's Students Progress
+
+```http
+GET /api/progress/tutor/:tutorId
+Authorization: Bearer <token>
 ```
 
 ---
 
-## 🚦 Getting Started
+## 8. Database Models
 
-### Prerequisites
+### User Model
+```javascript
+{
+  _id: ObjectId,
+  fullName: String (3-50 chars),
+  email: String (unique),
+  password: String (bcrypt hashed),
+  phoneNumber: String (10 digits),
+  location: String,
+  role: Enum ["user", "tutor", "admin"],
+  grade: String,
+  subjects: [String], // For tutors
+  tutorProfile: {
+    bio: String,
+    experience: Number,
+    hourlyRate: Number,
+    languages: [String],
+    qualifications: [{
+      degree: String,
+      institution: String,
+      year: Number
+    }]
+  },
+  googleId: String, // For OAuth login
+  createdAt: Date,
+  updatedAt: Date
+}
+```
 
-- Node.js (v22.14.0 or higher)
-- MongoDB (Local or Atlas)
-- Google Gemini API Key
+### Message Model
+```javascript
+{
+  _id: ObjectId,
+  title: String,
+  message: String (original or translated),
+  category: String,
+  createdBy: ObjectId (ref: User),
+  requiresTranslation: Boolean,
+  translationStatus: String,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
 
-### Installation
+### Study Material Model
+```javascript
+{
+  _id: ObjectId,
+  title: String,
+  description: String,
+  subject: String,
+  grade: String,
+  fileUrl: String (Cloudinary URL),
+  filePublicId: String,
+  uploader: ObjectId (ref: User),
+  tags: [String],
+  status: Enum ["active", "archived", "pending"],
+  metrics: {
+    views: Number,
+    downloads: Number,
+    likes: Number
+  },
+  likedBy: [ObjectId], // Hidden in API responses
+  createdAt: Date,
+  updatedAt: Date
+}
+```
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd AF_Backend
-   ```
+### Tutoring Session Model
+```javascript
+{
+  _id: ObjectId,
+  title: String,
+  description: String,
+  subject: String,
+  grade: String,
+  tutor: ObjectId (ref: User),
+  date: Date,
+  startTime: String (HH:MM),
+  endTime: String (HH:MM),
+  maxCapacity: Number,
+  enrolledStudents: [ObjectId],
+  availableSpots: Number,
+  status: Enum ["scheduled", "ongoing", "completed", "cancelled"],
+  isOnline: Boolean,
+  meetingLink: String,
+  location: String,
+  googleCalendarEventId: String,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+### Feedback Model
+```javascript
+{
+  _id: ObjectId,
+  student: ObjectId (ref: User),
+  tutor: ObjectId (ref: User),
+  session: ObjectId (ref: TutoringSession, optional),
+  rating: Number (1-5),
+  message: String,
+  createdAt: Date,
+  updatedAt: Date
+  // Unique index on: student + tutor + session
+}
+```
 
-3. **Configure environment variables**
-   
-   Create a `.env` file in the root directory:
-   ```env
-   PORT=5000
-   MONGO_URI=your_mongodb_connection_string
-   JWT_SECRET=your_jwt_secret_key
-   JWT_EXPIRES_IN=1d
-   GEMINI_API_KEY=your_google_gemini_api_key
-   NODE_ENV=development
-
-   # Study Materials – Cloudinary (IT23405240)
-   CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
-   CLOUDINARY_API_KEY=your_cloudinary_api_key
-   CLOUDINARY_API_SECRET=your_cloudinary_api_secret
-
-   # Feedback & Progress – SMTP Email (IT23242272)
-   SEND_FEEDBACK_EMAIL=true
-   FEEDBACK_EMAIL_TO_TUTOR=true
-   FEEDBACK_EMAIL_TO_ADMIN=true
-   ADMIN_NOTIFY_EMAIL=admin@qualityapp.com
-   MAIL_HOST=smtp.mailtrap.io
-   MAIL_PORT=2525
-   MAIL_USER=your_mailtrap_username
-   MAIL_PASS=your_mailtrap_password
-   MAIL_FROM_NAME=Quality Education
-   MAIL_FROM_EMAIL=no-reply@qualityedu.com
-   ```
-
-4. **Run the application**
-   ```bash
-   # Development mode with hot reload
-   npm run dev
-
-   # Production mode
-   npm start
-   ```
-
-5. **Server will be running at**
-   ```
-   http://localhost:5000
-   ```
+### Progress Model
+```javascript
+{
+  _id: ObjectId,
+  student: ObjectId (ref: User),
+  tutor: ObjectId (ref: User),
+  topic: String,
+  completionPercentage: Number (0-100),
+  notes: String,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
 
 ---
 
-## � Quick Start Testing (Beginner-Friendly)
+## 9. Architecture & Patterns
+
+### Design Patterns Used
+
+#### MVC (Model-View-Controller)
+- **Models**: Mongoose schemas in `/models` folder
+- **Controllers**: Route handlers in `/Controllers` folder  
+- **Views**: React components in `/Client/src/components`
+- **Routes**: Express routes in `/Routes` folder
+
+#### Service Layer Pattern
+- Business logic separated into `/services` folder
+- Controllers delegate to services
+- Services handle data transformation, validation, and external API calls
+- Example: `feedbackMailService.js`, `messageService.js`, `tutoringSessionService.js`
+
+#### Middleware Pattern
+- Authentication: `authMiddleware.js` - JWT verification
+- Validation: `studyMaterialValidation.js`, `tutoringSessionValidator.js`
+- Error Handling: `errorHandler.js` - Global error catching
+- File Upload: `uploadMiddleware.js` - Multer + Cloudinary integration
+
+#### Repository Pattern (Implicit)
+- Mongoose models act as data access layer
+- Centralized database queries
+- Reduces code duplication
+
+### Code Organization
+
+```
+Frontend (React):
+- Presentational Components: Reusable UI (buttons, cards, modals)
+- Container Components: Data-fetching logic (pages)
+- Services: API client abstraction
+- Stores: Global state management (Zustand)
+- Utils: Helper functions
+
+Backend (Node.js):
+- Controllers: HTTP request/response handling
+- Services: Business logic and external integrations
+- Models: Database schema definitions
+- Routes: URL routing and HTTP method mapping
+- Middleware: Cross-cutting concerns (auth, logging, error)
+- Utils: Helper functions and utilities
+- Validations: Input validation rules
+```
+
+### Error Handling Strategy
+
+**Backend:**
+- Custom error classes with descriptive messages
+- Global error handler middleware
+- Consistent JSON error responses
+- Status codes: 400 (Bad Request), 401 (Unauthorized), 403 (Forbidden), 404 (Not Found), 500 (Server Error)
+
+**Frontend:**
+- Axios interceptors for global error handling
+- Toast notifications for user feedback
+- Graceful error recovery
+- User-friendly error messages
+
+### Security Practices
+
+| Feature | Implementation |
+|---------|-----------------|
+| Password Security | bcrypt hashing (salt rounds: 10) |
+| Authentication | JWT tokens in HTTP-only cookies |
+| Authorization | Role-based middleware protection |
+| Input Validation | express-validator on all inputs |
+| CORS | Restricted to frontend domain |
+| NoSQL Injection | Input sanitization, parameterized queries |
+| Rate Limiting | (Can be added with express-rate-limit) |
+| HTTPS | Required in production |
+
+---
+
+## 10. Third-Party Integrations
+
+### Google Gemini API (Multi-Language AI Translation)
+**Purpose:** Translate any language (Sinhala, Tamil etc.) to English
+
+**Supported Languages:**
+- Sinhala (0D80–0DFF) → English
+- Tamil (0B80–0BFF) → English
+- Hindi (0900–097F) → English
+- Any other language → Translated to English via Gemini API
+
+**Integration Points:**
+- `/services/messageService.js` - `processMessageFieldsByLanguage()` & `createMessageWithTranslation()`
+- Main functions:
+  - `processMessageFieldsByLanguage(title, message, formUILanguage)` - Process & translate title+message based on language
+  - `createMessageWithTranslation(messageData, userData, formUILanguage, fileData)` - Create message with translation support
+  - `translateToEnglish(text, sourceLanguage)` - Core translation with retry logic (max 1 retry with exponential backoff)
+  - `containsSinhalaCharacters(text)` - Check for Sinhala Unicode range (0D80–0DFF)
+  - `containsTamilCharacters(text)` - Check for Tamil Unicode range (0B80–0BFF)
+- Language parameter supports: "Sinhala", "Tamil", "Hindi", or any language string (auto-detected by Gemini)
+- 10-second timeout for translation requests
+- Automatic retry on network errors (503, timeout, ECONNRESET) with exponential backoff (max delay: 10s)
+- Graceful fallback: Returns original text with `requiresTranslation: true` if translation fails
+- Response includes: `translationPerformed` flag and translated title+message
+- Batch processing: Translates title & message in parallel using `Promise.all()`
+- Error handling: Specific error messages for quota limits, timeouts, and API key issues
+
+**Setup:**
+1. Create Google Cloud project
+2. Enable Generative Language API
+3. Generate API key from AI Studio
+4. Add to `.env` as `GEMINI_API_KEY`
+
+**Performance & Error Handling:**
+- Automatic retry on transient errors (up to 1 retry with exponential backoff: 2s → 10s max)
+- Distinguishes between retryable errors (503, timeout) and non-retryable (429 quota, 403 forbidden)
+- Specific error messages for quota limits, API key issues, and timeouts
+- Batch translation: Title & message translated in parallel (faster than sequential)
+- Recommendation: Implement caching for frequently translated phrases to reduce API calls
+
+### Google Calendar API (Event Scheduling)
+**Purpose:** Auto-create calendar events for tutoring sessions
+
+**Integration Points:**
+- `/services/googleCalendarService.js`
+- `/Controllers/tutoringSessionController.js` - Session creation
+- Creates events, fetches availability, updates events
+
+**Setup:**
+1. Create Google Cloud project
+2. Enable Google Calendar API
+3. Create OAuth 2.0 credentials (service account)
+4. Download JSON key file
+5. Add credentials to `.env`
+
+### Cloudinary (Cloud File Storage)
+**Purpose:** Store and manage study material files
+
+**Integration Points:**
+- `/Middleware/uploadMiddleware.js` - File upload config
+- `/services/studyMaterialService.js` - File management
+- Supports: PDF, DOC, DOCX, PPT, PPTX, TXT, images (max 5 MB)
+
+**Features:**
+- Auto-delete old file when updating
+- Atomic transactions (rollback on DB failure)
+- URL transformations (thumbnails, optimization)
+
+**Setup:**
+1. Sign up at Cloudinary
+2. Get cloud name, API key, API secret
+3. Add to `.env`
+
+### Mailtrap (Email Service)
+**Purpose:** Send feedback notifications to tutors and admins
+
+**Integration Points:**
+- `/services/feedbackMailService.js` - Email composition
+- `/Controllers/feedbackEmailController.js` - Email triggering
+- Nodemailer SMTP integration
+
+**Features:**
+- HTML + plain text emails
+- Dynamic template rendering
+- Error logging and retry logic
+
+**Setup:**
+1. Sign up at Mailtrap
+2. Create inbox
+3. Get SMTP credentials
+4. Add to `.env` (MAIL_HOST, MAIL_PORT, MAIL_USER, MAIL_PASS)
+
+---
+
+## 11. Testing Instructions
+
+### Unit Tests
+
+Unit tests focus on individual functions and services without external dependencies.
+
+```bash
+# Run all unit tests
+npm run test:unit
+
+# Run specific component tests
+npm run test:unit:messages     # Help request messages (Sinhala/Tamil translation)
+npm run test:unit:sessions    # Tutoring sessions
+npm run test:unit:feedback    # Feedback & ratings
+npm run test:unit:progress    # Student progress
+```
+
+**Help Request Message Unit Tests Flow:**
+
+The message controller tests verify the complete help request workflow including multi-language translation and authorization:
+
+```bash
+# Test: deleteMessage Controller
+✅ Success Cases:
+  - Message deleted successfully (status 200, success message)
+  - Returns confirmation with "Message deleted successfully"
+
+❌ Error Cases:
+  - Message not found (status 400, "Message not found")
+  - User not authorized to delete (status 400, "You are not authorized to delete this message")
+  - Database query fails (status 500, with error details)
+  - Deletion operation fails (status 500, with error details)
+
+# Test: createMessage with Translation
+✅ Success Cases:
+  - Sinhala message translated to English (translationPerformed: true)
+  - Tamil message translated to English (translationPerformed: true)
+  - English message stored as-is (translationPerformed: false)
+
+❌ Error Cases:
+  - Translation timeout (10-second limit exceeded)
+  - Translation quota exceeded (returns original message gracefully)
+  - API key missing (throws configuration error)
+  - Invalid language format (bad request)
+
+# Test Coverage:
+- Sinhala character detection (Unicode 0D80–0DFF)
+- Tamil character detection (Unicode 0B80–0BFF)
+- Batch translation (title + message in parallel)
+- Retry logic with exponential backoff
+- Authorization checks (message creator verification)
+```
+
+**Test Files Location:**
+- `/tests/unit/` directory
+- Technologies: Jest, Mock functions
+
+### Integration Tests
+
+Integration tests verify complete API workflows with real database (MongoDB in Memory).
+
+```bash
+# Run all integration tests
+npm run test:integration
+
+# Run specific test suites
+npm run test:integration:help-request  # Help request messages API (POST /api/messages)
+npm run test:integration:sessions      # Tutoring sessions API
+npm run test:integration:feedback      # Feedback API
+npm run test:integration:progress      # Progress tracking API
+```
+
+**Help Request Integration Tests Flow (POST /api/messages):**
+
+The message API integration tests verify the complete POST endpoint workflow with real database (MongoDB in Memory):
+
+```bash
+# Test: POST /api/messages — Help Request Endpoint
+
+✅ Success Cases:
+  1. Responds to POST request with sample message data
+     - Accepts title, message, category, language fields
+     - Returns valid HTTP status code (2xx, 4xx, or 5xx)
+     - Response body contains expected data structure
+
+  2. Status code validation
+     - Returns 200, 201, 400, 401, or 403
+     - Properly indicates success or error condition
+
+  3. Accepts different message categories
+     - Mathematics, Science, IT & Programming, English, Other
+     - Each category returns valid status code
+
+  4. Request body processing
+     - Processes JSON payload correctly
+     - Returns structured response object
+
+✅ Multi-Language Support:
+  - English messages stored directly (no translation)
+  - Sinhala messages detected & translated to English (translationPerformed: true)
+  - Tamil messages detected & translated to English (translationPerformed: true)
+
+# Test Coverage:
+- Authenticated requests (JWT token validation)
+- Database persistence (MongoDB in Memory)
+- Language detection & translation mocking
+- Category validation across all supported subjects
+- Response structure validation
+- HTTP status code verification
+- File upload handling (image optional)
+
+# Workflow:
+1. Create test user & generate JWT token
+2. Connect to test MongoDB instance
+3. Send POST request with message data + auth token
+4. Mock Google Gemini translation service
+5. Verify response status and body
+6. Cleanup database after test
+```
+
+**Test Files Location:**
+- `/tests/integration/` directory
+- Technologies: Jest, Supertest, MongoMemoryServer
+
+### Performance Tests
+
+Performance tests simulate load with multiple concurrent users using Artillery.io.
+
+```bash
+# Generate authentication token for testing
+npm run test:perf:helprequest:token
+
+# Run load test
+npm run test:perf:helprequest
+
+# Generate detailed HTML report
+npm run test:perf:helprequest:report
+```
+
+**Available Performance Tests:**
+```bash
+npm run test:perf:helprequest      # Help request endpoints
+npm run test:perf:sessions         # Tutoring sessions endpoints
+npm run test:perf:feedback         # Feedback endpoints
+npm run test:perf:progress         # Progress tracking endpoints
+npm run perf:load                  # Baseline load test
+npm run perf:rampup                # Ramp-up test
+npm run perf:spike                 # Spike test
+npm run perf:stress                # Stress test
+```
+
+### Code Coverage
+
+```bash
+# Generate coverage report
+npm run test:coverage
+
+# Reports created in: /tests/coverage/
+# View HTML report: /tests/coverage/index.html
+```
+
+### Test Reports
+
+After running tests, reports are generated in:
+- **Unit/Integration:** Console output
+- **Performance:** HTML reports in `/tests/performance/` directory
+- **Coverage:** HTML report in `/tests/coverage/`
+
+---
+
+## 12. Deployment Guide
+
+### Backend Deployment (Render.com or Heroku)
+
+#### Using Render.com
+
+1. **Create Render Account**
+   - Sign up at [Render](https://render.com/)
+
+2. **Prepare Environment**
+   ```bash
+   # Create Procfile in root (if needed)
+   echo "web: node server.js" > Procfile
+   ```
+
+3. **Deploy**
+   - Connect GitHub repository
+   - Select "New Web Service"
+   - Choose Node.js runtime
+   - Environment: Set all `.env` variables
+
+4. **Health Check**
+   ```bash
+   curl https://your-backend.onrender.com/
+   ```
+
+#### Using Heroku
+
+1. **Install Heroku CLI**
+   ```bash
+   npm install -g heroku
+   ```
+
+2. **Login & Create App**
+   ```bash
+   heroku login
+   heroku create your-app-name
+   ```
+
+3. **Set Environment Variables**
+   ```bash
+   heroku config:set MONGO_URI=your_uri
+   heroku config:set JWT_SECRET=your_secret
+   # ... set all other variables
+   ```
+
+4. **Deploy**
+   ```bash
+   git push heroku main
+   ```
+
+### Frontend Deployment (Vercel or Netlify)
+
+#### Using Vercel
+
+1. **Install Vercel CLI**
+   ```bash
+   npm install -g vercel
+   ```
+
+2. **Deploy from Client Directory**
+   ```bash
+   cd Client
+   vercel
+   ```
+
+3. **Configure Environment**
+   - Set `VITE_API_URL` to your backend URL
+   - Update in Vercel dashboard settings
+
+#### Using Netlify
+
+1. **Install Netlify CLI**
+   ```bash
+   npm install -g netlify-cli
+   ```
+
+2. **Deploy**
+   ```bash
+   cd Client
+   npm run build
+   netlify deploy --prod --dir=dist
+   ```
+
+3. **Configure**
+   - Add `VITE_API_URL` in environment variables
+   - Set redirect rules for React Router
+
+### Production Checklist
+
+- [ ] Enable HTTPS on all domains
+- [ ] Set `NODE_ENV=production`
+- [ ] Update `FRONTEND_URL` and `PRODUCTION_URL` in backend `.env`
+- [ ] Configure CORS for production domain
+- [ ] Set up database backups
+- [ ] Configure error logging (Sentry, LogRocket)
+- [ ] Enable rate limiting on APIs
+- [ ] Set up monitoring and alerts
+- [ ] Test all payment flows (if applicable)
+- [ ] Review security headers (CORS, CSP, XSS protection)
+
+---
+
+## 13. Troubleshooting
+
+### Common Issues & Solutions
+
+#### Backend won't connect to MongoDB
+
+**Error:** `MongoDB connection failed`
+
+**Solutions:**
+```bash
+# 1. Check MONGO_URI in .env
+echo $MONGO_URI
+
+# 2. Verify database credentials are correct
+# 3. Check if IP is whitelisted in MongoDB Atlas
+# 4. Test with MongoDB Compass using connection string
+# 5. Restart MongoDB service
+```
+
+#### Port 5000 already in use
+
+**Error:** `EADDRINUSE: address already in use :::5000`
+
+**Solutions:**
+```bash
+# On Windows
+netstat -ano | findstr :5000
+taskkill /PID <PID> /F
+
+# On macOS/Linux
+lsof -i :5000
+kill -9 <PID>
+```
+
+#### Frontend can't call backend API
+
+**Error:** `CORS error` or `Failed to fetch`
+
+**Solutions:**
+1. Verify backend is running on port 5000
+2. Check `VITE_API_URL` is correct in `.env.local`
+3. Verify CORS is enabled in `server.js`
+4. Check for typos in API routes
+
+#### Translation Service isn't working
+
+**Error:** `Gemini API error` or `Translation failed` in console
+
+**Solutions:**
+```bash
+# 1. Verify GEMINI_API_KEY is correct in .env
+# 2. Check if Generative Language API is enabled in Google Cloud console
+# 3. Check request quota hasn't been exceeded (free tier has limits)
+# 4. Verify message contains text in supported language (Sinhala, Tamil, Hindi, etc.)
+# 5. Check translation timeout (default: 10 seconds) - may be too slow on poor connection
+# 6. Check retry logic: Automatic retries on network errors (max 1 retry)
+```
+
+**Supported Languages for Auto-Translation:**
+- Sinhala (0D80–0DFF Unicode range)
+- Tamil (0B80–0BFF Unicode range)
+- Hindi (0900–097F Unicode range)
+- Any language (Gemini API auto-detects language)
+
+#### Cloudinary uploads fail
+
+**Error:** `Cloudinary upload failed`
+
+**Solutions:**
+1. Verify `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
+2. Check file size (max 5 MB)
+3. Check file type is supported
+4. Verify folder/resource type settings in Cloudinary
+
+#### Email notifications not sending
+
+**Error:** `Mailtrap SMTP error`
+
+**Solutions:**
+```bash
+# 1. Verify MAIL_HOST, MAIL_PORT, MAIL_USER, MAIL_PASS
+# 2. Check SEND_FEEDBACK_EMAIL is true
+# 3. Test SMTP credentials with Mailtrap UI
+# 4. Check spam folder in inbox
+```
+
+#### Jest tests timing out
+
+**Error:** `Jest timeout exceeded`
+
+**Solutions:**
+```bash
+# Increase timeout
+npm run test:unit -- --testTimeout=50000
+
+# Or check for unresolved promises in tests
+# Ensure all async operations complete
+```
+
+---
+
+## 14. Contributors
+
+This project was developed by a team of computer science students:
+
+| Component | Developer | Student ID | Features |
+|-----------|-----------|-----------|----------|
+| **Authentication** | H A S Maduwantha | IT23472020 | User registration, Login, JWT auth, RBAC |
+| **Help Requests** | H A S Maduwantha | IT23472020 | Message CRUD, Multi language  translation (Gemini AI) |
+| **Study Materials** | ALAHAKOON PB | IT23405240 | Upload, Search, Filter, Like, Download, Cloudinary integration |
+| **Tutoring Sessions** | SERASINGHE CS | IT23401976 | Create/manage sessions, Google Calendar integration, Capacity management |
+| **Feedback & Progress** | NIMADITH LMH | IT23242272 | Ratings, Feedback, Progress tracking, Email notifications (Mailtrap) |
+| **Frontend** | Team | All | React dashboard, UI components, State management |
+
+### Contributing
+
+To contribute to this project:
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'Add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+### License
+
+This project is licensed under the MIT License - see LICENSE file for details.
+
+### Support
+
+For issues, questions, or suggestions:
+1. Create an issue on GitHub
+2. Contact the development team
+3. Check documentation in `/docs` (if available)
+
+---
+
+**Last Updated:** April 2026  
+**Repository:** [Quality-Education](https://github.com/ChiranLK/Quality-Education)  
+**Status:** Active Development
+
+---
+
+## � Quick Start Testing 
 
 ### For Developers: First Time Running Tests?
 
@@ -456,19 +1663,19 @@ This table shows which testing layers cover each component:
 
 ## 📌 Test Coverage by Scenario
 
-### Scenario 1: Student Creates & Updates Help Request
+### Scenario 1: Student Creates & Updates Help Request (Multi-Language Support)
 
 **Flow:**
 1. Student registers
-2. Student creates help request with Sinhala text
-3. Message auto-translates to English (Google Gemini API called)
-4. Student updates message with another Sinhala text
+2. Student creates help request in any language (Sinhala, Tamil English, etc.)
+3. Message auto-translates to English (Google Gemini API detects language & translates)
+4. Student updates message with text in another language (auto-translates again)
 5. Student deletes message
 
 **Tested in:**
-- ✅ Unit: `messageService.test.js` (translation logic)
-- ✅ Integration: Manual workflow + automated tests
-- ✅ Performance: Artillery with 80+ concurrent users
+- ✅ Unit: `messageService.test.js` (language detection, translation logic, retry mechanism)
+- ✅ Integration: `helpRequest.test.js` (full workflow + database persistence)
+- ✅ Performance: Artillery with 80+ concurrent users creating messages in multiple languages
 
 ---
 
@@ -688,7 +1895,10 @@ This table shows which testing layers cover each component:
 **Request Body:**
 ```json
 {
-  "message": "මට ගණිතයේ උදව්වක් අවශ්‍යයි"
+  "title": "රසායන විද්‍යා සංකල්ප ප්‍රශ්නය",
+  "message": "පහත දැක්වෙන අසමතුලිත රසායනික සමීකරණය සලකා බලන්න. මෙය නිවැරදිව තුලිත කර (Balance කර), ලැබෙන පූර්ණ සංඛ්‍යා සංගුණක (Coefficients) සඳහන් කරන්න.",
+  "category": "Chemistry",
+  "language": "English"
 }
 ```
 
@@ -696,18 +1906,17 @@ This table shows which testing layers cover each component:
 ```json
 {
   "success": true,
-  "msg": "Message created successfully",
-  "message": {
+  "message": "Message created successfully",
+  "data": {
     "_id": "507f1f77bcf86cd799439011",
-    "message": "I need help with mathematics",
-    "requiresTranslation": true,
+    "title": "Chemistry Concepts Question",
+    "message": "Consider the following unbalanced chemical equation. Correctly balance it, and state the resulting integer coefficients.",
+    "category": "chemistry",
     "createdBy": {
       "_id": "507f1f77bcf86cd799439012",
-      "fullName": "Shani Navodya",
-      "email": "shaninavodya@2001gmail.com",
-      "role": "user"
+      "fullName": "sanka"
     },
-    "createdAt": "2026-02-27T10:30:00.000Z"
+    "createdAt": "2026-04-12T10:30:00.000Z"
   },
   "translationPerformed": true
 }
@@ -729,20 +1938,23 @@ This table shows which testing layers cover each component:
 **Response:**
 ```json
 {
-  "messages": [
-    {
-      "_id": "507f1f77bcf86cd799439011",
-      "message": "I need help with mathematics",
-      "requiresTranslation": true,
-      "createdBy": {
-        "fullName": "Shani Navodya",
-        "email": "shaninavodya@2001gmail.com",
-        "role": "user"
-      },
-      "createdAt": "2026-02-27T10:30:00.000Z"
-    }
-  ]
-}
+            "_id": "69dafcceed23bb3b3c1b3d64",
+            "createdBy": {
+                "_id": "69d896b4e3578abed71c0091",
+                "fullName": "sanka",
+                "email": "it23472020@my.sliit.lk",
+                "role": "user"
+            },
+            "title": "Chemistry",
+            "message": "Consider the following unbalanced chemical equation. Correctly balance it, and state the resulting integer coefficients.",
+            "category": "Science",
+            "language": "Sinhala",
+            "requiresTranslation": true,
+            "image": null,
+            "createdAt": "2026-04-12T02:00:46.612Z",
+            "updatedAt": "2026-04-12T02:00:46.612Z",
+            "__v": 0
+        }
 ```
 
 **Access Control:**
@@ -766,7 +1978,10 @@ This table shows which testing layers cover each component:
 **Request Body:**
 ```json
 {
-  "message": "භෞතික විද්‍යාව සඳහා උදව්වක් අවශ්‍යයි"
+  "title": "රසායන විද්‍යා සංකල්ප ප්‍රශ්නය",
+  "message": "පහත දැක්වෙන අසමතුලිත රසායනික සමීකරණය සලකා බලන්න. මෙය නිවැරදිව තුලිත කර (Balance කර), ලැබෙන පූර්ණ සංඛ්‍යා සංගුණක (Coefficients) සඳහන් කරන්න.",
+  "category": "Chemistry",
+  "language": "English"
 }
 ```
 
@@ -777,7 +1992,7 @@ This table shows which testing layers cover each component:
   "msg": "Message updated successfully",
   "message": {
     "_id": "507f1f77bcf86cd799439011",
-    "message": "I need help with physics",
+    "message": "Consider the following unbalanced chemical equation. Correctly balance it, and state the resulting integer coefficients.",
     "requiresTranslation": true,
     "createdBy": {
       "_id": "507f1f77bcf86cd799439012",

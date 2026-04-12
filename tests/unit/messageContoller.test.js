@@ -1,12 +1,3 @@
-/**
- * UNIT TESTS — Controllers/messageContoller.js
- *
- * Tests each controller function in isolation using mocked model layer.
- * Uses jest.spyOn for named exports (ESM-compatible pattern).
- *
- * Covers all controller functions:
- *   createMessage, getAllMessages, updateMessage, deleteMessage
- */
 
 import { jest } from "@jest/globals";
 import mongoose from "mongoose";
