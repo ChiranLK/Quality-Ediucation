@@ -1297,9 +1297,7 @@ After running tests, reports are generated in:
 
 ## 12. Deployment Guide
 
-### Backend Deployment (Render.com or Heroku)
-
-#### Using Render.com
+### Backend Deployment (Render.com)
 
 1. **Create Render Account**
    - Sign up at [Render](https://render.com/)
@@ -1318,32 +1316,7 @@ After running tests, reports are generated in:
 
 4. **Health Check**
    ```bash
-   curl https://your-backend.onrender.com/
-   ```
-
-#### Using Heroku
-
-1. **Install Heroku CLI**
-   ```bash
-   npm install -g heroku
-   ```
-
-2. **Login & Create App**
-   ```bash
-   heroku login
-   heroku create your-app-name
-   ```
-
-3. **Set Environment Variables**
-   ```bash
-   heroku config:set MONGO_URI=your_uri
-   heroku config:set JWT_SECRET=your_secret
-   # ... set all other variables
-   ```
-
-4. **Deploy**
-   ```bash
-   git push heroku main
+   curl https://quality-education-8hz3.onrender.com
    ```
 
 ### Frontend Deployment (Vercel or Netlify)
@@ -1395,6 +1368,15 @@ After running tests, reports are generated in:
 - [ ] Set up monitoring and alerts
 - [ ] Test all payment flows (if applicable)
 - [ ] Review security headers (CORS, CSP, XSS protection)
+
+### Live URLs
+
+| Environment | Backend URL | Frontend URL |
+|-------------|------------|--------------|
+| **Production** | https://quality-education-8hz3.onrender.com | https://quality-education-six.vercel.app |
+| **Development** | http://localhost:5000 | http://localhost:5173 |
+
+**API Documentation:** https://quality-education-8hz3.onrender.com/api-docs (if Swagger UI is enabled)
 
 ---
 
