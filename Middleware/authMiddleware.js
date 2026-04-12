@@ -56,7 +56,12 @@ export const protect = async (req, res, next) => {
  * Attaches req.user { userId, role }
  */
 export const authenticateUser = (req, res, next) => {
-  const { token } = req.cookies;
+  let { token } = req.cookies;
+
+  // Fallback to Bearer token for cross-domain requests
+  if (!token && req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
+    token = req.headers.authorization.split(" ")[1];
+  }
 
   if (!token) {
     throw new UnauthenticatedError("Authentication invalid");
